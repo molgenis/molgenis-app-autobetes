@@ -1,4 +1,4 @@
-autobetes
-=========
+molgenis-autobetes
+==================
 
-Autobetes Molgenis server
+See Autobetes.nl.
