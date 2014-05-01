@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.autobetes">
+	<module name="autobetes">
+		<entity name="Event" implements="Autoid">
+			<field name="name" description="Name of event"/>
+			<field name="owner" type="xref" xref_entity="MolgenisUser" nillable="true" description="User to which the event belongs. Is nillable for development purposes."/>
+			<field name="eventType" type="enum" default="food"
+				enum_options="[food,activity]"
+				description="Event" />
+		</entity>
+		<entity name="EventHistory" implements="Autoid">
+			<field name="owner" type="xref" xref_entity="MolgenisUser" nillable="true" description="User to which the event belongs. Is nillable for development purposes."/>
+			<field name="event" type="xref" xref_entity="Event" description="Event that happend."/>			
+			<field auto="true" name="beginTime" type="datetime"
+				description="Moment when event begins." />
+		</entity>
+		<entity name="FoodEventHistory" extends="EventHistory">
+			<field name="amount" type="decimal" nillable="false" description="Number of times this food is consumed." />
+		</entity>
+		<entity name="ActivityEventHistory" extends="EventHistory">
+			<field name="intensity" type="decimal" nillable="false" description="Intensity of activity. 1=v. light, ..., 5=normal, ..., 10=v. heavy." />
+			<field auto="true" name="endTime" type="datetime"
+				description="Moment when event ends. Null for Food events." nillable="true"/>
+		</entity>
+	</module>
+</molgenis>
