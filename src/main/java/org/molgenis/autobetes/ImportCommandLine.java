@@ -3,7 +3,6 @@ package org.molgenis.autobetes;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
-import org.apache.commons.io.IOUtils;
 import org.molgenis.autobetes.autobetes.Event;
 import org.molgenis.autobetes.autobetes.EventRepository;
 import org.molgenis.data.DataService;
@@ -25,8 +24,9 @@ public class ImportCommandLine
 		EntityManager entityManager = Persistence.createEntityManagerFactory("autobetes-commandline")
 				.createEntityManager();
 
-		EventRepository repo = new EventRepository(entityManager, new DefaultEntityValidator(dataService,
+		EventRepository eventRepo = new EventRepository(entityManager, new DefaultEntityValidator(dataService,
 				new EntityAttributesValidator()), new QueryResolver(dataService));
+		dataService.addRepository(eventRepo);
 
 		entityManager.getTransaction().begin();
 		try
@@ -34,7 +34,8 @@ public class ImportCommandLine
 			Event event = new Event();
 			event.setEventType("food");
 			event.setName("Apple");
-			repo.add(event);
+			dataService.add(Event.ENTITY_NAME, event);
+
 			entityManager.getTransaction().commit();
 			System.out.println("Event added");
 		}
@@ -46,7 +47,6 @@ public class ImportCommandLine
 		finally
 		{
 			entityManager.close();
-			IOUtils.closeQuietly(repo);
 		}
 
 	}
