@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
-import org.elasticsearch.common.collect.Maps;
 import org.molgenis.autobetes.autobetes.Event;
 import org.molgenis.autobetes.autobetes.EventRepository;
 import org.molgenis.data.DataService;
@@ -13,6 +12,8 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
+
+import com.google.common.collect.Maps;
 
 public class ImportCommandLine
 {
