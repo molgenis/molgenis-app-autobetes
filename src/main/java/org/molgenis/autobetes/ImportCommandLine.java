@@ -1,8 +1,11 @@
 package org.molgenis.autobetes;
 
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
+import org.elasticsearch.common.collect.Maps;
 import org.molgenis.autobetes.autobetes.Event;
 import org.molgenis.autobetes.autobetes.EventRepository;
 import org.molgenis.data.DataService;
@@ -21,8 +24,15 @@ public class ImportCommandLine
 	public void importExample()
 	{
 		DataService dataService = new DataServiceImpl();
-		EntityManager entityManager = Persistence.createEntityManagerFactory("autobetes-commandline")
-				.createEntityManager();
+
+		Map<String, String> props = Maps.newHashMap();
+		props.put("javax.persistence.jdbc.driver", "com.mysql.jdbc.Driver");
+		props.put("javax.persistence.jdbc.url",
+				"jdbc:mysql://localhost/autobetes?innodb_autoinc_lock_mode=2&amp;rewriteBatchedStatements=true");
+		props.put("javax.persistence.jdbc.user", "molgenis");
+		props.put("javax.persistence.jdbc.password", "molgenis");
+
+		EntityManager entityManager = Persistence.createEntityManagerFactory("molgenis", props).createEntityManager();
 
 		EventRepository eventRepo = new EventRepository(entityManager, new DefaultEntityValidator(dataService,
 				new EntityAttributesValidator()), new QueryResolver(dataService));
@@ -50,5 +60,4 @@ public class ImportCommandLine
 		}
 
 	}
-
 }
