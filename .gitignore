@@ -1,0 +1,6 @@
+/target
+.settings/
+.project
+.classpath
+*~
+/src/main/java/org/molgenis/autobetes/data
