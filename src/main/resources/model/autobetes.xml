@@ -22,7 +22,11 @@
 			<field name="lid" type="int" nillable="true" description="Local ID (exists only in app) and is irrelevant on server. Column 'id' is the universal unique identifier of this record." />
 			<field name="owner" type="xref" xref_entity="MolgenisUser" nillable="true" description="User to which this record belongs. Is nillable for development purposes."/>
 			<field name="moment" type="string" unique="true" nillable="true" description="Store date/time 'as you see it on your watch' so that we can check whether it corresponds to 'unixtime' after correcting for time zone and day light saving." />
+			<field name="deleted" type="boolean" description="Indicates whether this record is deleted." />
 			<field name="lastchanged" type="long" description="Moment when this record was created or last changed (bookkeeping). In milliseconds since 1970 in GMT." />
+		</entity>
+		<entity name="LastSynced" description="This table lives only on clients.">
+			<field name="timestamp" type="long" description="Before sync'ing app with server a transaction is started. At the beginning of this transaction, the current time is stored." />
 		</entity>
 		
 		<entity name="IdentificationServer" abstract="true">
