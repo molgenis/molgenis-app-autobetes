@@ -26,6 +26,7 @@
 			<field name="lastchanged" type="long" description="Moment when this record was created or last changed (bookkeeping). In milliseconds since 1970 in GMT." />
 		</entity>
 		<entity name="LastSynced" description="This table lives only on clients.">
+			<field name="id" type="autoid" description="Client should autogenerate an id that uniquely identifies this record." />
 			<field name="timestamp" type="long" description="Before sync'ing app with server a transaction is started. At the beginning of this transaction, the current time is stored." />
 		</entity>
 		
