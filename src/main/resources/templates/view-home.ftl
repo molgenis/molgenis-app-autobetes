@@ -1,5 +1,7 @@
 <#include "header.ftl">
+echt gelukt?
 
+hoi dion
 <#include "footer.ftl">
 
 <#-- #include "molgenis-header.ftl">
