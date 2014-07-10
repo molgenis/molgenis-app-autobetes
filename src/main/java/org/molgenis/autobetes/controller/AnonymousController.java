@@ -7,7 +7,9 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.autobetes.controller.AnonymousController.URI;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.net.URI;
 import java.sql.Date;
@@ -24,19 +26,23 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dom4j.tree.AbstractEntity;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.autobetes.autobetes.ActivityEventInstance;
 import org.molgenis.autobetes.autobetes.Event;
 import org.molgenis.autobetes.autobetes.EventInstance;
 import org.molgenis.autobetes.autobetes.FoodEventInstance;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.AttributeMetaDataResponse;
 import org.molgenis.data.rest.EntityCollectionRequest;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -52,7 +58,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.google.common.collect.Lists;
 
 /**
  * Controller that handles anonymous requests
@@ -181,54 +190,179 @@ public class AnonymousController extends MolgenisPluginController
 				"Registration successful! We have sent you an email with a link to activate your account. NB The email may have ended up in your spam folder.");
 	}
 
-
-	@RequestMapping(value = "/update", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public List<Map<String, Object>> registerUser(@RequestBody TimestampLastUpdate timestamp,
+	public List<Map<String, Object>> addEntity(@RequestBody TimestampLastUpdate timestamp,
 			HttpServletRequest servletRequest)
 	{
 		
-		
-		//get token
-		String token = TokenExtractor.getToken(servletRequest);
-		//get token entity
-		MolgenisToken tokenEntity = dataService.findOne(MolgenisToken.ENTITY_NAME, new QueryImpl().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
-		//get user with token
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-					new QueryImpl().eq(MolgenisUser.ID, tokenEntity.getMolgenisUser().getId()), MolgenisUser.class);
-		
-		//get events from a user with timestamps greater than timestamp of request
-		Iterable<Event> events = dataService.findAll(Event.ENTITY_NAME, new QueryImpl().eq(Event.OWNER, user).and().ge(Event.LASTCHANGED, timestamp.getTimestamp()), Event.class);
-		
-		//convert Iterable<Event> to List<Map<String, Object>> in order to send as json
-		EntityMetaData meta = dataService.getEntityMetaData(Event.ENTITY_NAME);
+		return null;
+	}
+	
+	
+	@RequestMapping(value = "/update", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<Map<String, Object>> update(@RequestBody TimestampLastUpdate timestamp,
+			HttpServletRequest servletRequest)
+	{
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
+		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+	
+		//get events from a user with timestamps greater than timestamp of request
+		Iterable<Entity> events = dataService.findAll(Event.ENTITY_NAME, new QueryImpl().eq(Event.OWNER, user).and().ge(Event.LASTCHANGED, timestamp.getTimestamp()));
+		addEntitiesToList(entities, Event.ENTITY_NAME, events);
+		
+		//same for food event instances
+		Iterable<Entity> foodEventInstances = dataService.findAll(FoodEventInstance.ENTITY_NAME, new QueryImpl().eq(FoodEventInstance.OWNER, user).and().ge(FoodEventInstance.LASTCHANGED, timestamp.getTimestamp()));
+		addEntitiesToList(entities, FoodEventInstance.ENTITY_NAME, foodEventInstances);
+		
+		
+		//same for activity event instances
+		Iterable<Entity> activityEventinstances = dataService.findAll(ActivityEventInstance.ENTITY_NAME, new QueryImpl().eq(ActivityEventInstance.OWNER, user).and().ge(ActivityEventInstance.LASTCHANGED, timestamp.getTimestamp()));
+		addEntitiesToList(entities, ActivityEventInstance.ENTITY_NAME, activityEventinstances);
+
+		return entities;
+	}
+	
+
+	
+
+	/**
+	 * Updates an entity using PUT
+	 * 
+	 * Example url: /api/v1/person/99
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param entityMap
+	 */
+	/*
+	@RequestMapping(value = "/update", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<Map<String, Object>> update(@RequestBody TimestampLastUpdate timestamp,
+			HttpServletRequest servletRequest)
+	{
+		*/
+	
+	@RequestMapping(value = "/{entityName}/{id}", method = PUT)
+	@ResponseStatus(OK)
+	public void update(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
+			@RequestBody Map<String, Object> entityMap, HttpServletRequest servletRequest)
+	{
+		//IN THE MAKING
+		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		Entity entity = toEntity(meta, entityMap);
+		float entityLastChanged = (float)(entity.get("lastChanged"));
+		
+		Entity dbEntity = dataService.findOne(entityName, id);
+		float dbEntityLastChanged = (float)(dbEntity.get("lastChanged"));
+		
+		if(entityLastChanged > dbEntityLastChanged){
+			System.out.println("send entity more recently modified");
+			updateInternal(entityName, id, entityMap);
+		}
+		else{
+			System.out.println("db entity more recently modified");
+		}
+		
+	}
+	
+	private void addEntitiesToList(List<Map<String, Object>> entities, String entityName, Iterable<Entity> events)
+	{
+		//convert Iterable<Event> to List<Map<String, Object>> in order to send as json
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+				
 		for (Entity entity : events)
 		{
 			entities.add(getEntityAsMap(entity, meta, null, null));
 		}
 		
-		//get food event instances from a user with timestamps greater than timestamp of request
-		meta = dataService.getEntityMetaData(FoodEventInstance.ENTITY_NAME);
-		Iterable<FoodEventInstance> foodEventInstances = dataService.findAll(FoodEventInstance.ENTITY_NAME, new QueryImpl().eq(FoodEventInstance.OWNER, user).and().ge(FoodEventInstance.LASTCHANGED, timestamp.getTimestamp()), FoodEventInstance.class);
-		meta = dataService.getEntityMetaData(FoodEventInstance.ENTITY_NAME);
-		for (Entity entity : foodEventInstances)
+	}
+	
+	//copied from restController
+	private void updateInternal(String entityName, Object id, Map<String, Object> entityMap)
+	{
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		if (meta.getIdAttribute() == null)
 		{
-			entities.add(getEntityAsMap(entity, meta, null, null));
+			throw new IllegalArgumentException(entityName + " does not have an id attribute");
 		}
 
-		//get food event instances from a user with timestamps greater than timestamp of request
-		meta = dataService.getEntityMetaData(ActivityEventInstance.ENTITY_NAME);
-		Iterable<ActivityEventInstance> activityEventinstances = dataService.findAll(ActivityEventInstance.ENTITY_NAME, new QueryImpl().eq(ActivityEventInstance.OWNER, user).and().ge(ActivityEventInstance.LASTCHANGED, timestamp.getTimestamp()), ActivityEventInstance.class);
-		meta = dataService.getEntityMetaData(ActivityEventInstance.ENTITY_NAME);
-		for (Entity entity : activityEventinstances)
+		Entity existing = dataService.findOne(entityName, id);
+		if (existing == null)
 		{
-			entities.add(getEntityAsMap(entity, meta, null, null));
+			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
-		
-		return entities;
-	
+
+		Entity entity = toEntity(meta, entityMap);
+		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
+
+		dataService.update(entityName, entity);
 	}
+	
+	// Creates a new MapEntity based from a HttpServletRequest
+	//copied from restController
+	private Entity toEntity(EntityMetaData meta, Map<String, Object> request)
+	{
+		Entity entity = new MapEntity();
+		if (meta.getIdAttribute() != null) entity = new MapEntity(meta.getIdAttribute().getName());
+
+		for (AttributeMetaData attr : meta.getAtomicAttributes())
+		{
+			String paramName = attr.getName();
+			Object paramValue = request.get(paramName);
+			Object value = toEntityValue(attr, paramValue);
+			entity.set(attr.getName(), value);
+		}
+
+		return entity;
+	}
+	//copied from restcontroller
+	private Object toEntityValue(AttributeMetaData attr, Object paramValue)
+	{
+		Object value = null;
+
+		// Treat empty strings as null
+		if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
+		{
+			paramValue = null;
+		}
+
+		if (paramValue != null)
+		{
+			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
+			{
+				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
+				if (value == null)
+				{
+					throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id " + paramValue
+							+ " found");
+				}
+			}
+			else if (attr.getDataType().getEnumType() == MREF)
+			{
+				List<Object> ids = DataConverter.toObjectList(paramValue);
+				if ((ids != null) && !ids.isEmpty())
+				{
+					Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
+					List<Entity> mrefList = Lists.newArrayList(mrefs);
+					if (mrefList.size() != ids.size())
+					{
+						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());
+					}
+
+					value = mrefList;
+				}
+			}
+			else
+			{
+				value = DataConverter.convert(paramValue, attr);
+			}
+		}
+		return value;
+	}
+
 	
 	// Transforms an entity to a Map so it can be transformed to json
 	// copied from restController
@@ -350,5 +484,15 @@ public class AnonymousController extends MolgenisPluginController
 		result.put("message", msg);
 
 		return result;
+	}
+	
+	private MolgenisUser getUserFromToken(String token)
+	{
+		//get token entity
+		MolgenisToken tokenEntity = dataService.findOne(MolgenisToken.ENTITY_NAME, new QueryImpl().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
+		//get user with token
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.ID, tokenEntity.getMolgenisUser().getId()), MolgenisUser.class);
+		return user;
 	}
 }
