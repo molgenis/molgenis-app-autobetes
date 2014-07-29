@@ -1,6 +1,5 @@
 package org.molgenis.autobetes;
 
-import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -50,12 +49,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 		
-		corsInterceptPattern = "/plugin/anonymous/registerUser";
+		corsInterceptPattern = "/plugin/anonymous/**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 		
-		corsInterceptPattern = "/plugin/anonymous/update";
-		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
-		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 	}
 }
