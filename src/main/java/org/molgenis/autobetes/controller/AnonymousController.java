@@ -47,6 +47,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.UserAuthority;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.util.MolgenisDateFormat;
@@ -54,6 +56,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,6 +78,8 @@ public class AnonymousController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String BASE_URI = "";
 	public static final String TIME_STAMP_LAST_SYNC = "timeStampLastSync";
+	public static final String NOTINREQUESTCONTENT = "notInRequestContent";
+	public static final String TRUE = "True";
 
 	@Autowired
 	private DataService dataService;
@@ -119,6 +124,7 @@ public class AnonymousController extends MolgenisPluginController
 	public Map<String, Object> registerUser(@RequestBody RegistrationRequest registrationRequest,
 			HttpServletRequest servletRequest)
 	{
+
 		// validate email + pw
 		if (StringUtils.isBlank(registrationRequest.getEmail())
 				|| StringUtils.isBlank(registrationRequest.getPassword()))
@@ -141,9 +147,18 @@ public class AnonymousController extends MolgenisPluginController
 		String activationCode = UUID.randomUUID().toString();
 		mu.setActivationCode(activationCode);
 		mu.setActive(false);
+
+
 		try
 		{
+			//TODO : should this method be transactional?
+			// We give the minimal permission to access the AnonymousController for this newly created user
 			dataService.add(MolgenisUser.ENTITY_NAME, mu);
+			UserAuthority anonymousHomeAuthority = new UserAuthority();
+			anonymousHomeAuthority.setMolgenisUser(mu);
+			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
+					+ AnonymousController.ID.toUpperCase());
+			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		}
 		catch (Exception e)
 		{
@@ -205,9 +220,11 @@ public class AnonymousController extends MolgenisPluginController
 	public List<Map<String, Object>> sync(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
 	{
+		System.out.println(entityMap.toString());
 		// declare objects
-		long timeStampLastSync = 0;// timestamp of the last sync of client, send along in requestbody, if not it remains
-									// 0
+		TimestampLastUpdate timeStampLastSync = new TimestampLastUpdate(0);// timestamp of the last sync of client,
+		// send along in requestbody, if not it remains 0
+
 		List<Map<String, Object>> responseData = new ArrayList<Map<String, Object>>();// response list that will be
 																						// returned to client as a json
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
@@ -218,24 +235,26 @@ public class AnonymousController extends MolgenisPluginController
 		// HashSet keys are used to determine if entity comes from the request list or from db
 		HashSet<Integer> eventKeys = new HashSet<Integer>();
 		HashSet<Integer> eventInstanceKeys = new HashSet<Integer>();
-		//if a client defines an event and immediately(before syncing) an corresponding instance,
-		//the client does not have the sId of the event and therefore no server foreign key(sEvent) for the instance.
-		//Therefore  cid(key) and sid(value) need to be in hashmap, so the foreign key(sEvent) can be declared 
+		// if a client defines an event and immediately(before syncing) an corresponding instance,
+		// the client does not have the sId of the event and therefore no server foreign key(sEvent) for the instance.
+		// Therefore cid(key) and sid(value) need to be in hashmap, so the foreign key(sEvent) can be declared
 		HashMap<Integer, Integer> newEventSiDs = new HashMap<Integer, Integer>();
-		//iterate request list
+		// iterate request list
+
 		iterateListRecursively(0, timeStampLastSync, user, entityMap, newEventSiDs, eventKeys, eventInstanceKeys,
 				metaEvent, metaFoodEvent, metaActivityEvent);
-		//get entities from db and put these in response data
-		getEntitiesFromDBAndAppendToResponseData(Event.ENTITY_NAME, user, timeStampLastSync, responseData, metaEvent,
-				eventKeys);
-		getEntitiesFromDBAndAppendToResponseData(FoodEventInstance.ENTITY_NAME, user, timeStampLastSync, responseData,
-				metaFoodEvent, eventInstanceKeys);
-		getEntitiesFromDBAndAppendToResponseData(ActivityEventInstance.ENTITY_NAME, user, timeStampLastSync,
-				responseData, metaActivityEvent, eventInstanceKeys);
+		// get entities from db and put these in response data
+		getEntitiesFromDBAndAppendToResponseData(Event.ENTITY_NAME, user, timeStampLastSync.getTimestamp(),
+				responseData, metaEvent, eventKeys);
+		getEntitiesFromDBAndAppendToResponseData(FoodEventInstance.ENTITY_NAME, user, timeStampLastSync.getTimestamp(),
+				responseData, metaFoodEvent, eventInstanceKeys);
+		getEntitiesFromDBAndAppendToResponseData(ActivityEventInstance.ENTITY_NAME, user,
+				timeStampLastSync.getTimestamp(), responseData, metaActivityEvent, eventInstanceKeys);
 
 		return responseData;
 
 	}
+
 	/*
 	 * Retrieves collection of entities and calls addEntitiesToList method to compose response data.
 	 */
@@ -248,8 +267,9 @@ public class AnonymousController extends MolgenisPluginController
 	}
 
 	/**
-	 * Iterate List with objects recursively and process them. A recursive fashion is chosen because then
-	 * the list can be iterated only once and with the assurance that the event entities will be processed first
+	 * Iterate List with objects recursively and process them. A recursive fashion is chosen because then the list can
+	 * be iterated only once and with the assurance that the event entities will be processed first
+	 * 
 	 * @param index
 	 * @param timeStampLastSync
 	 * @param user
@@ -261,26 +281,27 @@ public class AnonymousController extends MolgenisPluginController
 	 * @param metaFoodEvent
 	 * @param metaActivityEvent
 	 */
-	private void iterateListRecursively(int index, long timeStampLastSync, MolgenisUser user,
+	private void iterateListRecursively(int index, TimestampLastUpdate timeStampLastSync, MolgenisUser user,
 			List<Map<String, Object>> entityMap, HashMap<Integer, Integer> newEventSiDs, HashSet<Integer> eventKeys,
 			HashSet<Integer> eventInstanceKeys, EntityMetaData metaEvent, EntityMetaData metaFoodEvent,
 			EntityMetaData metaActivityEvent)
 	{
-		
+
 		if (entityMap.size() > index)
 		{
 			Map<String, Object> mapEntity = entityMap.get(index);
 			if (mapEntity.containsKey("timeStampLastSync"))
 			{
-				//object is the timestamp
-				timeStampLastSync = Long.valueOf(mapEntity.get(TIME_STAMP_LAST_SYNC).toString()).longValue();
+				// object is the timestamp
+				timeStampLastSync
+						.setTimestamp(Long.valueOf(mapEntity.get(TIME_STAMP_LAST_SYNC).toString()).longValue());
 				iterateListRecursively(index + 1, timeStampLastSync, user, entityMap, newEventSiDs, eventKeys,
 						eventInstanceKeys, metaEvent, metaFoodEvent, metaActivityEvent);
 			}
 			else if (mapEntity.containsKey(Event.NAME))
 			{
 				// object is an event entity
-				//events need to be processed first, so first process this object and then proceed iteration
+				// events need to be processed first, so first process this object and then proceed iteration
 				processMapEntity(mapEntity, newEventSiDs, metaEvent, user, eventKeys);
 				iterateListRecursively(index + 1, timeStampLastSync, user, entityMap, newEventSiDs, eventKeys,
 						eventInstanceKeys, metaEvent, metaFoodEvent, metaActivityEvent);
@@ -288,7 +309,7 @@ public class AnonymousController extends MolgenisPluginController
 			else if (mapEntity.containsKey(ActivityEventInstance.INTENSITY))
 			{
 				// object is an activity entity
-				//events need to be processed first, so first proceed iteration and then process this object
+				// events need to be processed first, so first proceed iteration and then process this object
 				iterateListRecursively(index + 1, timeStampLastSync, user, entityMap, newEventSiDs, eventKeys,
 						eventInstanceKeys, metaEvent, metaFoodEvent, metaActivityEvent);
 				processMapEntity(mapEntity, newEventSiDs, metaActivityEvent, user, eventInstanceKeys);
@@ -296,8 +317,8 @@ public class AnonymousController extends MolgenisPluginController
 			}
 			else if (mapEntity.containsKey(FoodEventInstance.AMOUNT))
 			{
-				//object is an food entity
-				//same as activity entity
+				// object is an food entity
+				// same as activity entity
 				iterateListRecursively(index + 1, timeStampLastSync, user, entityMap, newEventSiDs, eventKeys,
 						eventInstanceKeys, metaEvent, metaFoodEvent, metaActivityEvent);
 				processMapEntity(mapEntity, newEventSiDs, metaFoodEvent, user, eventInstanceKeys);
@@ -309,6 +330,7 @@ public class AnonymousController extends MolgenisPluginController
 
 	/**
 	 * Makes entity from a Map<String, Object> and creates or updates entity in db
+	 * 
 	 * @param meta
 	 * @param request
 	 * @param user
@@ -323,34 +345,34 @@ public class AnonymousController extends MolgenisPluginController
 			int cEvent = (int) cEventDouble;
 			mapEntity.replace(EventInstance.SEVENT, newEventSiDs.get(cEvent));
 		}
-		//make entity
+		// make entity
 		Entity entity = toEntity(meta, mapEntity, user);
 
 		if (entity.get(Event.SID) == null)
 		{
-			//no sId means entity not been on server before
-			//store entity
+			// no sId means entity not been on server before
+			// store entity
 			dataService.add(meta.getName(), entity);
 			if (meta.getName() == Event.ENTITY_NAME)
 			{
-				//entity is a new event
-				//put cid as a key and sid as a value in the hashmap 
+				// entity is a new event
+				// put cid as a key and sid as a value in the hashmap
 				newEventSiDs.put(entity.getInt(Event.CID), entity.getInt(Event.SID));
 			}
 		}
 		else
 		{
 			// entity exists on server, determine which is more recent
-			//get entity
+			// get entity
 			Entity storedEntity = dataService.findOne(meta.getName(),
 					new QueryImpl().eq(Event.OWNER, user).and().eq(Event.SID, entity.get(Event.SID)));// (meta.getName(),
-																										
+
 			if (storedEntity == null)
 			{
 				// throw new UnknownEntityException("Entity of type " + meta.getName() + " with id " +
 				// entity.get(Event.SID) +" not found");
 			}
-			//compare timestamp of entity from request and entity from db
+			// compare timestamp of entity from request and entity from db
 			if (storedEntity.getDouble(Event.LASTCHANGED) < entity.getDouble(Event.LASTCHANGED))
 			{
 				// entity received from app more recent than on server.
@@ -358,15 +380,16 @@ public class AnonymousController extends MolgenisPluginController
 			}
 
 		}
-		//add key to hash set, in order to determine later on(by composing responseData) if a certain entity was in the request
-		//or was stored in db
+		// add key to hash set, in order to determine later on(by composing responseData) if a certain entity was in the
+		// request
+		// or was stored in db
 		keys.add(entity.getInt(Event.SID));
 
 	}
 
 	/**
-	 * Creates a new MapEntity based from a HttpServletRequest
-	 * copied from restController and slightly modified
+	 * Creates a new MapEntity based from a HttpServletRequest copied from restController and slightly modified
+	 * 
 	 * @param meta
 	 * @param request
 	 * @param user
@@ -408,9 +431,9 @@ public class AnonymousController extends MolgenisPluginController
 		}
 	}
 
-	
 	/**
 	 * copied from restcontroller
+	 * 
 	 * @param attr
 	 * @param paramValue
 	 * @return
@@ -458,16 +481,17 @@ public class AnonymousController extends MolgenisPluginController
 		}
 		return value;
 	}
+
 	/**
-	 * copied from restcontroller, slightly modified
-	 * Transforms an entity to a Map so it can be transformed to json
+	 * copied from restcontroller, slightly modified Transforms an entity to a Map so it can be transformed to json
+	 * 
 	 * @param entity
 	 * @param meta
 	 * @param attributesSet
 	 * @param attributeExpandsSet
 	 * @return
 	 */
-	
+
 	public Map<String, Object> getEntityAsMap(Entity entity, EntityMetaData meta, Set<String> attributesSet,
 			Map<String, Set<String>> attributeExpandsSet)
 	{
@@ -581,8 +605,6 @@ public class AnonymousController extends MolgenisPluginController
 			}
 
 		}
-		
-		
 
 		return entityMap;
 	}
@@ -596,8 +618,10 @@ public class AnonymousController extends MolgenisPluginController
 
 		return result;
 	}
+
 	/**
 	 * Declares user according to the given token
+	 * 
 	 * @param token
 	 * @return
 	 */
@@ -607,19 +631,21 @@ public class AnonymousController extends MolgenisPluginController
 		MolgenisToken tokenEntity = dataService.findOne(MolgenisToken.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
 		// get user with token
+		System.out.println("token:"+ token+":");
+		System.out.println("the user is:"+ tokenEntity.getMolgenisUser());
 		return tokenEntity.getMolgenisUser();
 	}
 
-
 	/**
 	 * Iterate list with entities retrieved from db, and add this to responsedata
+	 * 
 	 * @param responseData
 	 * @param meta
 	 * @param events
 	 * @param keys
 	 */
-	public List<Map<String, Object>> addEntitiesToList(List<Map<String, Object>> responseData, EntityMetaData meta, Iterable<Entity> events,
-			HashSet<Integer> keys)
+	public List<Map<String, Object>> addEntitiesToList(List<Map<String, Object>> responseData, EntityMetaData meta,
+			Iterable<Entity> events, HashSet<Integer> keys)
 	{
 		for (Entity entity : events)
 		{
@@ -628,7 +654,7 @@ public class AnonymousController extends MolgenisPluginController
 			{
 				// entity is not from requestbody but was allready stored in db
 				// necessary to indicate this for the client
-				entityAsMap.put("notInRequest", "True");
+				entityAsMap.put(NOTINREQUESTCONTENT, TRUE);
 			}
 			responseData.add(entityAsMap);
 		}

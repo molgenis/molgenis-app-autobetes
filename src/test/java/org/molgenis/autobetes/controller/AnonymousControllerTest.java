@@ -159,28 +159,29 @@ public class AnonymousControllerTest{
 		
 	}
 	
-	@Test
-	public void GetUserFromTokenTest(){
-		
-		MolgenisUser returnedUser = anonymousController.getUserFromToken(TOKEN);
-		
-		assertEquals(molgenisUser, returnedUser);
-		//returnedUser = anonymousController.getUserFromToken("A");
-		//assertEquals(null, returnedUser);
-		
-	}
-	
 	
 	@Test
 	public void addEntitiesToListTest(){
 		
 		HashSet<Integer> keys = new HashSet<Integer>();
-		keys.add(10);
+		keys.add(1);
 		ArrayList entitiesArray = new ArrayList();
 		entitiesArray.add(entity);
 		Iterable<Entity> entities = entitiesArray;
 		List<Map<String, Object>> response = anonymousController.addEntitiesToList(responseData, entityMetaData, entities, keys);
+		List<Map<String, Object>> expected = new ArrayList<Map<String, Object>>();
+		Map<String, Object> entityAsMap = new LinkedHashMap<String, Object>();
+		entityAsMap.put("name", entity.get("name"));
+		entityAsMap.put("DType", entity.get("DType"));
+		entityAsMap.put("cId", entity.get("cId"));
+		expected.add(entityAsMap);
+		assertEquals(response, expected);
 		
+		keys.remove(1);
+		responseData.clear();
+		response = anonymousController.addEntitiesToList(responseData, entityMetaData, entities, keys);
+		entityAsMap.put(AnonymousController.NOTINREQUESTCONTENT, AnonymousController.TRUE);
+		assertEquals(response, expected);
 		
 		
 	}
@@ -194,8 +195,6 @@ public class AnonymousControllerTest{
 		expected.put("DType", entity.get("DType"));
 		expected.put("cId", entity.get("cId"));
 		
-		System.out.println("returned map: "+ returnedMap);
-		System.out.println("expected map: "+ expected);
 		assertEquals(returnedMap, expected);
 	}
 	/*

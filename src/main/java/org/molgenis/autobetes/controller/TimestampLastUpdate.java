@@ -2,16 +2,19 @@ package org.molgenis.autobetes.controller;
 
 public class TimestampLastUpdate
 {
-	private final float timestamp;
+	private long timestamp;
 	
 	
-	public TimestampLastUpdate(float timestamp){
+	public TimestampLastUpdate(long timestamp){
 		this.timestamp = timestamp;
 	}
 	
-	public float getTimestamp()
+	public long getTimestamp()
 	{
 		return timestamp;
+	}
+	public void setTimestamp(long timestamp){
+		this.timestamp = timestamp;
 	}
 	
 }

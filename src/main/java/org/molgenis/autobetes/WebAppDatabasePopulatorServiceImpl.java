@@ -39,7 +39,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	public void populateDatabase()
 	{
 		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(dataService, HomeController.ID);
-		//make anonymous user in order to access AnonymousController without being
+		//make anonymous user in order to access AnonymousController without being admin
 		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
 		UserAuthority anonymousHomeAuthority = new UserAuthority();
 		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
