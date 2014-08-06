@@ -138,7 +138,7 @@ public class AnonymousController extends MolgenisPluginController
 		if (null != existingUser)
 		{
 			return response(false,
-					"Registration failed. Email already exists. Please click 'Forgotten' to get a new password.");
+					"Registration failed. Email already exists.");
 		}
 		MolgenisUser mu = new MolgenisUser();
 		mu.setUsername(registrationRequest.getEmail());
@@ -630,9 +630,6 @@ public class AnonymousController extends MolgenisPluginController
 		// get token entity
 		MolgenisToken tokenEntity = dataService.findOne(MolgenisToken.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
-		// get user with token
-		System.out.println("token:"+ token+":");
-		System.out.println("the user is:"+ tokenEntity.getMolgenisUser());
 		return tokenEntity.getMolgenisUser();
 	}
 
