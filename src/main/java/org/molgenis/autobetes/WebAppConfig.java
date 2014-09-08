@@ -53,5 +53,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 		
+		
+		
 	}
 }

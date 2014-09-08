@@ -127,7 +127,6 @@ public class AnonymousController extends MolgenisPluginController
 	public Map<String, Object> registerUser(@RequestBody RegistrationRequest registrationRequest,
 			HttpServletRequest servletRequest)
 	{
-
 		// validate email + pw
 		if (StringUtils.isBlank(registrationRequest.getEmail())
 				|| StringUtils.isBlank(registrationRequest.getPassword()))
@@ -141,34 +140,38 @@ public class AnonymousController extends MolgenisPluginController
 		if (null != existingUser)
 		{
 			return response(false,
-					"Registration failed. Email already exists.");
+					"Registration failed. Email already exists. Please click 'Forgotten' to get a new password.");
 		}
 		MolgenisUser mu = new MolgenisUser();
 		mu.setUsername(registrationRequest.getEmail());
 		mu.setPassword(registrationRequest.getPassword());
 		mu.setEmail(registrationRequest.getEmail());
-		
 		String activationCode = UUID.randomUUID().toString();
 		mu.setActivationCode(activationCode);
 		mu.setActive(false);
-
-
 		try
 		{
-			//TODO : should this method be transactional?
-			// We give the minimal permission to access the AnonymousController for this newly created user
 			dataService.add(MolgenisUser.ENTITY_NAME, mu);
+			
+			
 			UserAuthority anonymousHomeAuthority = new UserAuthority();
 			anonymousHomeAuthority.setMolgenisUser(mu);
 			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
 					+ AnonymousController.ID.toUpperCase());
 			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+			
+			anonymousHomeAuthority = new UserAuthority();
+			anonymousHomeAuthority.setMolgenisUser(mu);
+			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + HomeController.ID.toUpperCase());
+			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+			
 		}
 		catch (Exception e)
 		{
+			System.out.println("errore: "+ e);
 			return response(false, "Registration failed. Please contact the developers.");
 		}
-
+		
 		// send activation email
 		try
 		{
@@ -189,7 +192,8 @@ public class AnonymousController extends MolgenisPluginController
 			mailMessage.setTo(registrationRequest.getEmail());
 			mailMessage.setSubject("Registration Autobetes");
 			mailMessage.setText("To activate your account, please visit " + activationUri);
-			System.out.println(">> Message: " + mailMessage.getText());
+			mailMessage.setFrom("dionkoolhaas@gmail.com");
+			//System.out.println(mailMessage.toString());
 			mailSender.send(mailMessage);
 		}
 		catch (Exception e)
@@ -208,6 +212,7 @@ public class AnonymousController extends MolgenisPluginController
 		return response(
 				true,
 				"Registration successful! We have sent you an email with a link to activate your account. NB The email may have ended up in your spam folder.");
+		
 	}
 
 	/**
@@ -391,7 +396,18 @@ public class AnonymousController extends MolgenisPluginController
 		{
 			// no sId means entity is new on server
 			try{
-				dataService.add(meta.getName(), entity);
+				Iterable<Entity> entitiesWithSameLastChanged = dataService.findAll(meta.getName(),
+						new QueryImpl().eq(Event.OWNER, user).and().eq(Event.LASTCHANGED, entity.get(Event.LASTCHANGED)));// (meta.getName(),
+				if(entitiesWithSameLastChanged.iterator().hasNext()){
+					//we assume that two entities with the same lastchanged are identitcal
+					//set SID of entity with the one of found entity in db 
+					entity.set(Event.SID, entitiesWithSameLastChanged.iterator().next().get(Event.SID));
+					//update entity
+					dataService.update(meta.getName(), entity);
+				}
+				else{
+					dataService.add(meta.getName(), entity);
+				}
 			}catch (Exception e){
 				//failed to add entity
 			}finally{
