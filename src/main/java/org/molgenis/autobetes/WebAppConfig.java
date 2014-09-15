@@ -5,7 +5,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.omx.config.DataExplorerConfig;
-import org.molgenis.search.SearchSecurityConfig;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +23,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{ WebAppSecurityConfig.class, DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
-		DataExplorerConfig.class, SearchSecurityConfig.class })
+{ DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
+		DataExplorerConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired
