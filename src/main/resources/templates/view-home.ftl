@@ -1,7 +1,5 @@
 <#include "header.ftl">
-echt gelukt?
-
-hoi dion
+This is server content!
 <#include "footer.ftl">
 
 <#-- #include "molgenis-header.ftl">
