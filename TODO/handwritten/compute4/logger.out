@@ -1,0 +1,122 @@
+WARN main CsvFileReader - could not guess separator from line 'pumpid'. Assume one column.
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+ERROR main freemarker.runtime - Template processing error: "Error reading included file Header.ftl"
+
+Error reading included file Header.ftl
+The problematic instruction:
+----------
+==> include "Header.ftl" [on line 1, column 1 in s00_Report_1]
+----------
+
+Java backtrace for programmers:
+----------
+freemarker.template.TemplateException: Error reading included file Header.ftl
+	at freemarker.core.Include.accept(Include.java:167)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.MixedContent.accept(MixedContent.java:92)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.Environment.process(Environment.java:199)
+	at freemarker.template.Template.process(Template.java:259)
+	at org.molgenis.compute.commandline.ComputeCommandLine.filledtemplate(ComputeCommandLine.java:416)
+	at org.molgenis.compute.commandline.ComputeCommandLine.generateJobs(ComputeCommandLine.java:297)
+	at org.molgenis.compute.commandline.ComputeCommandLine.main(ComputeCommandLine.java:489)
+Caused by: java.io.FileNotFoundException: Template Header.ftl not found.
+	at freemarker.template.Configuration.getTemplate(Configuration.java:580)
+	at freemarker.core.Environment.getTemplateForInclusion(Environment.java:1490)
+	at freemarker.core.Include.accept(Include.java:157)
+	... 8 more
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+ERROR main freemarker.runtime - Template processing error: "Expression texreport is undefined on line 2, column 45 in s00_Report_1."
+
+Expression texreport is undefined on line 2, column 45 in s00_Report_1.
+The problematic instruction:
+----------
+==> ${texreport} [on line 2, column 43 in s00_Report_1]
+----------
+
+Java backtrace for programmers:
+----------
+freemarker.core.InvalidReferenceException: Expression texreport is undefined on line 2, column 45 in s00_Report_1.
+	at freemarker.core.TemplateObject.assertNonNull(TemplateObject.java:125)
+	at freemarker.core.Expression.getStringValue(Expression.java:118)
+	at freemarker.core.Expression.getStringValue(Expression.java:93)
+	at freemarker.core.DollarVariable.accept(DollarVariable.java:76)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.MixedContent.accept(MixedContent.java:92)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.Environment.process(Environment.java:199)
+	at freemarker.template.Template.process(Template.java:259)
+	at org.molgenis.compute.commandline.ComputeCommandLine.filledtemplate(ComputeCommandLine.java:416)
+	at org.molgenis.compute.commandline.ComputeCommandLine.generateJobs(ComputeCommandLine.java:297)
+	at org.molgenis.compute.commandline.ComputeCommandLine.main(ComputeCommandLine.java:489)
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Report.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-7157a04/../../workflowdata/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/LoadSensor.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/LoadSensor.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/LoadSensor.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/LoadSensor.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+ERROR main freemarker.runtime - Template processing error: "Error reading included file Header.ftl"
+
+Error reading included file Header.ftl
+The problematic instruction:
+----------
+==> include "Header.ftl" [on line 1, column 1 in s00_LoadSensor_1]
+----------
+
+Java backtrace for programmers:
+----------
+freemarker.template.TemplateException: Error reading included file Header.ftl
+	at freemarker.core.Include.accept(Include.java:167)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.MixedContent.accept(MixedContent.java:92)
+	at freemarker.core.Environment.visit(Environment.java:221)
+	at freemarker.core.Environment.process(Environment.java:199)
+	at freemarker.template.Template.process(Template.java:259)
+	at org.molgenis.compute.commandline.ComputeCommandLine.filledtemplate(ComputeCommandLine.java:432)
+	at org.molgenis.compute.commandline.ComputeCommandLine.generateJobs(ComputeCommandLine.java:302)
+	at org.molgenis.compute.commandline.ComputeCommandLine.main(ComputeCommandLine.java:513)
+Caused by: java.io.FileNotFoundException: Template Header.ftl not found.
+	at freemarker.template.Configuration.getTemplate(Configuration.java:580)
+	at freemarker.core.Environment.getTemplateForInclusion(Environment.java:1490)
+	at freemarker.core.Include.accept(Include.java:157)
+	... 8 more
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/LoadSensor.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/templates/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/templates/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/LoadSensor.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/templates/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/templates/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/templates/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/protocols/LoadSensor.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/templates/Footer.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/templates/Header.ftl does not contain #MOLGENIS header. Defaults will be used
+WARN main org.molgenis.compute.commandline.ComputeBundleFromDirectory - protocol /Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/compute4/molgenis_compute-2dbb3c5/../../analysisworkflow/templates/Submit.sh.ftl does not contain #MOLGENIS header. Defaults will be used

@@ -382,7 +382,7 @@ public class AnonymousController extends MolgenisPluginController
 				int cEvent = (int) mapEntity.get(EventInstance.CEVENT);
 				
 				if(newEventSiDs.containsKey(cEvent)){
-					mapEntity.replace(EventInstance.SEVENT, newEventSiDs.get(cEvent));
+					mapEntity.put(EventInstance.SEVENT, newEventSiDs.get(cEvent));
 				}
 				else{
 					throw new RuntimeException("");

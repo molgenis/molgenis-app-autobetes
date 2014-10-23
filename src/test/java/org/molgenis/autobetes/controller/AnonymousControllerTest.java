@@ -1,61 +1,35 @@
 package org.molgenis.autobetes.controller;
 
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.autobetes.autobetes.Event;
-import org.molgenis.autobetes.autobetes.EventMetaData;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
-import org.molgenis.data.rest.RestController;
-import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.token.MolgenisToken;
-import org.molgenis.util.GsonHttpMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Controller;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.molgenis.autobetes.controller.AnonymousController.URI;
-import static org.molgenis.data.rest.RestController.BASE_URI;
 
 @Test
 public class AnonymousControllerTest{

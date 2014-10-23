@@ -8,3 +8,4 @@ test-output/
 /src/main/java/org/molgenis/autobetes/data
 *~
 /target
+/target/
