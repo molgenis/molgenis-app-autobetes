@@ -1,11 +1,14 @@
 package org.molgenis.autobetes;
 
+import org.molgenis.autobetes.controller.AnonymousController;
 import org.molgenis.autobetes.controller.HomeController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,15 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	public void populateDatabase()
 	{
 		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(dataService, HomeController.ID);
+		//make anonymous user in order to access AnonymousController without being admin
+		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
+		UserAuthority anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + AnonymousController.ID.toUpperCase());
+		
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+		
+		
 	}
 
 	@Override
