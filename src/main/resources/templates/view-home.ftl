@@ -1,8 +1,10 @@
-<#include "headerOriginal.ftl">
-
-echt gelukt?
-
-hoi dion
-<a href="/plugin/home/upload-csv" onclick="showSpinner()">go to upload</a>
-
+<#include "header.ftl">
+This is server content!
 <#include "footer.ftl">
+
+<#-- #include "molgenis-header.ftl">
+<#include "molgenis-footer.ftl">
+
+<@header/>
+b
+<@footer/-->
