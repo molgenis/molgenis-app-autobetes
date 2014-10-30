@@ -1,7 +1,6 @@
 package org.molgenis.autobetes;
 
 import org.molgenis.data.DataService;
-import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.OmxConfig;
 import org.molgenis.omx.config.DataExplorerConfig;
@@ -24,8 +23,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{  OmxConfig.class, EmbeddedElasticSearchConfig.class,
-		DataExplorerConfig.class})
+{ OmxConfig.class, DataExplorerConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired
@@ -43,17 +41,16 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
-		//enable cross origin
+		super.addInterceptors(registry);
+		// enable cross origin
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
 		String corsInterceptPattern = "/api/**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
-		
+
 		corsInterceptPattern = "/plugin/anonymous/**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
-		
-		
-		
+
 	}
 }

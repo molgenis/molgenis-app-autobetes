@@ -1,0 +1,9 @@
+Name,defaultValue,description,dataType,hasOne_name
+backslash,\\\\,"On laptop \\\\ and on linux cluster \\",,
+root,/Users/mdijkstra/Documents/pompgemak/molgenis_distro,,,
+resultsDir,${root}/results
+reportDir,${resultsDir}/report/${pumpId},,,
+reportPrefix,${reportDir}/${pumpId}_,,,
+texReport,${reportPrefix}report.tex,,,
+BGPiePdf,${reportPrefix}BGPie.pdf,,,
+sourceRApi,"library(RCurl, lib.loc='~/libs'); msource <- function(murl = 'http://localhost:8080/molgenis_distro/api/R', verbose = TRUE){if(verbose) cat('Creating connection',murl,'\n'); data <- getURLContent(murl); t <- tempfile(); writeLines(data, con=t); sys.source(t,globalenv()); unlink(t) }; msource()",,,

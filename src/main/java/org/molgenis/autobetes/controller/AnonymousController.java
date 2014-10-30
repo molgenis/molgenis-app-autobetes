@@ -1,38 +1,48 @@
 package org.molgenis.autobetes.controller;
 
-
-
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.autobetes.controller.AnonymousController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.net.URI;
-import java.rmi.ServerException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.autobetes.autobetes.ActivityEvent;
 import org.molgenis.autobetes.autobetes.ActivityEventInstance;
+import org.molgenis.autobetes.autobetes.BgSensorRpi;
 import org.molgenis.autobetes.autobetes.Event;
 import org.molgenis.autobetes.autobetes.EventInstance;
 import org.molgenis.autobetes.autobetes.FoodEvent;
 import org.molgenis.autobetes.autobetes.FoodEventInstance;
-import org.molgenis.autobetes.autobetes.TestEvent;
 import org.molgenis.autobetes.autobetes.ServerExceptionLog;
+import org.molgenis.autobetes.autobetes.TestEvent;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
@@ -51,23 +61,18 @@ import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.util.MolgenisDateFormat;
-import org.neo4j.cypher.internal.compiler.v2_1.ast.rewriters.deMorganRewriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.google.common.collect.Lists;
-
-import java.util.UUID;
 
 /**
  * Controller that handles anonymous requests
@@ -84,21 +89,18 @@ public class AnonymousController extends MolgenisPluginController
 	public static final String TRUE = "True";
 	public static final String FOOD = "Food";
 	public static final int MAXLENGTHSTRING = 254;
-	
 
-	
-//	@Autowired
+	// @Autowired
 	private DataService dataService;
 
-	
 	private JavaMailSender mailSender;
-	
+
 	@Autowired
 	public AnonymousController(DataService dataService, JavaMailSender mailSender)
 	{
 		super(URI);
-		if(dataService == null) throw new IllegalArgumentException("DataService is null!");
-		if(mailSender == null) throw new IllegalArgumentException("JavaMailSender is null!");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null!");
+		if (mailSender == null) throw new IllegalArgumentException("JavaMailSender is null!");
 		this.dataService = dataService;
 		this.mailSender = mailSender;
 	}
@@ -223,7 +225,42 @@ public class AnonymousController extends MolgenisPluginController
 
 	}
 
-	
+	/**
+	 * Accepts sensor JSON
+	 */
+	@RequestMapping(value = "/addSensor", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> addSensorData(@RequestBody String s, HttpServletRequest servletRequest)
+	{
+		System.out.println(">> Parse sensor values");
+		Object initJSONObject = JSONValue.parse(s);
+
+		int existingRecords = 0;
+		int newRecords = 0;
+		
+		GlucoseSensorDataParser gp = new GlucoseSensorDataParser(initJSONObject);
+		for (int i = 0; i < gp.getList().size(); i++)
+		{
+			GlucoseSensorData g = gp.getList().get(i);
+			BgSensorRpi rec = new BgSensorRpi();
+			rec.setDateTimeMs(g.getDateTime().getTime());
+			rec.setAmount(g.getAmount());
+
+			BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME,
+					new QueryImpl().eq(BgSensorRpi.DATETIMEMS, g.getDateTime().getTime()), BgSensorRpi.class);
+			
+			if (null == h) {
+				dataService.add(BgSensorRpi.ENTITY_NAME, rec);
+				newRecords++;
+			} else {
+				existingRecords++;
+			}
+		}
+
+		// MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+
+		return response(true, "Added " + newRecords + " new sensor values. " + existingRecords + "  already imported before.");
+	}
 
 	/**
 	 * Updates an entity using PUT
@@ -252,11 +289,11 @@ public class AnonymousController extends MolgenisPluginController
 		EntityMetaData metaActivityEvent = dataService.getEntityMetaData(ActivityEvent.ENTITY_NAME);
 		EntityMetaData metaFoodEventInstance = dataService.getEntityMetaData(FoodEventInstance.ENTITY_NAME);
 		EntityMetaData metaActivityEventInstance = dataService.getEntityMetaData(ActivityEventInstance.ENTITY_NAME);
-		
+
 		HashMap<String, String> reftoevent = new HashMap<String, String>();
 		// iterate request list
-		iterateListRecursively(reftoevent, 0, timeStampLastSync, user, entityMap,
-				metaFoodEvent, metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
+		iterateListRecursively(reftoevent, 0, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent,
+				metaFoodEventInstance, metaActivityEventInstance);
 		// get entities from db and put these in response data
 		getEntitiesFromDBAndAppendToResponseData(FoodEvent.ENTITY_NAME, user, timeStampLastSync.getTimestamp(),
 				responseData, metaFoodEvent);
@@ -267,13 +304,14 @@ public class AnonymousController extends MolgenisPluginController
 				responseData, metaFoodEventInstance);
 		getEntitiesFromDBAndAppendToResponseData(ActivityEventInstance.ENTITY_NAME, user,
 				timeStampLastSync.getTimestamp(), responseData, metaActivityEventInstance);
-		
+
 		return responseData;
 
 	}
 
 	/**
 	 * Retrieves entities from db with lastchanged timestamp higher then timeStampLastSync, and appends to responsedata
+	 * 
 	 * @param entityName
 	 * @param user
 	 * @param timeStampLastSync
@@ -283,18 +321,18 @@ public class AnonymousController extends MolgenisPluginController
 	private void getEntitiesFromDBAndAppendToResponseData(String entityName, MolgenisUser user, long timeStampLastSync,
 			List<Map<String, Object>> responseData, EntityMetaData meta)
 	{
-		//get all entities from a user
+		// get all entities from a user
 		Iterable<Entity> dbEntities = dataService.findAll(entityName,
 				new QueryImpl().eq(Event.OWNER, user).and().ge(Event.LASTCHANGED, timeStampLastSync));
-		//iterate iterable
+		// iterate iterable
 		for (Entity entity : dbEntities)
 		{
-			//append to responsedata
+			// append to responsedata
 			Map<String, Object> entityAsMap = getEntityAsMap(entity, meta, null, null);
-			
+
 			responseData.add(entityAsMap);
 		}
-		
+
 	}
 
 	/**
@@ -311,141 +349,144 @@ public class AnonymousController extends MolgenisPluginController
 	 * @param metaFoodEventInstance
 	 * @param metaActivityEventInstance
 	 */
-	private void iterateListRecursively(HashMap<String, String> reftoevent,int index, TimestampLastUpdate timeStampLastSync, MolgenisUser user,
-			List<Map<String, Object>> entityMap, EntityMetaData metaFoodEvent, EntityMetaData metaActivityEvent,
-			EntityMetaData metaFoodEventInstance, EntityMetaData metaActivityEventInstance)
+	private void iterateListRecursively(HashMap<String, String> reftoevent, int index,
+			TimestampLastUpdate timeStampLastSync, MolgenisUser user, List<Map<String, Object>> entityMap,
+			EntityMetaData metaFoodEvent, EntityMetaData metaActivityEvent, EntityMetaData metaFoodEventInstance,
+			EntityMetaData metaActivityEventInstance)
 	{
-		try{
-		if (entityMap.size() > index)
+		try
 		{
-
-			Map<String, Object> mapEntity = entityMap.get(index);
-			if (mapEntity.containsKey("timeStampLastSync"))
-			{
-				// object is the timestamp
-				timeStampLastSync
-						.setTimestamp(Long.valueOf(mapEntity.get(TIME_STAMP_LAST_SYNC).toString()).longValue());
-				iterateListRecursively(reftoevent , index + 1, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent, metaFoodEventInstance,
-						metaActivityEventInstance);
-			}
-			else if (mapEntity.containsKey(Event.NAME))
+			if (entityMap.size() > index)
 			{
 
-				// object is an event entity
-				// events need to be processed first, so first process this object and then proceed iteration
-
-				if (mapEntity.get(Event.EVENTTYPE).equals(FOOD))
+				Map<String, Object> mapEntity = entityMap.get(index);
+				if (mapEntity.containsKey("timeStampLastSync"))
+				{
+					// object is the timestamp
+					timeStampLastSync.setTimestamp(Long.valueOf(mapEntity.get(TIME_STAMP_LAST_SYNC).toString())
+							.longValue());
+					iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent,
+							metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
+				}
+				else if (mapEntity.containsKey(Event.NAME))
 				{
 
-					processMapEntity(mapEntity, metaFoodEvent, user);
-					iterateListRecursively(reftoevent ,index + 1, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent, metaFoodEventInstance,
-							metaActivityEventInstance);
+					// object is an event entity
+					// events need to be processed first, so first process this object and then proceed iteration
+
+					if (mapEntity.get(Event.EVENTTYPE).equals(FOOD))
+					{
+
+						processMapEntity(mapEntity, metaFoodEvent, user);
+						iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap,
+								metaFoodEvent, metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
+
+					}
+					else
+					{
+
+						processMapEntity(mapEntity, metaActivityEvent, user);
+						iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap,
+								metaFoodEvent, metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
+
+					}
 
 				}
-				else
+
+				else if (mapEntity.containsKey(ActivityEventInstance.INTENSITY))
 				{
-					
-
-					processMapEntity(mapEntity, metaActivityEvent, user);
-					iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent, metaFoodEventInstance,
-							metaActivityEventInstance);
+					// object is an activity entity
+					// events need to be processed first, so first proceed iteration and then process this object
+					iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent,
+							metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
+					processMapEntity(mapEntity, metaActivityEventInstance, user);
 
 				}
+				else if (mapEntity.containsKey(FoodEventInstance.AMOUNT))
+				{
+					// object is an food entity
+					// same as activity entity
+					iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent,
+							metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
+					processMapEntity(mapEntity, metaFoodEventInstance, user);
 
+				}
 			}
-
-			else if (mapEntity.containsKey(ActivityEventInstance.INTENSITY))
-			{
-				// object is an activity entity
-				// events need to be processed first, so first proceed iteration and then process this object
-				iterateListRecursively(reftoevent ,index + 1, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent, metaFoodEventInstance,
-						metaActivityEventInstance);
-				processMapEntity(mapEntity, metaActivityEventInstance, user);
-
-			}
-			else if (mapEntity.containsKey(FoodEventInstance.AMOUNT))
-			{
-				// object is an food entity
-				// same as activity entity
-				iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent, metaFoodEventInstance,
-						metaActivityEventInstance);
-				processMapEntity( mapEntity, metaFoodEventInstance, user);
-
-			}
-		}
 		}
 		catch (Exception e)
 		{
 			writeExceptionToDB(user, entityMap.get(index).toString(), e.toString());
 			System.out.println(e);
-			iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent, metaFoodEventInstance,
-					metaActivityEventInstance);
+			iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent,
+					metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
 		}
-		
 
 	}
 
-	
 	/**
-	 * Makes entity from a Map<String, Object> and creates in db entity if not exists
-	 * or updates entity if entity has a higher timestamp (more recently modified than the one from db)
+	 * Makes entity from a Map<String, Object> and creates in db entity if not exists or updates entity if entity has a
+	 * higher timestamp (more recently modified than the one from db)
 	 * 
 	 * @param meta
 	 * @param request
 	 * @param user
 	 * @return
 	 */
-	private void processMapEntity( Map<String, Object> mapEntity, EntityMetaData meta, MolgenisUser user)
+	private void processMapEntity(Map<String, Object> mapEntity, EntityMetaData meta, MolgenisUser user)
 	{
-		
-		
+
 		// make entity
 		Entity entity = toEntity(meta, mapEntity, user);
 		Entity storedEntity = dataService.findOne(meta.getName(),
 				new QueryImpl().eq(Event.OWNER, user).and().eq(Event.ID, entity.get(Event.ID)));
-		
+
 		if (storedEntity == null)
 		{
-			//no entity in db, add entity
+			// no entity in db, add entity
 			if (meta.getName() == FoodEventInstance.ENTITY_NAME || meta.getName() == ActivityEventInstance.ENTITY_NAME)
 			{
-				//because primary keys need to be autogenerated, the foreign key of event instances(to events) are only known on the server,
-				//therefore event entity need to be collected from db to set the foreign key in the event instance.
-				//get entity from db
-				Entity eventEntity = dataService.findOne(Event.ENTITY_NAME, new QueryImpl().eq(Event.OWNER, user).and().eq(Event.ID, entity.get(EventInstance.EVENTID)));
-				//set foreign key
+				// because primary keys need to be autogenerated, the foreign key of event instances(to events) are only
+				// known on the server,
+				// therefore event entity need to be collected from db to set the foreign key in the event instance.
+				// get entity from db
+				Entity eventEntity = dataService.findOne(Event.ENTITY_NAME, new QueryImpl().eq(Event.OWNER, user).and()
+						.eq(Event.ID, entity.get(EventInstance.EVENTID)));
+				// set foreign key
 				entity.set(EventInstance.FOREIGNKEY, eventEntity);
 			}
-			try{
+			try
+			{
 				dataService.add(meta.getName(), entity);
 			}
-			catch(Exception e){
+			catch (Exception e)
+			{
 				writeExceptionToDB(user, entity.toString(), e.toString());
-				System.out.println("exception is:"+ e.toString());
+				System.out.println("exception is:" + e.toString());
 				System.out.println("entity is: " + entity.toString());
-				System.out.println("user is"+ user.toString());
+				System.out.println("user is" + user.toString());
 			}
 		}
-		else{
-			//entity is in db
-			//check if entity from client is more recently modified than the one from db
+		else
+		{
+			// entity is in db
+			// check if entity from client is more recently modified than the one from db
 			if (storedEntity.getDouble(TestEvent.LASTCHANGED) < entity.getDouble(TestEvent.LASTCHANGED))
 			{
-				//indeed client entity more resent
-				
-				if (meta.getName() == FoodEventInstance.ENTITY_NAME || meta.getName() == ActivityEventInstance.ENTITY_NAME)
+				// indeed client entity more resent
+
+				if (meta.getName() == FoodEventInstance.ENTITY_NAME
+						|| meta.getName() == ActivityEventInstance.ENTITY_NAME)
 				{
-					//set foreign key(key to the autogenerated id of event)
+					// set foreign key(key to the autogenerated id of event)
 					entity.set(EventInstance.FOREIGNKEY, storedEntity.get(EventInstance.FOREIGNKEY));
 				}
 				// set primary key
 				entity.set(Event.PRIMARYKEY, storedEntity.get(Event.PRIMARYKEY));
-				
+
 				// entity received from app more recent than on server.
 				dataService.update(meta.getName(), entity);
 			}
 		}
-
 
 	}
 
@@ -471,34 +512,41 @@ public class AnonymousController extends MolgenisPluginController
 				Object paramValue = mapEntity.get(paramName);
 				Object value = null;
 				FieldTypeEnum dataType = attr.getDataType().getEnumType();
-				
-				//an undefined javascript object will be processed as a string "undefined"
-				//if datatype is a number the conversion(toEntityValue) will result in an error.
-				//therefore this check
+
+				// an undefined javascript object will be processed as a string "undefined"
+				// if datatype is a number the conversion(toEntityValue) will result in an error.
+				// therefore this check
 				if (paramValue != null && paramValue.equals("undefined"))
 				{
-					if(dataType == INT || dataType == LONG || dataType== DECIMAL){
+					if (dataType == INT || dataType == LONG || dataType == DECIMAL)
+					{
 						value = null;
 					}
 				}
-				//websql has no true or false, instead it uses 0 and 1,
-				//if datatype is a boolean than use the custom method convertDoubleToBoolean
+				// websql has no true or false, instead it uses 0 and 1,
+				// if datatype is a boolean than use the custom method convertDoubleToBoolean
 				else if (dataType == BOOL)
 				{
-					if(paramValue.equals("undefined")){
+					if (paramValue.equals("undefined"))
+					{
 						value = null;
 					}
-					else{
+					else
+					{
 						value = convertDoubleToBoolean((double) paramValue);
 					}
 				}
-				else{
-					//surround with try catch, if it fails then value will remain null
-					try{
+				else
+				{
+					// surround with try catch, if it fails then value will remain null
+					try
+					{
 						value = toEntityValue(attr, paramValue);
 					}
-					catch(Exception e){
-						System.out.println("Failed to convert parameter value: "+ paramValue+" to dataType: "+ dataType.toString());
+					catch (Exception e)
+					{
+						System.out.println("Failed to convert parameter value: " + paramValue + " to dataType: "
+								+ dataType.toString());
 						System.out.println(e);
 					}
 				}
@@ -522,9 +570,8 @@ public class AnonymousController extends MolgenisPluginController
 
 	private boolean convertDoubleToBoolean(double input)
 	{
-		
-		
-		if(input > 0)
+
+		if (input > 0)
 		{
 			return true;
 		}
@@ -711,8 +758,10 @@ public class AnonymousController extends MolgenisPluginController
 
 		return entityMap;
 	}
+
 	/**
 	 * Once registering succeeded, this method composes the message to the user.
+	 * 
 	 * @param success
 	 * @param msg
 	 * @return
@@ -735,48 +784,48 @@ public class AnonymousController extends MolgenisPluginController
 	 */
 	public MolgenisUser getUserFromToken(String token)
 	{
-		
+
 		MolgenisToken tokenEntity = dataService.findOne(MolgenisToken.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
 		return tokenEntity.getMolgenisUser();
 	}
 
-
 	/**
 	 * This method writes an exception that occurred during a certain sync, to db.
+	 * 
 	 * @param user
 	 * @param entityAsString
 	 * @param exceptionAsString
 	 */
-	private void writeExceptionToDB(MolgenisUser user, String entityAsString, String exceptionAsString){
-		//make a substring of strings if the string is longer than possible 
-		if(entityAsString.length() > MAXLENGTHSTRING){
+	private void writeExceptionToDB(MolgenisUser user, String entityAsString, String exceptionAsString)
+	{
+		// make a substring of strings if the string is longer than possible
+		if (entityAsString.length() > MAXLENGTHSTRING)
+		{
 			entityAsString = entityAsString.substring(0, MAXLENGTHSTRING);
 		}
-		if(exceptionAsString.length() > MAXLENGTHSTRING){
+		if (exceptionAsString.length() > MAXLENGTHSTRING)
+		{
 			exceptionAsString = exceptionAsString.substring(0, MAXLENGTHSTRING);
 		}
-		//first check if exception is allready in db
-		Entity dbEntity = dataService.findOne(ServerExceptionLog.ENTITY_NAME, 
-				new QueryImpl().eq(ServerExceptionLog.OWNER, user)
-				.and().eq(ServerExceptionLog.ENTITY, entityAsString)
-				.and().eq(ServerExceptionLog.EXCEPTION, exceptionAsString));
+		// first check if exception is allready in db
+		Entity dbEntity = dataService.findOne(ServerExceptionLog.ENTITY_NAME,
+				new QueryImpl().eq(ServerExceptionLog.OWNER, user).and().eq(ServerExceptionLog.ENTITY, entityAsString)
+						.and().eq(ServerExceptionLog.EXCEPTION, exceptionAsString));
 		if (dbEntity == null)
 		{
-			//exception not in db, write now to db
-			//make entity
+			// exception not in db, write now to db
+			// make entity
 			EntityMetaData meta = dataService.getEntityMetaData(ServerExceptionLog.ENTITY_NAME);
 			Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
 			entityMap.put(ServerExceptionLog.ENTITY, entityAsString);
 			entityMap.put(ServerExceptionLog.EXCEPTION, exceptionAsString);
 			Entity entity = toEntity(meta, entityMap, user);
-			System.out.println("entity isss:"+entity);
-			//write to db
+			System.out.println("entity isss:" + entity);
+			// write to db
 			dataService.add(meta.getName(), entity);
-			
+
 		}
 	}
-	
-
 
 }

@@ -1,10 +1,11 @@
-<#include "header.ftl">
-This is server content!
-<#include "footer.ftl">
+<#-- #include "header.ftl">
+This is server content! remove
+<#include "footer.ftl"-->
 
-<#-- #include "molgenis-header.ftl">
+<#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
 <@header/>
-b
-<@footer/-->
+IMprove this text
+
+<@footer/>

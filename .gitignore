@@ -7,4 +7,4 @@ test-output/
 .DS_Store
 /src/main/java/org/molgenis/autobetes/data
 *~
-/target
+/target/

@@ -1,0 +1,4 @@
+<BUTTON TYPE="submit" CLASS="btn btn-warning" ONCLICK="__action.value='newTopic';return true;">Plaats een nieuw onderwerp</BUTTON>
+
+<A HREF="molgenis.do?__target=ForumPlugin&amp;__action=newTopic&amp;number=2" CLASS="btn btn-large btn-primary" STYLE="width:50;"><B><I CLASS="icon-search icon-white"></I> Zoek verder met dit hotel</B></A>                                     
+<I CLASS="icon-repeat"></I><B><INPUT TYPE="submit" ONCLICK="__action.value='newTopic';return true;" VALUE="Opnieuw beginnen" STYLE="font-weight: bold; color: #F66;"/></B>

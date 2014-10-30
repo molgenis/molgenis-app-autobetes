@@ -1,0 +1,2 @@
+# Header
+mkdir -p ${reportDir}
