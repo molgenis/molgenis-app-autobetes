@@ -41,6 +41,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
+		super.addInterceptors(registry);
 		// enable cross origin
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
 		String corsInterceptPattern = "/api/**";
