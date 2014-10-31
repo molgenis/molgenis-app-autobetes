@@ -1,0 +1,1 @@
+export CATALINA_OPTS="-Xmx4g -XX:MaxPermSize=512m -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Dmolgenis.home=/srv/molgenis/.molgenis/autobetes -Dlog4j.configuration=log4j-molgenis.properties"

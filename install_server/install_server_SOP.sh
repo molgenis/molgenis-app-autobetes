@@ -1,0 +1,5 @@
+echo "cp mysql-connector-java-5.1.28.jar apache-tomcat-7.0.55/lib/"
+echo "cp setenv.sh apache-tomcat/bin/"
+echo "create db"
+echo "create .molgenis/ folder to server"
+echo "remove elestic"
