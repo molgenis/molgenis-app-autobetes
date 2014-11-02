@@ -16,6 +16,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
@@ -103,7 +108,7 @@ public class AnonymousController extends MolgenisPluginController
 
 	@Autowired
 	private FileStore fileStore;
-	
+
 	@Autowired
 	public AnonymousController(DataService dataService, JavaMailSender mailSender)
 	{
@@ -241,6 +246,9 @@ public class AnonymousController extends MolgenisPluginController
 	@ResponseBody
 	public Map<String, Object> addSensorData(@RequestBody String s, HttpServletRequest servletRequest)
 	{
+		// who's data is this?
+		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+		
 		System.out.println(">> Parse sensor values");
 		Object initJSONObject = JSONValue.parse(s);
 
@@ -252,52 +260,100 @@ public class AnonymousController extends MolgenisPluginController
 		{
 			GlucoseSensorData g = gp.getList().get(i);
 			BgSensorRpi rec = new BgSensorRpi();
+			rec.setOwner(user);
 			rec.setDateTimeMs(g.getDateTime().getTime());
 			rec.setAmount(g.getAmount());
 
 			BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME,
 					new QueryImpl().eq(BgSensorRpi.DATETIMEMS, g.getDateTime().getTime()), BgSensorRpi.class);
-			
-			if (null == h) {
+
+			if (null == h)
+			{
 				dataService.add(BgSensorRpi.ENTITY_NAME, rec);
 				newRecords++;
-			} else {
+			}
+			else
+			{
 				existingRecords++;
 			}
 		}
 
-		// MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+		System.out.println(">> TOKEN: " + TokenExtractor.getToken(servletRequest));
 
-		return response(true, "Added " + newRecords + " new sensor values. " + existingRecords + "  already imported before.");
+		return response(true, "Added " + newRecords + " new sensor values. " + existingRecords
+				+ "  already imported before.");
 	}
-	
+
 	/**
 	 * Accepts sensor BINARY
 	 */
-	@RequestMapping(value = "/sensorBinary", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data", produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/sensorJson", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Object>  sensorBinary(@RequestParam Part file, HttpServletRequest servletRequest)
+	public Map<String, Object> sensorJson(@RequestParam Part file, HttpServletRequest servletRequest)
 	{
+		System.out.println(">> TOKEN: " + TokenExtractor.getToken(servletRequest));
+		
 		long timestamp = System.currentTimeMillis();
 		String originalFileName = FileUploadUtils.getOriginalFileName(file);
 
+		String json = "";
 		try
 		{
-			//TODO: add username to file name?
+			// TODO: add username to file name?
 			String newFileName = originalFileName + "." + timestamp + ".data";
 			File rawData = fileStore.store(file.getInputStream(), newFileName);
 			System.out.println(">> Imported " + newFileName);
-			
-			//TODO: parse raw bytes
+
+			Scanner scanner = new Scanner(rawData);
+			while (scanner.hasNext())
+			{
+				json+=scanner.next();
+			}
+			System.out.println(json);
 		}
+
 		catch (IOException e)
 		{
-			System.err.println(">> ERROR in sensorBinary upload, saving file in file store");
+			System.err.println(">> ERROR in sensorJson upload or with saving file in file store");
 			e.printStackTrace();
+			return response(false, "st went wrong");
 		}
+
+		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
 		
-		
-		return response(true, "binary data received");
+		// parse json
+		System.out.println(">> Parse sensor values");
+		Object initJSONObject = JSONValue.parse(json);
+
+		int existingRecords = 0;
+		int newRecords = 0;
+
+		GlucoseSensorDataParser gp = new GlucoseSensorDataParser(initJSONObject);
+		for (int i = 0; i < gp.getList().size(); i++)
+		{
+			GlucoseSensorData g = gp.getList().get(i);
+			BgSensorRpi rec = new BgSensorRpi();
+//			rec.setMolgenisUser(user);
+			rec.setDateTimeMs(g.getDateTime().getTime());
+			rec.setAmount(g.getAmount());
+
+			BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME,
+					new QueryImpl().eq(BgSensorRpi.DATETIMEMS, g.getDateTime().getTime()), BgSensorRpi.class);
+
+			if (null == h)
+			{
+				// put json in db
+				dataService.add(BgSensorRpi.ENTITY_NAME, rec);
+				newRecords++;
+			}
+			else
+			{
+				existingRecords++;
+			}
+		}	
+
+		return response(true, "Added " + newRecords + " new sensor values. " + existingRecords
+				+ "  already imported before.");
 	}
 
 	/**
