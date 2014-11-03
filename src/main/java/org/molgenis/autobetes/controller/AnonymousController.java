@@ -239,50 +239,50 @@ public class AnonymousController extends MolgenisPluginController
 
 	}
 
-	/**
-	 * Accepts sensor JSON
-	 */
-	@RequestMapping(value = "/addSensor", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Map<String, Object> addSensorData(@RequestBody String s, HttpServletRequest servletRequest)
-	{
-		// who's data is this?
-		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
-		
-		System.out.println(">> Parse sensor values");
-		Object initJSONObject = JSONValue.parse(s);
-
-		int existingRecords = 0;
-		int newRecords = 0;
-		
-		GlucoseSensorDataParser gp = new GlucoseSensorDataParser(initJSONObject);
-		for (int i = 0; i < gp.getList().size(); i++)
-		{
-			GlucoseSensorData g = gp.getList().get(i);
-			BgSensorRpi rec = new BgSensorRpi();
-			rec.setOwner(user);
-			rec.setDateTimeMs(g.getDateTime().getTime());
-			rec.setAmount(g.getAmount());
-
-			BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME,
-					new QueryImpl().eq(BgSensorRpi.DATETIMEMS, g.getDateTime().getTime()), BgSensorRpi.class);
-
-			if (null == h)
-			{
-				dataService.add(BgSensorRpi.ENTITY_NAME, rec);
-				newRecords++;
-			}
-			else
-			{
-				existingRecords++;
-			}
-		}
-
-		System.out.println(">> TOKEN: " + TokenExtractor.getToken(servletRequest));
-
-		return response(true, "Added " + newRecords + " new sensor values. " + existingRecords
-				+ "  already imported before.");
-	}
+//	/**
+//	 * Accepts sensor JSON
+//	 */
+//	@RequestMapping(value = "/addSensor", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+//	@ResponseBody
+//	public Map<String, Object> addSensorData(@RequestBody String s, HttpServletRequest servletRequest)
+//	{
+//		// who's data is this?
+//		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+//		
+//		System.out.println(">> Parse sensor values");
+//		Object initJSONObject = JSONValue.parse(s);
+//
+//		int existingRecords = 0;
+//		int newRecords = 0;
+//		
+//		GlucoseSensorDataParser gp = new GlucoseSensorDataParser(initJSONObject);
+//		for (int i = 0; i < gp.getList().size(); i++)
+//		{
+//			GlucoseSensorData g = gp.getList().get(i);
+//			BgSensorRpi rec = new BgSensorRpi();
+//			rec.setOwner(user);
+//			rec.setDateTimeMs(g.getDateTime().getTime());
+//			rec.setAmount(g.getAmount());
+//
+//			BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME,
+//					new QueryImpl().eq(BgSensorRpi.DATETIMEMS, g.getDateTime().getTime()), BgSensorRpi.class);
+//
+//			if (null == h)
+//			{
+//				dataService.add(BgSensorRpi.ENTITY_NAME, rec);
+//				newRecords++;
+//			}
+//			else
+//			{
+//				existingRecords++;
+//			}
+//		}
+//
+//		System.out.println(">> TOKEN: " + TokenExtractor.getToken(servletRequest));
+//
+//		return response(true, "Added " + newRecords + " new sensor values. " + existingRecords
+//				+ "  already imported before.");
+//	}
 
 	/**
 	 * Accepts sensor BINARY
@@ -333,7 +333,7 @@ public class AnonymousController extends MolgenisPluginController
 		{
 			GlucoseSensorData g = gp.getList().get(i);
 			BgSensorRpi rec = new BgSensorRpi();
-//			rec.setMolgenisUser(user);
+			rec.setOwner(user);
 			rec.setDateTimeMs(g.getDateTime().getTime());
 			rec.setAmount(g.getAmount());
 
