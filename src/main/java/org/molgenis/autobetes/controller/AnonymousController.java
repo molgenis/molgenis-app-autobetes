@@ -14,18 +14,16 @@ import static org.molgenis.autobetes.controller.AnonymousController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,15 +34,14 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.autobetes.autobetes.ActivityEvent;
 import org.molgenis.autobetes.autobetes.ActivityEventInstance;
 import org.molgenis.autobetes.autobetes.BgSensorRpi;
+import org.molgenis.autobetes.autobetes.BinaryData;
 import org.molgenis.autobetes.autobetes.Event;
 import org.molgenis.autobetes.autobetes.EventInstance;
 import org.molgenis.autobetes.autobetes.FoodEvent;
@@ -65,6 +62,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
+import org.molgenis.script.SavedScriptRunner;
+import org.molgenis.script.ScriptResult;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
@@ -108,6 +107,9 @@ public class AnonymousController extends MolgenisPluginController
 
 	@Autowired
 	private FileStore fileStore;
+
+	@Autowired
+	private SavedScriptRunner scriptRunner;
 
 	@Autowired
 	public AnonymousController(DataService dataService, JavaMailSender mailSender)
@@ -239,121 +241,200 @@ public class AnonymousController extends MolgenisPluginController
 
 	}
 
-//	/**
-//	 * Accepts sensor JSON
-//	 */
-//	@RequestMapping(value = "/addSensor", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-//	@ResponseBody
-//	public Map<String, Object> addSensorData(@RequestBody String s, HttpServletRequest servletRequest)
-//	{
-//		// who's data is this?
-//		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
-//		
-//		System.out.println(">> Parse sensor values");
-//		Object initJSONObject = JSONValue.parse(s);
-//
-//		int existingRecords = 0;
-//		int newRecords = 0;
-//		
-//		GlucoseSensorDataParser gp = new GlucoseSensorDataParser(initJSONObject);
-//		for (int i = 0; i < gp.getList().size(); i++)
-//		{
-//			GlucoseSensorData g = gp.getList().get(i);
-//			BgSensorRpi rec = new BgSensorRpi();
-//			rec.setOwner(user);
-//			rec.setDateTimeMs(g.getDateTime().getTime());
-//			rec.setAmount(g.getAmount());
-//
-//			BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME,
-//					new QueryImpl().eq(BgSensorRpi.DATETIMEMS, g.getDateTime().getTime()), BgSensorRpi.class);
-//
-//			if (null == h)
-//			{
-//				dataService.add(BgSensorRpi.ENTITY_NAME, rec);
-//				newRecords++;
-//			}
-//			else
-//			{
-//				existingRecords++;
-//			}
-//		}
-//
-//		System.out.println(">> TOKEN: " + TokenExtractor.getToken(servletRequest));
-//
-//		return response(true, "Added " + newRecords + " new sensor values. " + existingRecords
-//				+ "  already imported before.");
-//	}
-
 	/**
-	 * Accepts sensor BINARY
+	 * Parses sensor BINARY sensor data into db
+	 * @return mm modulo 5 of last record's hh:mm
 	 */
-	@RequestMapping(value = "/sensorJson", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data", produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/upload/binary/sensor/{page}", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Object> sensorJson(@RequestParam Part file, HttpServletRequest servletRequest)
+	public Integer uploadBinary(@RequestParam Part file, HttpServletRequest servletRequest,
+			@PathVariable Integer page)
 	{
-		System.out.println(">> TOKEN: " + TokenExtractor.getToken(servletRequest));
-		
-		long timestamp = System.currentTimeMillis();
-		String originalFileName = FileUploadUtils.getOriginalFileName(file);
+		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
 
-		String json = "";
+		// create name
+		// ownerId-type-page.binary
+		String newFileName = user.getId() + "-sensor-page" + page + ".binary";
+
+		File page2 = null;
+		// save in file store
 		try
 		{
-			// TODO: add username to file name?
-			String newFileName = originalFileName + "." + timestamp + ".data";
-			File rawData = fileStore.store(file.getInputStream(), newFileName);
+			page2 = fileStore.store(file.getInputStream(), newFileName);
 			System.out.println(">> Imported " + newFileName);
-
-			Scanner scanner = new Scanner(rawData);
-			while (scanner.hasNext())
-			{
-				json+=scanner.next();
-			}
-			System.out.println(json);
 		}
-
 		catch (IOException e)
 		{
 			System.err.println(">> ERROR in sensorJson upload or with saving file in file store");
 			e.printStackTrace();
-			return response(false, "st went wrong");
+			return null;
 		}
 
-		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+		long timestamp = System.currentTimeMillis();
+
+		// keep track of file in BinaryData table
+		BinaryData bd = new BinaryData();
+		bd.setReceived(timestamp);
+		bd.setDataType("sensor"); // TODO: don't use hard coded string "sensor", but rather use field propertie if
+									// possible
+		bd.setPage(page);
+		bd.setFileName(newFileName);
+		bd.setOwner(user);
+
+		// add or update
+		BinaryData bdFromDb = dataService.findOne(BinaryData.ENTITY_NAME,
+				new QueryImpl().eq(BinaryData.FILENAME, newFileName), BinaryData.class);
+		if (null == bdFromDb)
+		{
+			dataService.add(BinaryData.ENTITY_NAME, bd);
+			bdFromDb = bd;
+		}
+		else
+		{
+			// update date time received
+			bdFromDb.setReceived(timestamp);
+			dataService.update(BinaryData.ENTITY_NAME, bdFromDb);
+		}
+
+		// combine most recent 2 or 1 pages of user
+		String twoPagesFileName = null;
+		try
+		{
+			twoPagesFileName = concatTwoPages(bdFromDb, page2, user);
+		}
+		catch (IOException e)
+		{
+			System.err.println(">> merging two binary pages went wrong");
+			e.printStackTrace();
+			return null;
+		}
+
+		Integer minute = saveSensorData(twoPagesFileName, user);
+		if (null == minute) return -1;
 		
-		// parse json
+		// TODO: Fix: should return most recent from DB
+		return (minute % 5) + 1;
+	}
+
+	/**
+	 * Saves sensor data in db
+	 * @param twoPagesFileName
+	 * @param user
+	 * @return minute of time last record (HH:{MM} used for next sync)
+	 */
+	private Integer saveSensorData(String twoPagesFileName, MolgenisUser user)
+	{
+		// convert to json
+		// sensorDataToJson(twoPagesFileName);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("binaryFile", prependFileStoreDir(twoPagesFileName));
+
+		// TODO don't hard code script name?
+		ScriptResult scriptResult = scriptRunner.runScript("binaryToJson", map);
+		String json = scriptResult.getOutput();
+
+		// save json in db
 		System.out.println(">> Parse sensor values");
-		Object initJSONObject = JSONValue.parse(json);
+		Object jsonObject = JSONValue.parse(json);
 
-		int existingRecords = 0;
-		int newRecords = 0;
-
-		GlucoseSensorDataParser gp = new GlucoseSensorDataParser(initJSONObject);
+		java.util.Date lastRecTimestamp = null;
+		GlucoseSensorDataParser gp = new GlucoseSensorDataParser(jsonObject);
+		List<BgSensorRpi> lst = new ArrayList<BgSensorRpi>();
 		for (int i = 0; i < gp.getList().size(); i++)
 		{
 			GlucoseSensorData g = gp.getList().get(i);
 			BgSensorRpi rec = new BgSensorRpi();
 			rec.setOwner(user);
+			lastRecTimestamp = g.getDateTime();
 			rec.setDateTimeMs(g.getDateTime().getTime());
 			rec.setAmount(g.getAmount());
 
 			BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME,
 					new QueryImpl().eq(BgSensorRpi.DATETIMEMS, g.getDateTime().getTime()), BgSensorRpi.class);
 
-			if (null == h)
+			if (null == h) // put json list (store list in db below)
+			lst.add(rec);
+		}
+
+		// add list to db
+		dataService.add(BgSensorRpi.ENTITY_NAME, lst);
+		
+		// return minute of hour
+		if (null == lastRecTimestamp) return -1;
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(lastRecTimestamp);
+		cal.get(Calendar.MINUTE);
+		return cal.get(Calendar.MINUTE);
+	}
+
+	private String concatTwoPages(BinaryData bd, File page2, MolgenisUser user) throws IOException
+	{
+		// check page and page minus 1 present
+		// if last but one page is indeed the most recently uploaded, then parse last two
+		Iterable<BinaryData> bdlst = dataService.findAll(BinaryData.ENTITY_NAME, new QueryImpl().eq(Event.OWNER, user),
+				BinaryData.class);
+
+		BinaryData bdPrevPage = null;
+		for (BinaryData bdCandidate : bdlst)
+		{
+			if (null == bdPrevPage)
 			{
-				// put json in db
-				dataService.add(BgSensorRpi.ENTITY_NAME, rec);
-				newRecords++;
+				bdPrevPage = bdCandidate;
 			}
 			else
 			{
-				existingRecords++;
+				if (bdPrevPage.getReceived() < bdCandidate.getReceived()
+						&& bdCandidate.getReceived() < bd.getReceived())
+				{ // new candidate for prev page
+					bdPrevPage = bdCandidate;
+				}
 			}
-		}	
+		}
 
-		return response(true, "Added " + newRecords + " new sensor values. " + existingRecords
-				+ "  already imported before.");
+		Boolean twoPages = bd.getPage().equals(bdPrevPage.getPage() + 1);
+
+		// finalBinaryData file name: userId-page1(-page2).to.be.analyzed.binary
+		String binaryDataToBeAnalyzedFileName = user.getId().toString();
+		if (twoPages)
+		{
+			binaryDataToBeAnalyzedFileName += "-" + bdPrevPage.getPage();
+		}
+		// Create final file to be analyzed:
+		binaryDataToBeAnalyzedFileName += "-" + bd.getPage() + ".to.be.analyzed.binary";
+
+		File binaryDataToBeAnalyzedFile = new File(prependFileStoreDir(binaryDataToBeAnalyzedFileName));
+
+		if (twoPages)
+		{
+			// concatenate two files
+			File page1 = fileStore.getFile(bdPrevPage.getFileName());
+			FileUtils.copyFile(page1, binaryDataToBeAnalyzedFile);
+			FileOutputStream fos = new FileOutputStream(binaryDataToBeAnalyzedFile, true); // append = true
+			FileInputStream fis = new FileInputStream(page2);
+			byte[] fileBytes = new byte[(int) page2.length()];
+			int bytesRead = fis.read(fileBytes, 0, (int) page2.length());
+			assert (bytesRead == fileBytes.length);
+			assert (bytesRead == (int) page2.length());
+			fos.write(fileBytes);
+			fos.flush();
+			fis.close();
+			fos.close();
+
+			System.out.println(">> saved 2 pages in " + binaryDataToBeAnalyzedFileName);
+		}
+		else
+		{
+			// only copy file
+			FileUtils.copyFile(page2, binaryDataToBeAnalyzedFile);
+			System.out.println(">> saved 1 pages in " + binaryDataToBeAnalyzedFileName);
+		}
+
+		return binaryDataToBeAnalyzedFileName;
+	}
+
+	private String prependFileStoreDir(String fileName)
+	{
+		return fileStore.getStorageDir() + File.separatorChar + fileName;
 	}
 
 	/**
