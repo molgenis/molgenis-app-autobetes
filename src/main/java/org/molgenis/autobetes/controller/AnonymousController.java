@@ -71,6 +71,8 @@ import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
@@ -241,6 +243,23 @@ public class AnonymousController extends MolgenisPluginController
 
 	}
 
+	
+	/**
+	 * @return time stamp of most recent sensor data of user to which this token belongs! 
+	 */
+	@RequestMapping(value = "/sensorLastTimeStamp", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Long sensorLastTimeStamp(HttpServletRequest servletRequest)
+	{
+		MolgenisUser owner = getUserFromToken(TokenExtractor.getToken(servletRequest));
+		
+//		new QueryImpl().sort(new Sort(Direction.DESC)).offset(0).pageSize(1);
+		BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME, new QueryImpl().sort(new Sort(Direction.DESC, BgSensorRpi.DATETIMEMS)).offset(0).pageSize(1), BgSensorRpi.class);
+		
+		return h.getDateTimeMs();
+	}
+	
+	
 	/**
 	 * Parses sensor BINARY sensor data into db
 	 * @return mm modulo 5 of last record's hh:mm
