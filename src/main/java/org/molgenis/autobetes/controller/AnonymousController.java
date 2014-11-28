@@ -6,6 +6,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
 import static org.molgenis.autobetes.controller.AnonymousController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.io.File;
 import java.net.URI;
 import java.rmi.ServerException;
 import java.sql.Date;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -33,6 +35,7 @@ import org.molgenis.autobetes.autobetes.FoodEvent;
 import org.molgenis.autobetes.autobetes.FoodEventInstance;
 import org.molgenis.autobetes.autobetes.TestEvent;
 import org.molgenis.autobetes.autobetes.ServerExceptionLog;
+import org.molgenis.autobetes.autobetes.UserInfo;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
@@ -50,6 +53,7 @@ import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.util.FileStore;
 import org.molgenis.util.MolgenisDateFormat;
 import org.neo4j.cypher.internal.compiler.v2_1.ast.rewriters.deMorganRewriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,15 +61,18 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.google.common.collect.Lists;
+
 
 import java.util.UUID;
 
@@ -89,7 +96,8 @@ public class AnonymousController extends MolgenisPluginController
 	
 //	@Autowired
 	private DataService dataService;
-
+	
+	
 	
 	private JavaMailSender mailSender;
 	
@@ -108,6 +116,7 @@ public class AnonymousController extends MolgenisPluginController
 	{
 		return "view-home";
 	}
+	
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
 	@ResponseBody
@@ -223,6 +232,66 @@ public class AnonymousController extends MolgenisPluginController
 
 	}
 
+	/**
+	 * Updates an entity using PUT
+	 * 
+	 * Example url: /api/v1/person/99
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param entityMap
+	 */
+	@RequestMapping(value = "/getUserInfo", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> getUserInfo(@RequestBody List<Map<String, Object>> entityMap,
+			HttpServletRequest servletRequest)
+	{
+		//System.out.println(entityMap.toString());
+		System.out.println(servletRequest.toString());
+		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+		EntityMetaData metaUserInfo = dataService.getEntityMetaData(UserInfo.ENTITY_NAME);
+		Entity userInfo = dataService.findOne(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user) );
+		if(userInfo == null){
+			return null;
+		}
+		else{
+			Map<String, Object> userInfoMap = getEntityAsMap(userInfo, metaUserInfo, null, null);
+			
+			return userInfoMap;
+		}
+		
+	}
+	/**
+	 * Updates an entity using PUT
+	 * 
+	 * Example url: /api/v1/person/99
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param entityMap
+	 */
+	@RequestMapping(value = "/setUserInfo", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> setUserInfo(@RequestBody List<Map<String, Object>> entityMap,
+			HttpServletRequest servletRequest)
+	{
+		//System.out.println(entityMap.toString());
+		System.out.println(servletRequest.toString());
+		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+		EntityMetaData metaUserInfo = dataService.getEntityMetaData(UserInfo.ENTITY_NAME);
+		Entity userInfo = dataService.findOne(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user) );
+		
+		Entity entityFromClient = toEntity(metaUserInfo, entityMap.get(0), user);
+		if(userInfo == null){
+			dataService.add(UserInfo.ENTITY_NAME, entityFromClient);
+			return null;
+		}
+		else{
+			dataService.update(UserInfo.ENTITY_NAME, userInfo);
+			return null;
+		}
+		
+	}
 	
 
 	/**

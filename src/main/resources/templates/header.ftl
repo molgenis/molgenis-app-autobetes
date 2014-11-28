@@ -8,7 +8,6 @@
 	<link rel="stylesheet" href="/css/jquery.mobile-1.4.2.min.css" />
 	<!-- script src="/js/jquery-1.8.3.min.js"></script-->
 	<script src="/js/jquery.js"></script>
-	<script src="/js/jquery.mobile-1.4.2.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 
 	<script src="/js/molgenis.js"></script>
