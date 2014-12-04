@@ -2,6 +2,7 @@ package org.molgenis.autobetes;
 
 import org.molgenis.autobetes.controller.AnonymousController;
 import org.molgenis.autobetes.controller.HomeController;
+import org.molgenis.autobetes.controller.MovesController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
@@ -47,6 +48,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		
+		//same goes for movescontroller
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + MovesController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		
 	}
 
