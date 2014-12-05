@@ -9,6 +9,9 @@ import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.elasticsearch.http.HttpStats;
+import org.molgenis.autobetes.MovesConnector;
+import org.molgenis.autobetes.MovesConnectorImpl;
 import org.molgenis.autobetes.autobetes.Event;
 import org.molgenis.autobetes.autobetes.MovesToken;
 import org.molgenis.data.DataService;
@@ -40,10 +43,9 @@ public class MovesController extends MolgenisPluginController
 	public static final String ID = "moves";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String BASE_URI = "";
-	public static final String CLIENT_ID = "Da6TIHoVori74lacfuVk9QxzlIM5xy9E";
-	public static final String CLIENT_SECRET = "4jLntt7PFe8c9K05YSh_S3_jA2n7GlnDeIeqwL4EwGrE0G824u97xpS38g21nC2k";
-	private final String USER_AGENT = "Mozilla/5.0";
-
+	private static final String CLIENT_ID_PARAM_VALUE = "Da6TIHoVori74lacfuVk9QxzlIM5xy9E";
+	private static final String CLIENT_SECRET_PARAM_VALUE = "4jLntt7PFe8c9K05YSh_S3_jA2n7GlnDeIeqwL4EwGrE0G824u97xpS38g21nC2k";
+	
 
 	// private static int BASALTIMESTEP = 3 * 60 * 1000; // 3 min
 	private static String HEADER = "HEADER";
@@ -71,27 +73,51 @@ public class MovesController extends MolgenisPluginController
 		return "view-home";
 	}
 
+	@RequestMapping(value = "/getInfo", method = RequestMethod.GET)
+	public String getInfo()
+	{
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "admin"), MolgenisUser.class);
+		Entity movesEntityFromDB= dataService.findOne(MovesToken.ENTITY_NAME,
+				new QueryImpl().eq(MovesToken.OWNER, user));
+		MovesConnector movesConnector = new MovesConnectorImpl();
+		boolean isValid = movesConnector.accessTokenIsValid(movesEntityFromDB.get(MovesToken.ACCESSTOKEN).toString());
+		if(isValid){
+			//retrieve info
+			System.out.println("retrieve info!");
+		}
+		else{
+			//access token not valid
+			//refresh token
+			MapEntity newEntity = movesConnector.refreshToken(movesEntityFromDB.getString(MovesToken.REFRESH_TOKEN) ,user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+			//save token
+			newEntity.set(MovesToken.ID, movesEntityFromDB.get(MovesToken.ID));
+			dataService.update(MovesToken.ENTITY_NAME, newEntity);
+			//retrieve info
+		}
+		return "view-home";
+	}
 	@RequestMapping(value = "/connect", method = RequestMethod.GET)
 	public String connectToMoves(@RequestParam(value = "code") String authorizationcode, Model model,@RequestParam(value = "token") String token )
 	{
 		try{
 			MolgenisUser user = getUserFromToken(token);
-			MapEntity entity = exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode, CLIENT_ID, CLIENT_SECRET);
-			
+			MovesConnector movesConnector = new MovesConnectorImpl();
+			MapEntity entity = movesConnector.exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+
 			Entity entityFromDB= dataService.findOne(MovesToken.ENTITY_NAME,
 					new QueryImpl().eq(MovesToken.OWNER, user));
-			
+
 			System.out.println("entity from DB:"+ entityFromDB);
-			
+
 			if(entityFromDB == null){
-				
+
 				dataService.add(MovesToken.ENTITY_NAME, entity);
 			}
 			else{
 				entity.set(MovesToken.ID, entityFromDB.get(MovesToken.ID));
 				dataService.update(MovesToken.ENTITY_NAME, entity);
 			}
-			
+
 			model.addAttribute("code", authorizationcode);
 			model.addAttribute("token", token);
 			model.addAttribute("username", user.getUsername());
@@ -104,61 +130,8 @@ public class MovesController extends MolgenisPluginController
 		}
 
 	}
-	
-	private MapEntity exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String clientId, String secretId){
-		try{
-			String url = "https://api.moves-app.com/oauth/v1/access_token?grant_type=authorization_code&code="+authorizationcode+"&client_id="+clientId+"&client_secret="+secretId+"&redirect_uri=http://autobetes.nl?token="+token;
-			//String url = "https://api.moves-app.com/api/1.1/user/activities/daily?from=20141119&to=20141128&access_token=_MJnP57s9Bto6h9qNFyubozuI24y3UI3fZ2q755uVDx1nf8xyV77255YHUEXd9o2";
-			URL obj = new URL(url);
-			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
-			//add reuqest header
-			con.setDoOutput(true);
-			con.setRequestMethod("POST");
-			con.setRequestProperty("Content-Type", "application/json; charset=utf8");
-			con.setRequestProperty("User-Agent", "Mozilla/5.0");
-			con.setRequestProperty("Accept" ,"*/*");
-			con.setRequestProperty("Accept-Encoding", "gzip,deflate");
-			con.setRequestProperty("Accept-Language", "en-US,en;q=0.8");
-			
-			String input = "{}";
-			// Send post request
-	        OutputStream os = con.getOutputStream();
-	        os.write(input.getBytes("UTF-8"));
-	        os.close();
-	        
-			int responseCode = con.getResponseCode();
-			if(responseCode == 400){
-				throw new Exception("Unauthorized");
-			}
-			else{
-				//read response
-				BufferedReader in = new BufferedReader(
-						new InputStreamReader(new GZIPInputStream(con.getInputStream())));
 
-				String inputLine;
-				StringBuffer response = new StringBuffer();
-				while ((inputLine = in.readLine()) != null) {
-					response.append(inputLine);
-				
-				}
-				in.close();
-				JSONObject jObject = new JSONObject(response.toString());	
-				MapEntity entity = new MapEntity(MovesToken.ENTITY_NAME);
-				entity.set(MovesToken.OWNER, user);
-				entity.set(MovesToken.ACCESSTOKEN, jObject.get("access_token").toString());
-				entity.set(MovesToken.TOKEN_TYPE, jObject.get("token_type").toString());
-				entity.set(MovesToken.EXPIRES_IN, jObject.get("expires_in").toString() );
-				entity.set(MovesToken.REFRESH_TOKEN, jObject.get("refresh_token").toString() );
-				entity.set(MovesToken.USER_ID, jObject.get("user_id").toString() );
-				return(entity);
-			}
-			
-		}
-		catch(Exception e){
-			return null;
-		}
-	}
 
 	/**
 	 * Declares user according to the given token
