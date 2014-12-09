@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -17,6 +20,8 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.molgenis.autobetes.MovesConnector;
+import org.molgenis.autobetes.MovesConnectorImpl;
 import org.molgenis.autobetes.pumpobjectsparser.BasalProfileDefinitionGroupParser;
 import org.molgenis.autobetes.pumpobjectsparser.BasalProfileDefinitionParser;
 import org.molgenis.autobetes.pumpobjectsparser.BasalProfileStartParser;
@@ -109,7 +114,8 @@ public class HomeController extends MolgenisPluginController
 	public String uploadCSV( @RequestParam
 	Part file, Model model, HttpServletRequest servletRequest)
 	{
-		System.out.println(SecurityUtils.getCurrentUsername());
+		String username = SecurityUtils.getCurrentUsername();
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
 		try
 		{
 			File uploadFile = fileStore.store(file.getInputStream(), file.getName());
@@ -119,6 +125,9 @@ public class HomeController extends MolgenisPluginController
 			String tmpDir = baseDir + "tmp/";
 			String outputDir = baseDir + "split/";
 			split(uploadFile, new File(outputDir), tmpDir);
+			MovesConnector movesConnector = new MovesConnectorImpl();
+			movesConnector.manageActivities(dataService, user);
+			model.addAttribute("message", "great succes!!");
 			//System.out.println(IOUtils.toString(file.getInputStream(), "UTF-8"));
 			
 			//List<File> uploadedFiles = ZipFileUtil.unzip(uploadFile);
@@ -130,7 +139,7 @@ public class HomeController extends MolgenisPluginController
 			model.addAttribute("message", "Please upload a valid zip file!");
 			model.addAttribute("isCorrectZipFile", false);
 		}
-		model.addAttribute("message", "great succes!!");
+		
 		return "view-home";
 	}
 
@@ -298,4 +307,6 @@ public class HomeController extends MolgenisPluginController
 			stream.close();
 		}
 	}
+	
+
 }

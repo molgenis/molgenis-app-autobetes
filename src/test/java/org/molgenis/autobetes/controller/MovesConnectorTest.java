@@ -4,9 +4,13 @@ import static org.mockito.Mockito.mock;
 import static org.hamcrest.CoreMatchers.*;
 import static org.testng.Assert.*;
 
+import java.util.List;
+
 import org.molgenis.autobetes.MovesConnector;
 import org.molgenis.autobetes.MovesConnectorImpl;
+import org.molgenis.autobetes.autobetes.MovesActivity;
 import org.molgenis.autobetes.autobetes.MovesToken;
+import org.molgenis.autobetes.autobetes.MovesUserProfile;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
@@ -36,7 +40,7 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 	private MovesToken movesEntity;
 	private MovesConnector movesConnector = new MovesConnectorImpl();
 	
-	private String refresh_token = "L2fQ65jkIvSrwW0xc0tIqKi3aSvIO3V5_z46WA5Y8lUX578DXmo_0d8wV582xc9C";
+	private String refresh_token = "kYtxAijz2ITEXN843r5bWkEelq8cBs9KKGHtGcjx43rfW3Y60Tjb9494NCU7ZeqJ";
 	private static final String CLIENT_ID_PARAM_VALUE = "Da6TIHoVori74lacfuVk9QxzlIM5xy9E";
 	private static final String CLIENT_SECRET_PARAM_VALUE = "4jLntt7PFe8c9K05YSh_S3_jA2n7GlnDeIeqwL4EwGrE0G824u97xpS38g21nC2k";
 	
@@ -72,15 +76,23 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 	@Test
 	public void refreshTokenTest(){
 		//test with invalid token
-		//MapEntity newEntity = movesConnector.refreshToken(refresh_token, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-		//System.out.println(newEntity.toString());
+		MovesToken newEntity = movesConnector.refreshToken(refresh_token, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+		System.out.println(newEntity.toString());
 		//assertThat(newEntity, not(null));
 	}
 	
 	@Test
 	public void getUserProfileTest(){
-		Entity isValid = movesConnector.getUserProfile(movesEntity);
+		MovesUserProfile userProfile = movesConnector.getUserProfile(movesEntity);
+		System.out.println(userProfile.toString());
 	}
+	
+	@Test
+	public void getActivitiesTest(){
+		List<MovesActivity> isValid = movesConnector.getActivities(movesEntity, 20141119, 20141208);
+		System.out.println(isValid.toString());
+	}
+	
 	
 
 	@Configuration

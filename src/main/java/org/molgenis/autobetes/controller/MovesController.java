@@ -6,6 +6,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import org.codehaus.jettison.json.JSONObject;
@@ -13,7 +17,9 @@ import org.elasticsearch.http.HttpStats;
 import org.molgenis.autobetes.MovesConnector;
 import org.molgenis.autobetes.MovesConnectorImpl;
 import org.molgenis.autobetes.autobetes.Event;
+import org.molgenis.autobetes.autobetes.MovesActivity;
 import org.molgenis.autobetes.autobetes.MovesToken;
+import org.molgenis.autobetes.autobetes.MovesUserProfile;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -73,65 +79,64 @@ public class MovesController extends MolgenisPluginController
 		return "view-home";
 	}
 
-	@RequestMapping(value = "/getInfo", method = RequestMethod.GET)
-	public String getInfo()
-	{
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "admin"), MolgenisUser.class);
-		Entity movesEntityFromDB= dataService.findOne(MovesToken.ENTITY_NAME,
-				new QueryImpl().eq(MovesToken.OWNER, user));
-		MovesConnector movesConnector = new MovesConnectorImpl();
-		boolean isValid = movesConnector.accessTokenIsValid(movesEntityFromDB.get(MovesToken.ACCESSTOKEN).toString());
-		if(isValid){
-			//retrieve info
-			System.out.println("retrieve info!");
-		}
-		else{
-			//access token not valid
-			//refresh token
-			MapEntity newEntity = movesConnector.refreshToken(movesEntityFromDB.getString(MovesToken.REFRESH_TOKEN) ,user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-			//save token
-			newEntity.set(MovesToken.ID, movesEntityFromDB.get(MovesToken.ID));
-			dataService.update(MovesToken.ENTITY_NAME, newEntity);
-			//retrieve info
-		}
-		return "view-home";
-	}
 	@RequestMapping(value = "/connect", method = RequestMethod.GET)
 	public String connectToMoves(@RequestParam(value = "code") String authorizationcode, Model model,@RequestParam(value = "token") String token )
 	{
 		try{
+			
 			MolgenisUser user = getUserFromToken(token);
 			MovesConnector movesConnector = new MovesConnectorImpl();
-			MapEntity entity = movesConnector.exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-
-			Entity entityFromDB= dataService.findOne(MovesToken.ENTITY_NAME,
-					new QueryImpl().eq(MovesToken.OWNER, user));
-
-			System.out.println("entity from DB:"+ entityFromDB);
-
+			//get moves token 
+			MovesToken movesToken = movesConnector.exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+			//check if there allready is a token for the user. If so, overwrite.
+			MovesToken entityFromDB = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
+			Entity userProfile;
 			if(entityFromDB == null){
-
-				dataService.add(MovesToken.ENTITY_NAME, entity);
+				//no MovesToken in db
+				//add MovesToken
+				dataService.add(MovesToken.ENTITY_NAME, movesToken);
+				//get user profile 
+				userProfile = movesConnector.getUserProfile(movesToken);
+				//add to db
+				dataService.add(MovesUserProfile.ENTITY_NAME, userProfile);
 			}
 			else{
-				entity.set(MovesToken.ID, entityFromDB.get(MovesToken.ID));
-				dataService.update(MovesToken.ENTITY_NAME, entity);
+				//allready a MovesToken in db
+				//update MovesToken
+				movesToken.set(MovesToken.ID, entityFromDB.get(MovesToken.ID));
+				dataService.update(MovesToken.ENTITY_NAME, movesToken);
+				//check if there allready is a user profile for the
+				userProfile = dataService.findOne(MovesUserProfile.ENTITY_NAME, new QueryImpl().eq(MovesUserProfile.MOVESTOKEN,movesToken));
+				
+				if(userProfile == null){
+					//no user profile in db
+					//get user profile from moves
+					userProfile = movesConnector.getUserProfile(movesToken);
+					//add to db
+					dataService.add(MovesUserProfile.ENTITY_NAME, userProfile);
+				}
 			}
-
-			model.addAttribute("code", authorizationcode);
-			model.addAttribute("token", token);
-			model.addAttribute("username", user.getUsername());
+			
+			movesConnector.manageActivities(dataService, user);
+			
 			model.addAttribute("message", "Congratulations, you are now connected to moves.");
 			return "view-moves";
 		}
 		catch(Exception e){
+			
+			model.addAttribute("message", "Oops something went wrong, please try again later.");
 			System.out.println(e.toString());
-			return "view-home";
+			return "view-moves";
 		}
 
 	}
 
-
+	private static int getCurrentDate(){
+		//get current date in yyyyMMdd format
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		Date date = new Date();
+		return Integer.parseInt(dateFormat.format(date));
+	}
 
 	/**
 	 * Declares user according to the given token
