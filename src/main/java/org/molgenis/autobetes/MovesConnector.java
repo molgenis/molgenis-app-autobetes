@@ -39,7 +39,7 @@ public interface MovesConnector
 	
 	/**
 	 * Once user authorizes this server to connect with moves an authorization code is retrieved. Together with the client id, secret id and token
-	 * this method retrieves the MovesToken which allows accessing personal data
+	 * this method retrieves the MovesToken which allows accessing personal data. 
 	 * @param user
 	 * @param token
 	 * @param authorizationcode

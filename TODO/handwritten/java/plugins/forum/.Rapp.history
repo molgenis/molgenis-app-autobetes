@@ -1,0 +1,799 @@
+find.bgmeter()
+a=find.bgmeter()
+a
+a[1,]
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)
+length(cov)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]
+plot(g,r)
+abline(a=0,b=1)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Coverage")#
+axis(1)#
+axis(2)
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Coverage (>= 20x (%))")#
+axis(1)#
+axis(2)
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x")#
+axis(1)#
+axis(2)
+text(r,g)
+text(1:8,r,g)
+text(1:8,r,g,cex=2)
+text(1:8,r,g,cex=29)
+text(r,g,1:8,cex=3)
+text(r,g,1:8,cex=1)
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1)#
+axis(2)#
+text(r,g,1:8,cex=1)
+abline(a=0,b=1)
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2)#
+axis(2)#
+text(r,g,1:8,cex=1)#
+abline(a=0,b=1, lty=2)
+axis(1, cex.axis=2, line=2)
+axis(pos=2)
+axis(1, cex.axis=2, pos=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, pos=2)#
+axis(2)#
+text(r,g,1:8,cex=1)#
+abline(a=0,b=1, lty=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, pos=1)#
+axis(2)#
+text(r,g,1:8,cex=1)#
+abline(a=0,b=1, lty=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, pos=0)#
+axis(2)#
+text(r,g,1:8,cex=1)#
+abline(a=0,b=1, lty=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2)#
+axis(2)#
+text(r,g,1:8,cex=1)#
+abline(a=0,b=1, lty=2)
+axis(cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2)#
+axis(2)#
+text(r,g,1:8,cex=1)#
+abline(a=0,b=1, lty=2))
+axis(1, cex.axis=2, padj=2)
+axis(1, cex.axis=2, padj=1)
+axis(1, cex.axis=2, padj=.1)
+axis(1, cex.axis=2, padj=.4)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n", cex.axis=2)#
+axis(1, cex.axis=2, padj=.4)#
+axis(2)#
+text(r,g,1:8,cex=1)#
+abline(a=0,b=1, lty=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, padj=.4, cex.axis=2)#
+axis(2)#
+text(r,g,1:8,cex=1)#
+abline(a=0,b=1, lty=2)
+axis(axis(1, cex.axis=2, padj=.4, lwd=2))
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(g, r, axes=F, xlab="", ylab="", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, padj=.4, lwd=2, xlab="Groningen")#
+axis(2, cex.axis=2, padj=.4, lwd=2, xlab="Rotterdam")#
+text(r,g,1:8,cex=2)#
+abline(a=0,b=1, lty=2, lwd=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="", ylab="", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, padj=.4, lwd=2, xlab="Rotterdam")#
+axis(2, cex.axis=2, padj=.4, lwd=2, xlab="Groningen")#
+text(r,g,1:8,cex=2)#
+abline(a=0,b=1, lty=2, lwd=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="", ylab="", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, padj=.4, lwd=2, xlab="Rotterdam", line=-1)#
+axis(2, cex.axis=2, padj=.4, lwd=2, xlab="Groningen")#
+text(r,g,1:8,cex=2)#
+abline(a=0,b=1, lty=2, lwd=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, padj=.4, lwd=2, xlab="Rotterdam")#
+axis(2, cex.axis=2, padj=.4, lwd=2, xlab="Groningen")#
+text(r,g,1:8,cex=2)#
+abline(a=0,b=1, lty=2, lwd=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="Percentage covered >= 20x", t="n")#
+axis(1, cex.axis=2, padj=.4, lwd=2)#
+axis(2, cex.axis=2, padj=.4, lwd=2)#
+text(r,g,1:8,cex=2)#
+abline(a=0,b=1, lty=2, lwd=2)
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+#Percentage covered >= 20x#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="", t="n")#
+axis(1, cex.axis=2, padj=.4, lwd=2)#
+axis(2, cex.axis=2, padj=.4, lwd=2)#
+text(r,g,1:8,cex=2)#
+abline(a=0,b=1, lty=2, lwd=2)
+par()$oma
+par()$mai
+par(mai=c(1.02, .82, 0,0))
+cov = c(93, 91.4, 90.2, 87.9, 88.6, 85.5, 92.2, 90.3, 85, 80.2, 79.9, 73.8, 82.8, 77.8, 74, 67)#
+g = cov[1:8 * 2]#
+r = cov[1:8 * 2 - 1]#
+#
+#Percentage covered >= 20x#
+plot(r, g, axes=F, xlab="Rotterdam", ylab="Groningen", main="", t="n")#
+axis(1, cex.axis=2, padj=.4, lwd=2)#
+axis(2, cex.axis=2, padj=.4, lwd=2)#
+text(r,g,1:8,cex=2)#
+abline(a=0,b=1, lty=2, lwd=2)
+#
+library(RCurl, lib.loc='~/libs'); msource <- function(murl = 'http://localhost:8080/molgenis_distro/api/R', verbose = TRUE){if(verbose) cat('Creating connection',murl,'\n'); data <- getURLContent(murl); t <- tempfile(); writeLines(data, con=t); sys.source(t,globalenv()); unlink(t) }; msource()#
+#
+carbs.data	= find.carbs()#
+#
+# Remove zero carbs:#
+index.keep	= which(0 < carbs.data[,4])#
+carbs.data	= carbs.data[index.keep, ]#
+#
+unixtime	= carbs.data[,"unixtime"]#
+carbs		= carbs.data[,"value"]#
+#
+# Convert unixtime (milli seconds) to hours on a day (0 ... 23.99)#
+secondsInDay	= 86400#
+secondsInHour	=  3600#
+#
+hour = ((unixtime/1e3) %% secondsInDay) / secondsInHour#
+#
+# Define bins for histogram#
+bin.minutes	= 5#
+bin.size	= bin.minutes / 60#
+#
+bin.right = seq(bin.size, 24, by = bin.size)	# Right side of bin (bin does not contain this value)#
+bin.count = rep(0, length(bin.right))			# Grams of carbohydrates eaten in corresponding bin#
+#
+# Fill bin.right and bin.count for the intervals#
+for (i in 1 : length(carbs))#
+{#
+	index = hour[i] %/% bin.size + 1#
+	bin.count[index] = bin.count[index] + carbs[i]#
+}
+bin.count
+88.8/10e5
+1e2
+88.8/1e2
+3e2
+88.8/1e5*3e8
+88.8/1e5*3e8/.47
+88.8/1e5*3e8*.47
+88.8/1e5*3e8
+88.8/1e5*3e8/.00001
+88.8/1e5*3e8
+w=(88.8/1e5*3e8)
+3e8/2
+3e8/w
+1/2*2
+w
+w/3e8
+3e8/2
+3e8/w
+3e8/w*.47
+3e8/w
+w
+p=3e8
+f=88.8/1e5
+g=.47
+f*p/g
+1.4*43
+1.4*43 + 7.5*8
+1.4*43 + 7.5*8*2/3
+100/47*88.8
+100/47*88.8 / 100000
+88.8 / 47 / 1000
+10^4
+10^5
+10^5/100000
+a = A = 300 * 10^6
+A = 300 * 10^6
+W = 88.8/10^5
+A*W
+0.47 / W
+0.47 / (88.8/100000)
+la()
+ls()
+72000000/1000
+72000000/1000/3600
+28800000/1000/3600
+library(stringr)#
+a=read.csv('../data/CareLink-Export-1353854792761.csv', sep=';', dec=',', skip=11, as.is=T)#
+#
+##
+###
+### CONCLUSIE: kolom 34 "Onbewerkt..type" kan als identificatie 'kolom' gebruikt worden#
+### Als kolom 34 = "JournalEntryMealMarker" of "BolusWizardBolusEstimate"#
+### dan staat er in kolom "Onbewerkt..waarden" zoiets als "CARB_INPUT=15".#
+#
+### Als kolom 34 = "GlucoseSensorData", dan "GlucoseSensorData" + "ISIG-waarde" pakken.#
+###
+##
+#
+##
+###
+### Gebeurtenis markeren: maaltijd#
+###
+##
+index = which(a[,34] == "JournalEntryMealMarker")#
+a[index, c("Tijdstempel", "Onbewerkt..waarden")]
+17+14+9+15+17+18+18+16+9
+133*.6
+runif(1)
+runif(1)*10
+sample(1)
+sample(1:3, 1)
+.58 * 65
+350/3
+110-350/3
+47.67+6.67
+47.67+6.67+116.67
+68+55
+68+55 - 110
+350/3
+110 + 13
+69 + 55 + 68 + 32 + 71 + 18 + 50
+363/3
+121-69
+52+69
+171-69
+171-52
+(121*3-2)/3
+171-52
+69+52
+p=(365 - i) / 365
+i=0
+p=(365 - i) / 365
+for (i in 1:23) p = p * (365 - i) / 365
+p
+p = 1;for (i in 1:22) p = p * (365 - i) / 365
+p
+p = 1;for (i in 1:22) p = p * (365 - i) / 365; print(p)
+p = 1;for (i in 1:21) p = p * (365 - i) / 365; print(p)
+names = read.csv('data_names')
+list.files()
+  path.expand( '~/' )
+  path.expand( '.' )
+  path.expand( './' )
+list.files()
+getwd()
+frame_files <- lapply(sys.frames(), function(x) x$ofile)#
+frame_files <- Filter(Negate(is.null), frame_files)#
+PATH <- dirname(frame_files[[length(frame_files)]])
+frame_files
+system("ls")
+system("$(dirname $0)")
+a=system("$(dirname $0)")
+a
+#!/usr/bin/env Rscript#
+# author: mdijkstra#
+# version: 24jan12#
+#
+library(stringr)#
+#
+#FIXME: solve differently!#
+current.path = '/Users/mdijkstra/Documents/work/git/molgenis_apps/modules/compute/demo/demoWorkflow/root/tools/getStatistics_20121127/'#
+source(str_c(current.path,'getStatisticsFunctions.R'))#
+#
+debug = F#
+source(str_c(current.path,'getStatisticsReadCommandLineArgs.R'))#
+#
+hsmetrics.col.selection = c('BAIT_SET', 'GENOME_SIZE', 'BAIT_TERRITORY', 'TARGET_TERRITORY', 'TOTAL_READS', 'PCT_PF_UQ_READS_ALIGNED', 'PF_UQ_BASES_ALIGNED', 'ON_BAIT_BASES', 'NEAR_BAIT_BASES', 'OFF_BAIT_BASES', 'MEAN_BAIT_COVERAGE', 'MEAN_TARGET_COVERAGE', 'ZERO_CVG_TARGETS_PCT', paste('PCT_TARGET_BASES_', c('2X', '10X', '20X', '30X'), sep=''), 'PCT_USABLE_BASES_ON_TARGET')#
+almetrics.col.selection = c('MEAN_READ_LENGTH', 'STRAND_BALANCE')#
+insert.col.selection = c('MEDIAN_INSERT_SIZE', 'MEAN_INSERT_SIZE', 'STANDARD_DEVIATION')#
+dedup.col.selection = c('READ_PAIR_DUPLICATES', 'PERCENT_DUPLICATION')#
+conc.col.selection = c('nSNPs', 'Overall_concordance')
+hsmetrics.files = "/Users/mdijkstra/Documents/work/git/molgenis_apps/modules/compute/demo/demoWorkflow/root/tmp/projectName/run00//externalSampleID.hsmetrics"
+hsmetrics.files = "/Users/mdijkstra/Documents/work/git/molgenis_apps/modules/compute/demo/demoWorkflow/root/tmp/projectName/run00//externalSampleID.hsmetrics"#
+almetrics.files = "/Users/mdijkstra/Documents/work/git/molgenis_apps/modules/compute/demo/demoWorkflow/root/tmp/projectName/run00//externalSampleID.alignmentmetrics"#
+insertmetrics.files = "/Users/mdijkstra/Documents/work/git/molgenis_apps/modules/compute/demo/demoWorkflow/root/tmp/projectName/run00//externalSampleID.insertsizemetrics"#
+dedupmetrics.files = "/Users/mdijkstra/Documents/work/git/molgenis_apps/modules/compute/demo/demoWorkflow/root/tmp/projectName/run00//20130129_simMachine_0001_FLOWCELL_L1_None.human_g1k_v37.dedup.metrics"#
+concordance.files = "/Users/mdijkstra/Documents/work/git/molgenis_apps/modules/compute/demo/demoWorkflow/root/tmp/projectName/run00//externalSampleID.concordance.ngsVSarray.txt"#
+samples = "externalSampleID"
+.Platform$pkgType
+source('http://localhost:8080/api/R')
+ls()
+msource
+r_api_location
+source('http://localhost/api/R')
+ls
+ls()
+clear;
+               library(bitops)#
+                library(RCurl)
+molgenispath <- paste("http://localhost:8080/api/R/")
+serverpath <- paste("http://localhost:8080/")
+source("http://localhost:8080/api/R/source.R")
+ll
+ls()
+msource = function(murl = "http://127.0.0.1:8080/xqtl/api/R/", verbose = TRUE){#
+  if(verbose) cat("Creating connection",murl,"\n")#
+  data <- getURLContent(murl)#
+  t <- tempfile()#
+  writeLines(data, con=t)#
+  sys.source(t,globalenv())#
+  unlink(t)#
+}
+source("http://localhost:8080/api/R/source.R")
+paste("http://localhost:8080/nl/api/R/")
+r_api_location = 'http://localhost:8080/api/R/'
+source("http://localhost:8080/api/R/source.R")
+ls()
+find.consumedproduct()
+MOLGENIS.connect()
+find.consumedproduct()
+find.consumedproduct
+source('http://localhost:8080/api/R/lmd/R/ConsumedProduct.R')
+ MOLGENIS.find( "lmd.ConsumedProduct", mget(ls(),environment()), .verbose=.verbose)
+.verbose
+ MOLGENIS.find( "lmd.ConsumedProduct", mget(ls(),environment()), .verbose=F)
+r_api_location = 'http://localhost:8080/api/R/'#
+#
+msource = function(murl = "http://localhost:8080/api/R/", verbose = TRUE){#
+  if(verbose) cat("Creating connection",murl,"\n")#
+  data <- getURLContent(murl)#
+  t <- tempfile()#
+  writeLines(data, con=t)#
+  sys.source(t,globalenv())#
+  unlink(t)#
+}#
+#
+#
+#load autogenerated R interfaces#
+source("http://localhost:8080/nl/api/R/source.R")#
+#
+#connect to the server#
+MOLGENIS.connect("http://localhost:8080/nl")
+#
+#load autogenerated R interfaces#
+source("http://localhost:8080/api/R/source.R")#
+#
+#connect to the server#
+MOLGENIS.connect("http://localhost:8080")
+MOLGENIS.connect("http://localhost:8080/")
+MOLGENIS.connect()
+MOLGENIS.connect
+find.consumedproduct
+find.consumedproduct()
+MOLGENIS.find("lmd.ConsumedProduct", mget(ls(), #
+        environment()), .verbose = .verbose)
+MOLGENIS.find("lmd.ConsumedProduct", mget(ls(),environment()), .verbose = .verbose)
+#
+r_api_location = 'http://localhost:8080/api/R/'#
+#
+msource = function(murl = "http://localhost:8080/api/R/", verbose = TRUE){#
+  if(verbose) cat("Creating connection",murl,"\n")#
+  data <- getURLContent(murl)#
+  t <- tempfile()#
+  writeLines(data, con=t)#
+  sys.source(t,globalenv())#
+  unlink(t)#
+}#
+#
+#
+#load autogenerated R interfaces#
+source("http://localhost:8080/api/R/source.R")
+ls()
+#
+r_api_location = 'http://localhost:8080/api/R/'#
+#
+msource = function(murl = "http://localhost:8080/api/R/", verbose = TRUE){#
+  if(verbose) cat("Creating connection",murl,"\n")#
+  data <- getURLContent(murl)#
+  t <- tempfile()#
+  writeLines(data, con=t)#
+  sys.source(t,globalenv())#
+  unlink(t)#
+}#
+#
+#
+#load autogenerated R interfaces#
+source("http://localhost:8080/api/R/source.R")
+MOLGENIS.connect()
+find.consumedproduct()
+find.consumedproduct
+MOLGENIS.find("lmd.ConsumedProduct", mget(ls(),environment()), .verbose = .verbose)
+MOLGENIS.find
+ls()
+a=list()
+a[[1]] = 1:2
+a[[2]] = 11:12
+a
+a$1
+a[[1]]
+a=list()
+a[[1]] = c(id=13, amount=123)
+a[[2]] = c(id=1, amount=2123)
+a
+a[[1]]$id
+b=a[[1]]
+b$id
+b
+b["id"]
+b = list()
+b$id=1
+b$amount=123
+b
+a
+a[[1]] = b
+a
+a[[1]]$id
+b = list(id=1, amount =234)
+b
+c(id=2)
+a = list(id=1)
+a
+a$id
+a[[1]] = c(id=2)
+a
+a[[2]] = c(id=3)
+a
+a$id
+a[[1]]$id
+a[[2]]$id
+nutr= NULL
+nutr = c(nutr, 123)
+nutr
+q()
+source('http://localhost:8080/api/R')
+source('http://localhost:8080/api/R/source.R')
+ls()
+r_api_location
+source('http://localhost:8080/api/R/')
+a=source('http://localhost:8080/api/R/')
+msource
+msource('http://localhost:8080/api/R/')
+find.product()
+getmycolor = function(x) {#
+    # assume 0 <= x <= 1#
+    # 0 returns red, and 1 returns green, else return inbetween#
+    resolution = 50#
+    mycolvec = c(rainbow(resolution, start=0, end=.3))#
+    for (i in 1:resolution) substr(mycolvec[i],8,9) = "AA"#
+    mycolvec[ x * (resolution-1) + 1]#
+}#
+#
+get.barsize.col = function(P, my.AH. = my.ah, my.MAX. = my.max) {#
+    # 0 nothing#
+    # 1 ADH#
+    # 2 MAX#
+    # 3 2*MAX#
+    #
+    i.little = which(0 < P & P <= my.AH.)#
+    i.lot    = which(!is.na(my.MAX.) & my.AH. < P)#
+    i.MAX.na = which(is.na(my.MAX.))#
+    #
+    barsize = colvec = rep(0, length(P))    #
+    if (0 < length(i.little)) {#
+        barsize[i.little] = P[i.little] / my.AH.[i.little]#
+        barsize.help      = 2 * barsize[i.little] - 1 # make color 'twice as worse'...#
+        barsize.help      = pmax(0, barsize.help)#
+        colvec[i.little]  = getmycolor(barsize.help)#
+    }#
+    if (0 < length(i.lot))    {#
+        barsize[i.lot]    = 1 + (P[i.lot] - my.AH.[i.lot])  / (my.MAX.[i.lot] - my.AH.[i.lot])#
+        barsize[i.lot]    = pmin(3, barsize[i.lot])#
+        colvec[i.lot]     = getmycolor(pmax(0, 2 - barsize[i.lot]))#
+    }#
+    if (0 < length(i.MAX.na)) {#
+        barsize[i.MAX.na] = P[i.MAX.na] / my.AH.[i.MAX.na]#
+        barsize[i.MAX.na] = pmin(2, barsize[i.MAX.na])#
+        #
+        barsize.help      = barsize[i.MAX.na]#
+        index             = which(barsize.help < 1)#
+        if (0 < length(index)) {#
+            barsize.help[index] = 2 * barsize.help[index] - 1#
+            barsize.help[index] = pmax(0, barsize.help[index])#
+        }#
+        #
+        colvec[i.MAX.na]  = getmycolor(pmin(1,barsize.help))#
+    }#
+    #
+    list(barsize = barsize, colvec = colvec)#
+}#
+#
+add.space = function(vec, add.space.after) {#
+    for (i in length(add.space.after) : 1) vec = c(vec[1 : add.space.after[i]], NA, vec[(add.space.after[i] + 1) : length(vec)])#
+    vec#
+}#
+#
+plot.food.components = function(P.current, imagefile = NA) {#
+    add.space.after = c(10, 18) #1, 4, 8, 9, #
+    my.colors = c('#EEEEFF', '#A0A0FF')#
+    cex.x.axis          = if (offline) 1 else 3#
+    cex.y.axis          = if (offline) 1 else 3#
+ #
+    bsc = get.barsize.col(P.current)#
+    barsize = bsc$barsize#
+    colvec  = bsc$colvec#
+    #
+    barsize.advice = get.barsize.col(P.advice)$barsize#
+    #
+    barsize         = add.space(barsize, add.space.after)#
+    colvec          = add.space(colvec, add.space.after)#
+    x.labels        = names(my.ah)#
+    x.labels[which(my.ah==0)] = paste(x.labels[which(my.ah==0)], "*", sep='')#
+    x.labels        = add.space(x.labels, add.space.after)#
+    barsize.advice  = add.space(barsize.advice, add.space.after)#
+    #
+    if (!offline) png(filename = imagefile, width = 4 * 480, height = 1.3 * 480)#
+        if (offline) {#
+            par(mai = c(1.3, 1, .2, 0), bg = screen.bg.color)#
+        } else {#
+            par(mai = c(3.5, 2.8, .2, 0), bg = screen.bg.color) #mai=c(3.2#
+        }#
+        #
+        y.lim = c(0, 3)#
+        xpos = barplot(barsize, ylim = y.lim, col = colvec, axes = F, las = 2, names = '')#
+        x.delta = xpos[2] - xpos[1]#
+        rect(-xpos[2],  0, tail(xpos,1) + x.delta, 3, col=my.colors[1], border=0)#
+        rect(-xpos[2],  1, tail(xpos,1) + x.delta, 2, col='#D0D0FF', border=0) # groen: '#D0FFD0' '#D0D0FF'#
+#
+        # draw horizontal connecting lines#
+        x.is.na = c(0, which(is.na(barsize)), length(barsize) + 1)#
+        for (i in 1:(length(x.is.na)-1)) lines(c(xpos[x.is.na[i] + 1] - .44, xpos[x.is.na[i+1] - 1] + .44), rep(par("usr")[3], 2), lwd=8, col="#5B82A4")#
+        #
+        # plot 'headers'#
+        text(mean(xpos[c(1,10)]),  3, 'Algemeen',  col="#D0D0FF", cex=6, pos = 1)#
+        text(mean(xpos[c(12,19)]), 3, 'Mineralen', col="#D0D0FF", cex=6, pos = 1)#
+        text(mean(xpos[c(21,30)]), 3, 'Vitaminen', col="#D0D0FF", cex=6, pos = 1)#
+        if (all(P.current==0)) text(mean(xpos), 1.5, 'Voer meer gegevens in!', col=my.colors[1], cex=6)#
+#
+        # plot the bars!#
+        par(new=T)#
+        xpos = barplot(barsize, ylim = y.lim, col = colvec, axes = F, las = 2, names = '')           #
+#
+        # show advice#
+        for (i in 1:length(xpos)) {#
+            lines(c(xpos[i], xpos[i]), c(barsize[i], barsize.advice[i]), lwd=2, col="#5B82A4")        #
+            lines(c(xpos[i] - .3 * x.delta, xpos[i] + .3 * x.delta), c(barsize.advice[i], barsize.advice[i]), lwd=4, col="#5B82A4")#
+        }#
+#
+        text(xpos, par("usr")[3] - 0.2, srt = 45, adj = 1, labels = x.labels, xpd = TRUE, cex = cex.x.axis)#
+        text(xpos[1] - 2, par("usr")[3] - par("mai")[1]*.55, "*Neem zo weinig mogelijk van deze stof", adj = 0, xpd = TRUE, cex = cex.x.axis)#
+        axis(2, at = c(0,1,2,3), labels = c('Niets', 'Aanbevolen', 'Maximum', ''), las = 1, cex.axis = cex.y.axis, lwd = 2)#
+        #axis(2, at = c(0,1,2), labels = c('Niets', 'Aanbevolen', 'Maximum'), las = 1, cex.axis = cex.y.axis, lwd = 0, lwd.ticks = 2)#
+    if (!offline) dev.off()#
+}#
+#
+get.ADH.Max = function(gebruikerID, E.my.total, n.days.no.hunger, path.to.ADH.file = '.') {#
+	gebruiker.info = list()#
+	gebruiker.info$gewicht = 75#
+	gebruiker.info$lengte = 1.85#
+	gebruiker.BMR = 2500/24#
+    #gebruiker.info  = find.gebruiker(id = gebruikerID)#
+    age             = 40#
+    sex             = "man"#
+    #
+    adh = read.csv(paste(path.to.ADH.file, '/ADH_vanaf13jaar.csv', sep=''), sep=';', as.is=T)#
+    #
+    # determine respective row#
+        age.col = as.numeric(adh[2:nrow(adh),1])#
+        i = 1#
+        while (age.col[i] < age) i = i + 1#
+        i = i + (sex == "vrouw") + 1#
+    #
+    # Determine upper limits:#
+        my.adh = as.numeric(adh[i, 3:ncol(adh)])#
+        names(my.adh) = colnames(adh)[3:ncol(adh)]#
+        my.max = sapply(my.adh, function(x) NA)#
+        my.max["VitamineA"]                 = 3000#
+        my.max["VitamineB3..Nicotinezuur."] = 35#
+        my.max["VitamineB6"]                = 25#
+        my.max["VitamineB11..Foliumzuur."]  = 1000#
+        my.max["VitamineD"]                 = 50#
+        my.max["VitamineE"]                 = 300#
+        my.max["Ca"]                        = 2500#
+        my.max["Se"]                        = 300#
+        my.max["Zn"]                        = 25#
+        #
+    # Eigen aanvulling hiervan op basis van voedingscentrum:#
+        my.max["VitamineB1"]                = 10#
+        my.max["VitamineB2"]                = 35    #
+        my.max["VitamineB12"]               = 40#
+        my.max["VitamineC"]                 = 3000#
+        #
+        my.adh["Na"]                        = 1500#
+        my.max["Na"]                        = 2400#
+    #
+        my.adh["K"]                         = 2600#
+        my.max["K"]                         = 4700#
+    #
+        my.max["Fe"]                        = 45#
+        #
+        my.max["Mg"]                        = 660#
+            #
+        #
+    # Remove the columns of which we don't have data in the food table:#
+        my.adh = my.adh[-c(8, 14, 16)]#
+        my.max = my.max[-c(8, 14, 16)]    #
+    #
+        adh.min.index = 1:8#
+        adh.vit.index = 9:18#
+    #
+        vit.nice.names = c('Vitamine A', 'Vitamine B1', 'Vitamine B2', 'Nicotinezuur (B3)', 'Vitamine B6', 'Foliumzuur (B11)', 'Vitamine B12', 'Vitamine C', 'Vitamine D', 'Vitamine E')#
+        min.nice.names = c('Natrium', 'Kalium', 'Calcium', 'IJzer', 'Magnesium', 'Seleen', 'Zink', 'Fosfor')#
+    #
+    names(my.adh) = names(my.max) = c(min.nice.names,vit.nice.names)#
+    # order columns such that they match the colnames in eten.table:#
+    new.order = c(1, 3:7, 2, 8:11, 13, 15:18, 14, 12)#
+    my.adh = my.adh[new.order]#
+    my.max = my.max[new.order]#
+    #
+    # Scale to total amount:#
+    my.adh = my.adh * n.days.no.hunger#
+    my.max = my.max * n.days.no.hunger#
+#
+    # Add ADH and MAX for energy, fat, alcohol...#
+    my.adh.add = my.max.add = NULL#
+    #
+    BMI = gebruiker.info$gewicht / (gebruiker.info$lengte / 100)^2#
+    BMI.upper = if (sex == "man") 25 else 24#
+#
+    E.my.total.aimed = n.days.no.hunger * 24 * gebruiker.BMR#
+    #
+    # The question is whether these depend on the _actual_ energy intake, or on the _aimed_ intake#
+    # In general: I choose for the _aimed_ intake#
+    # For 'vezels': I choose for the maximum of the _aimed_ and the _acutal_ intake#
+    energy.percent = max(E.my.total.aimed, E.my.total) / 100 # <- as energy.percent, I choose the maximum of the actual intake and of the amount that one whom never sports should eat.#
+    fat.energy  = 9 # 9 Cal per gram#
+    carb.energy = 4#
+    prot.energy = 4#
+    #
+    my.adh.add["Energie"]       = E.my.total.aimed#
+    my.max.add["Energie"]       = E.my.total.aimed * 1.2#
+#
+    my.adh.add["Eiwit"]         = 10 * energy.percent / prot.energy # min scaled below to adh # deze min-E% zijn van <- van modifast.nl; maar minima zijn geen adh!#
+    my.max.add["Eiwit"]         = 60 * energy.percent / prot.energy #
+#
+    my.adh.add["Koolhydraten"]   = 40 * energy.percent / carb.energy # min scaled below to adh#
+    my.max.add["Koolhydraten"]   = 70 * energy.percent / carb.energy #
+        #
+    my.adh.add["Vet (totaal)"]  = 20 * energy.percent / fat.energy  # min scaled below to adh#
+    if (BMI < BMI.upper) {#
+        my.max.add["Vet (totaal)"] = 40 * energy.percent / fat.energy#
+    } else {#
+        my.max.add["Vet (totaal)"] = 35 * energy.percent / fat.energy#
+    }#
+#
+    ### Scale minimum up to ADH such that their total sums to 100%  ( (10 + 40 + 20) / 100 = .7 ):#
+    my.adh.add["Eiwit"]         = my.adh.add["Eiwit"]         / .7#
+    my.adh.add["Koolhydraten"]  = my.adh.add["Koolhydraten"]  / .7#
+    my.adh.add["Vet (totaal)"]  = my.adh.add["Vet (totaal)"]  / .7#
+#
+    my.adh.add["Verzadigd vet"] = 0#
+    my.max.add["Verzadigd vet"] = 10 * energy.percent / fat.energy#
+    #
+    my.adh.add["Transvet"]      = 0#
+    my.max.add["Transvet"]      = 1 * energy.percent / fat.energy#
+    #
+    my.adh.add["Linolzuur"]     = 2  * energy.percent / fat.energy#
+    my.max.add["Linolzuur"]     = 12 * energy.percent / fat.energy # Max 12% van totale dagelijkse energie (http://www.voedingscentrum.nl/encyclopedie/onverzadigd-vet.aspx)#
+#
+    my.adh.add["Cholesterol"]   = 0#
+    my.max.add["Cholesterol"]   = n.days.no.hunger * 300 # dit zijn mg toch?#
+#
+    my.adh.add["Alcohol"]       = 0#
+    my.max.add["Alcohol"]       = n.days.no.hunger * if (sex == "man") 20 else 10#
+#
+    my.adh.add["Vezels"]        = 3.4 * max(E.my.total, E.my.total.aimed)/ 239 # voedingscentrum: 3.4g / MJ#
+                                  # For the adviced amount 'vezels': I choose for the maximum of the _aimed_ and the _acutal_ intake#
+    my.max.add["Vezels"]        = 5 * my.adh.add["Vezels"] # <-zelf ingevuld!#
+#
+    return(list(ah = c(my.adh.add, my.adh), max = c(my.max.add, my.max)))#
+}#
+#
+#
+# Determine personal voedingstoffen-guidelines: Aanbevolen ... Maximum#
+ADH.Max = get.ADH.Max(NULL, 2500, 1);#
+my.ah   = ADH.Max$ah#
+my.max  = ADH.Max$max#
+#
+screen.bg.color = "#F8FAFB"#
+advice.color.positive = "'#387C44'" #38AC44#
+advice.color.negative = "'#800517'" #A00517#
+#
+#
+offline = T#
+plot.food.components(my.ah * .5 + my.max *.5, 0 * my.ah, imagefile = NA)
+q()
+	setwd('/Users/mdijkstra/Documents/pompgemak/molgenis_distro/handwritten/java/plugins/forum/')#
+	# matrix 'nutr' is originating from 'java'#
+	pngVitaminFile = pngHealthFile = NA#
+	nutr = NULL#
+	nutr = rbind(nutr, c(pid = 292, weight = 150.0))#
+	nutr = rbind(nutr, c(pid = 20, weight = 150.0))#
+	nutr = rbind(nutr, c(pid = 929, weight = 160.0))#
+	nutr = rbind(nutr, c(pid = 1, weight = 123.0))
+source('MolgenisConnect.R')#
+source('CreateVitaminPlot_functions.R')#
+#
+screen.bg.color = "#FFFFFF"#"#F8FAFB"#
+advice.color.positive = "'#387C44'" #38AC44#
+advice.color.negative = "'#800517'" #A00517#
+advice.transparency = "88"#
+color.rect.background = "#FFFFFF"#"#EEEEFF"#
+color.rect.okay = "#EFFFEF"#"#AAFFFF"#"#00AEEF"#
+color.heading = "#cee3ea"#"#d8ffd8"#"#D1FFFF"#
+col.axis.text = "#888888"#
+color.horizontal.lines = color.heading #"#5B82A4"#
+color.no.food = "#FF7F00"#
+#
+# Personal characteristics -- Move this to 'java'#
+gebruiker.info = list()#
+gebruiker.info$gewicht = 75#
+gebruiker.info$lengte = 1.85#
+gebruiker.BMR = 2500/24#
+age             = 40#
+sex             = "man"#
+#
+# Calculate adviced/max values, based on 'personal characteristics'#
+ADH.Max = get.ADH.Max();#
+my.ah   = ADH.Max$ah#
+my.max  = ADH.Max$max
+my.ah
+my.max
+source('CreateVitaminPlot_functions.R')
+#
+# Calculate adviced/max values, based on 'personal characteristics'#
+ADH.Max = get.ADH.Max();#
+my.ah   = ADH.Max$ah#
+my.max  = ADH.Max$max
+my.max
+q()

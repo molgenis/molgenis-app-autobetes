@@ -62,6 +62,7 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 	public MapEntity exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String clientId, String secretId);
 
 	 */
+	/*
 	@Test
 	public void accessTokenIsValidTest(){
 		//test with invalid token
@@ -93,7 +94,7 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 		System.out.println(isValid.toString());
 	}
 	
-	
+	*/
 
 	@Configuration
 	public static class Config
@@ -112,5 +113,5 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 
 	}
 
-
+	
 }

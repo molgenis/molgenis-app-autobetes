@@ -232,11 +232,10 @@ public class AnonymousControllerTest extends AbstractTestNGSpringContextTests{
 		assertEquals(returnedMap, expected);
 	}*/
 	
+	/* TODO: remove! sync2 seems to be non-existent!!
 	@Test
 	public void testSync2() throws Exception{
-		
-		
-		
+			
 		//test with testInt as a double, should be integer
 		this.mockMvc.perform(post(AnonymousController.URI+"/sync2").header(TOKEN_HEADER, TOKEN)
 				.content("[{id:'asdf12', name:'Piet', testInt: 2.565, lastchanged:'2', deleted:1}]")
@@ -262,6 +261,7 @@ public class AnonymousControllerTest extends AbstractTestNGSpringContextTests{
 				.content("[{name:'fiets', testInt: 2.0, lastchanged:'2', deleted:0}]")
 				.contentType(APPLICATION_JSON)).andExpect(status().isOk());
 	}
+	*/
 	/*
 	@Test
 	public void iteratorWithoutReport() throws IOException

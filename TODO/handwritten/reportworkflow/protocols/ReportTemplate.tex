@@ -1,0 +1,80 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[dutch]{babel}
+\usepackage{hyperref}
+\usepackage{datetime}
+\usepackage{nameref}
+\usepackage{grffile}
+\usepackage{graphicx}
+\usepackage[strings]{underscore}
+\usepackage{verbatim}
+\usepackage{wrapfig}
+\usepackage{lastpage}
+\usepackage{palatino}
+\usepackage{amsmath}
+
+% Redefine caption name of Table of Content, and Figure and Table
+${backslash}renewcommand{${backslash}contentsname}{Inhoudsopgave}
+${backslash}renewcommand{${backslash}figurename}{Figuur}
+${backslash}renewcommand{${backslash}tablename}{Tabel}
+
+${backslash}title{Verbeter je suikerspiegel}
+${backslash}author{Pompgemak.nl}
+
+${backslash}linespread{1.3}
+
+${backslash}begin{document}
+${backslash}maketitle
+${backslash}thispagestyle{empty}
+${backslash}vspace{40mm}
+
+${backslash}begin{table}[h]
+        ${backslash}centering
+        ${backslash}begin{tabular}{l l}
+                \hline
+                \multicolumn{2}{l}{${backslash}textbf{Gebruiker}} ${backslash}${backslash}
+                Naam & ${user} ${backslash}${backslash}
+                Pomp ID & ${pumpId} ${backslash}${backslash}
+                ${backslash}${backslash}
+                \multicolumn{2}{l}{${backslash}textbf{Rapport}} ${backslash}${backslash}
+                Periode & van ... tot ${backslash}${backslash}
+                Aantal pagina's & \\pageref{LastPage} ${backslash}${backslash}
+                \hline
+        \end{tabular}
+\end{table}
+
+${backslash}clearpage
+${backslash}tableofcontents
+
+${backslash}clearpage
+
+\section*{Samenvatting}
+${backslash}addcontentsline{toc}{section}{Samenvatting}
+
+\section*{Introductie}
+${backslash}addcontentsline{toc}{section}{Introductie}
+
+\section*{Maaltijden}
+${backslash}addcontentsline{toc}{section}{Maaltijden}
+
+\subsection*{Ontbijt}
+${backslash}addcontentsline{toc}{subsection}{Ontbijt}
+
+\subsection*{Lunch}
+${backslash}addcontentsline{toc}{subsection}{Lunch}
+
+\subsection*{Diner}
+${backslash}addcontentsline{toc}{subsection}{Diner}
+
+\section*{Hypo's en hypers}
+${backslash}addcontentsline{toc}{section}{Hypo's en hypers}
+
+${backslash}begin{figure}[h]
+        ${backslash}caption{Overzicht van je bloedglucosewaarden.}
+        ${backslash}begin{center}
+                ${backslash}includegraphics[width=.9${backslash}textwidth]{${BGPiePdf}}
+        \end{center}
+        \label{fig:dry}
+\end{figure}
+
+
+\end{document}
