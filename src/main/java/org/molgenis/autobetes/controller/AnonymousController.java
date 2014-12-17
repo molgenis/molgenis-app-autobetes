@@ -38,6 +38,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONValue;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.autobetes.WebAppDatabasePopulatorServiceImpl;
 import org.molgenis.autobetes.autobetes.ActivityEvent;
 import org.molgenis.autobetes.autobetes.ActivityEventInstance;
 import org.molgenis.autobetes.autobetes.BgSensorRpi;
@@ -60,6 +61,7 @@ import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
@@ -102,8 +104,9 @@ public class AnonymousController extends MolgenisPluginController
 	public static final String TRUE = "True";
 	public static final String FOOD = "Food";
 	public static final int MAXLENGTHSTRING = 254;
+	public static final String ADMIN = "admin";
 
-	// @Autowired
+	//@Autowired
 	private DataService dataService;
 
 	private JavaMailSender mailSender;
@@ -114,6 +117,7 @@ public class AnonymousController extends MolgenisPluginController
 	@Autowired
 	private SavedScriptRunner scriptRunner;
 
+
 	@Autowired
 	public AnonymousController(DataService dataService, JavaMailSender mailSender)
 	{
@@ -122,6 +126,7 @@ public class AnonymousController extends MolgenisPluginController
 		if (mailSender == null) throw new IllegalArgumentException("JavaMailSender is null!");
 		this.dataService = dataService;
 		this.mailSender = mailSender;
+
 	}
 
 	@RequestMapping
@@ -129,7 +134,7 @@ public class AnonymousController extends MolgenisPluginController
 	{
 		return "view-home";
 	}
-	
+
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
 	@ResponseBody
@@ -156,7 +161,7 @@ public class AnonymousController extends MolgenisPluginController
 	@ResponseBody
 	public Map<String, Object> registerUser(@RequestBody RegistrationRequest registrationRequest,
 			HttpServletRequest servletRequest)
-	{
+			{
 		// validate email + pw
 		if (StringUtils.isBlank(registrationRequest.getEmail())
 				|| StringUtils.isBlank(registrationRequest.getPassword()))
@@ -222,7 +227,7 @@ public class AnonymousController extends MolgenisPluginController
 			mailMessage.setTo(registrationRequest.getEmail());
 			mailMessage.setSubject("Registration Autobetes");
 			mailMessage.setText("To activate your account, please visit " + activationUri);
-			mailMessage.setFrom("dionkoolhaas@gmail.com");
+			mailMessage.setFrom("info@diadvies.com");
 			// System.out.println(mailMessage.toString());
 			mailSender.send(mailMessage);
 		}
@@ -243,7 +248,7 @@ public class AnonymousController extends MolgenisPluginController
 				true,
 				"Registration successful! We have sent you an email with a link to activate your account. NB The email may have ended up in your spam folder.");
 
-	}
+			}
 
 	/**
 	 * Updates an entity using PUT
@@ -258,7 +263,7 @@ public class AnonymousController extends MolgenisPluginController
 	@ResponseBody
 	public Map<String, Object> getUserInfo(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
-	{
+			{
 		//System.out.println(entityMap.toString());
 		System.out.println(servletRequest.toString());
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
@@ -269,11 +274,11 @@ public class AnonymousController extends MolgenisPluginController
 		}
 		else{
 			Map<String, Object> userInfoMap = getEntityAsMap(userInfo, metaUserInfo, null, null);
-			
+
 			return userInfoMap;
 		}
-		
-	}
+
+			}
 	/**
 	 * Updates an entity using PUT
 	 * 
@@ -287,13 +292,13 @@ public class AnonymousController extends MolgenisPluginController
 	@ResponseBody
 	public Map<String, Object> setUserInfo(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
-	{
+			{
 		//System.out.println(entityMap.toString());
 		System.out.println(servletRequest.toString());
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
 		EntityMetaData metaUserInfo = dataService.getEntityMetaData(UserInfo.ENTITY_NAME);
 		Entity userInfo = dataService.findOne(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user) );
-		
+
 		Entity entityFromClient = toEntity(metaUserInfo, entityMap.get(0), user);
 		if(userInfo == null){
 			dataService.add(UserInfo.ENTITY_NAME, entityFromClient);
@@ -303,9 +308,9 @@ public class AnonymousController extends MolgenisPluginController
 			dataService.update(UserInfo.ENTITY_NAME, userInfo);
 			return null;
 		}
-		
-	}
-	
+
+			}
+
 	/**
 	 * @return time stamp of most recent sensor data of user to which this token belongs! 
 	 */
@@ -314,14 +319,14 @@ public class AnonymousController extends MolgenisPluginController
 	public Long sensorLastTimeStamp(HttpServletRequest servletRequest)
 	{
 		MolgenisUser owner = getUserFromToken(TokenExtractor.getToken(servletRequest));
-		
-//		new QueryImpl().sort(new Sort(Direction.DESC)).offset(0).pageSize(1);
+
+		//		new QueryImpl().sort(new Sort(Direction.DESC)).offset(0).pageSize(1);
 		BgSensorRpi h = dataService.findOne(BgSensorRpi.ENTITY_NAME, new QueryImpl().sort(new Sort(Direction.DESC, BgSensorRpi.DATETIMEMS)).offset(0).pageSize(1), BgSensorRpi.class);
-		
+
 		return h.getDateTimeMs();
 	}
-	
-	
+
+
 	/**
 	 * Parses sensor BINARY sensor data into db
 	 * @return mm modulo 5 of last record's hh:mm
@@ -357,7 +362,7 @@ public class AnonymousController extends MolgenisPluginController
 		BinaryData bd = new BinaryData();
 		bd.setReceived(timestamp);
 		bd.setDataType("sensor"); // TODO: don't use hard coded string "sensor", but rather use field propertie if
-									// possible
+		// possible
 		bd.setPage(page);
 		bd.setFileName(newFileName);
 		bd.setOwner(user);
@@ -392,7 +397,7 @@ public class AnonymousController extends MolgenisPluginController
 
 		Integer minute = saveSensorData(twoPagesFileName, user);
 		if (null == minute) return -1;
-		
+
 		// TODO: Fix: should return most recent from DB
 		return (minute % 5) + 1;
 	}
@@ -434,12 +439,12 @@ public class AnonymousController extends MolgenisPluginController
 					new QueryImpl().eq(BgSensorRpi.DATETIMEMS, g.getDateTime().getTime()), BgSensorRpi.class);
 
 			if (null == h) // put json list (store list in db below)
-			lst.add(rec);
+				lst.add(rec);
 		}
 
 		// add list to db
 		dataService.add(BgSensorRpi.ENTITY_NAME, lst);
-		
+
 		// return minute of hour
 		if (null == lastRecTimestamp) return -1;
 		Calendar cal = Calendar.getInstance();
@@ -531,14 +536,14 @@ public class AnonymousController extends MolgenisPluginController
 	@ResponseBody
 	public List<Map<String, Object>> sync(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
-	{
+			{
 		System.out.println(entityMap.toString());
 		// declare objects
 		TimestampLastUpdate timeStampLastSync = new TimestampLastUpdate(0);// timestamp of the last sync of client,
 		// send along in requestbody, if not it remains 0
 
 		List<Map<String, Object>> responseData = new ArrayList<Map<String, Object>>();// response list that will be
-																						// returned to client as a json
+		// returned to client as a json
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
 		// metadata is used to convert entity to Map<String, Object> and vice versa
 		EntityMetaData metaFoodEvent = dataService.getEntityMetaData(FoodEvent.ENTITY_NAME);
@@ -551,6 +556,7 @@ public class AnonymousController extends MolgenisPluginController
 		iterateListRecursively(reftoevent, 0, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent,
 				metaFoodEventInstance, metaActivityEventInstance);
 		// get entities from db and put these in response data
+		getStandardEventsFromDBAndAppendToResponseData(responseData);
 		getEntitiesFromDBAndAppendToResponseData(FoodEvent.ENTITY_NAME, user, timeStampLastSync.getTimestamp(),
 				responseData, metaFoodEvent);
 		getEntitiesFromDBAndAppendToResponseData(ActivityEvent.ENTITY_NAME, user, timeStampLastSync.getTimestamp(),
@@ -563,7 +569,22 @@ public class AnonymousController extends MolgenisPluginController
 
 		return responseData;
 
+			}
+
+	private void getStandardEventsFromDBAndAppendToResponseData(List<Map<String, Object>> responseData)
+	{
+
+		//equals 1 of admin
+		// get all entities from a user + adminuser
+		MolgenisUser adminUser = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "admin"),MolgenisUser.class);
+		
+		Iterable<Entity> dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
+				new QueryImpl().eq(Event.OWNER, adminUser).and().like(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMINIDPREPOSITION));
+		EntityMetaData meta = dataService.getEntityMetaData(ActivityEvent.ENTITY_NAME);
+		appendEntitiesToResponseData(responseData, dbEntities, meta);
 	}
+
+	//.or().like(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMINIDPREPOSITION)
 
 	/**
 	 * Retrieves entities from db with lastchanged timestamp higher then timeStampLastSync, and appends to responsedata
@@ -577,9 +598,15 @@ public class AnonymousController extends MolgenisPluginController
 	private void getEntitiesFromDBAndAppendToResponseData(String entityName, MolgenisUser user, long timeStampLastSync,
 			List<Map<String, Object>> responseData, EntityMetaData meta)
 	{
-		// get all entities from a user
+		//equals 1 of admin
+		// get all entities from a user + adminuser
 		Iterable<Entity> dbEntities = dataService.findAll(entityName,
 				new QueryImpl().eq(Event.OWNER, user).and().ge(Event.LASTCHANGED, timeStampLastSync));
+		appendEntitiesToResponseData(responseData, dbEntities, meta);
+
+	}
+
+	private void appendEntitiesToResponseData(List<Map<String, Object>> responseData, Iterable<Entity> dbEntities, EntityMetaData meta){
 		// iterate iterable
 		for (Entity entity : dbEntities)
 		{
@@ -588,7 +615,6 @@ public class AnonymousController extends MolgenisPluginController
 
 			responseData.add(entityAsMap);
 		}
-
 	}
 
 	/**
@@ -696,7 +722,9 @@ public class AnonymousController extends MolgenisPluginController
 		//get entityfromdb
 		Entity storedEntity = dataService.findOne(meta.getName(),
 				new QueryImpl().eq(Event.OWNER, user).and().eq(Event.ID, entity.get(Event.ID)));
+		if(entity.getIdValue().toString().contains("admin")){
 
+		}
 		if (storedEntity == null)
 		{
 			// no entity in db, add entity
@@ -723,6 +751,11 @@ public class AnonymousController extends MolgenisPluginController
 				System.out.println("user is" + user.toString());
 			}
 		}
+		else if(isAdminId(storedEntity.getIdValue().toString())){
+			//entity is from admin
+			//entity is not editable
+			//do nothing
+		}
 		else
 		{
 			// entity is in db
@@ -743,6 +776,21 @@ public class AnonymousController extends MolgenisPluginController
 				// entity received from app more recent than on server.
 				dataService.update(meta.getName(), entity);
 			}
+		}
+
+	}
+	/**
+	 * Checks if id is from admin
+	 * @param string
+	 * @return
+	 */
+	private boolean isAdminId(String string)
+	{
+		if(string.contains("admin")){
+			return true;
+		}
+		else{
+			return false;
 		}
 
 	}
@@ -901,7 +949,7 @@ public class AnonymousController extends MolgenisPluginController
 
 	public Map<String, Object> getEntityAsMap(Entity entity, EntityMetaData meta, Set<String> attributesSet,
 			Map<String, Set<String>> attributeExpandsSet)
-	{
+			{
 		if (null == entity) throw new IllegalArgumentException("entity is null");
 
 		if (null == meta) throw new IllegalArgumentException("meta is null");
@@ -938,17 +986,17 @@ public class AnonymousController extends MolgenisPluginController
 				{
 					Date date = entity.getDate(attrName);
 					entityMap
-							.put(attrName,
-									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE)
-											.format(date) : null);
+					.put(attrName,
+							date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE)
+					.format(date) : null);
 				}
 				else if (attrType == DATE_TIME)
 				{
 					Date date = entity.getDate(attrName);
 					entityMap
-							.put(attrName,
-									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
-											.format(date) : null);
+					.put(attrName,
+							date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
+					.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF)
 				{
@@ -1014,7 +1062,7 @@ public class AnonymousController extends MolgenisPluginController
 		}
 
 		return entityMap;
-	}
+			}
 
 	/**
 	 * Once registering succeeded, this method composes the message to the user.
@@ -1068,7 +1116,7 @@ public class AnonymousController extends MolgenisPluginController
 		// first check if exception is allready in db
 		Entity dbEntity = dataService.findOne(ServerExceptionLog.ENTITY_NAME,
 				new QueryImpl().eq(ServerExceptionLog.OWNER, user).and().eq(ServerExceptionLog.ENTITY, entityAsString)
-						.and().eq(ServerExceptionLog.EXCEPTION, exceptionAsString));
+				.and().eq(ServerExceptionLog.EXCEPTION, exceptionAsString));
 		if (dbEntity == null)
 		{
 			// exception not in db, write now to db
