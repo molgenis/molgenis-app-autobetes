@@ -63,7 +63,7 @@
 			<field name="bodyWeight" type="int" nillable="true" description="Weight of user. Together with length BMI can be computed." />
 			<field name="length" type="int" nillable="true" description="Length of user. Together with bodyweight BMI can be computed." />
 			<field name="birthYear" type="int" nillable="true" description="Year that user is born." />
-			<field name="timestamp" type="long" description="Timestamp user switched on or of." />
+			<field name="lastchanged" type="long" description="Timestamp user switched on or of." />
 			<field name="owner" unique="true" type="xref" xref_entity="MolgenisUser" description="User to which this record belongs. Is nillable for development purposes." />
 		</entity>
 		<entity name= "UserActivity">
@@ -110,7 +110,7 @@
 		</entity>
 		<entity name="ActivityEvent" extends="Event">
 			<field name="power" type="decimal" default="3" nillable="true" description="Calories / kilo gram body weight / hour." />
-			<field name="special" type="boolean" default="false" nillable="true" description="Wheter the event is special, i.e. ill, stress, ill, do not track, sensor inaccurate, holiday, party" />
+			<!--<field name="special" type="boolean" default="false" nillable="true" description="Wheter the event is special, i.e. ill, stress, ill, do not track, sensor inaccurate, holiday, party" /> needed once activities are reintroduced in app -->
 		</entity>
 
 		<entity name="EventInstance" implements="IdentificationApp">

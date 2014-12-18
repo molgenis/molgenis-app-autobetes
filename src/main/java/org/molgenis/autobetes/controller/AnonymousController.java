@@ -76,6 +76,7 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.instrument.classloading.tomcat.TomcatLoadTimeWeaver;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
@@ -250,6 +251,7 @@ public class AnonymousController extends MolgenisPluginController
 
 			}
 
+
 	/**
 	 * Updates an entity using PUT
 	 * 
@@ -259,36 +261,7 @@ public class AnonymousController extends MolgenisPluginController
 	 * @param id
 	 * @param entityMap
 	 */
-	@RequestMapping(value = "/getUserInfo", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Map<String, Object> getUserInfo(@RequestBody List<Map<String, Object>> entityMap,
-			HttpServletRequest servletRequest)
-			{
-		//System.out.println(entityMap.toString());
-		System.out.println(servletRequest.toString());
-		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
-		EntityMetaData metaUserInfo = dataService.getEntityMetaData(UserInfo.ENTITY_NAME);
-		Entity userInfo = dataService.findOne(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user) );
-		if(userInfo == null){
-			return null;
-		}
-		else{
-			Map<String, Object> userInfoMap = getEntityAsMap(userInfo, metaUserInfo, null, null);
-
-			return userInfoMap;
-		}
-
-			}
-	/**
-	 * Updates an entity using PUT
-	 * 
-	 * Example url: /api/v1/person/99
-	 * 
-	 * @param entityName
-	 * @param id
-	 * @param entityMap
-	 */
-	@RequestMapping(value = "/setUserInfo", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/syncUserInfo", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> setUserInfo(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
@@ -297,19 +270,25 @@ public class AnonymousController extends MolgenisPluginController
 		System.out.println(servletRequest.toString());
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
 		EntityMetaData metaUserInfo = dataService.getEntityMetaData(UserInfo.ENTITY_NAME);
-		Entity userInfo = dataService.findOne(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user) );
+		Entity userInfo = dataService.findOne(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user));
 
 		Entity entityFromClient = toEntity(metaUserInfo, entityMap.get(0), user);
 		if(userInfo == null){
 			dataService.add(UserInfo.ENTITY_NAME, entityFromClient);
-			return null;
+			return getEntityAsMap(entityFromClient, metaUserInfo, null, null);
 		}
 		else{
-			dataService.update(UserInfo.ENTITY_NAME, userInfo);
-			return null;
+			if(userInfo.getDouble(TestEvent.LASTCHANGED) < entityFromClient.getDouble(TestEvent.LASTCHANGED)){
+				entityFromClient.set(UserInfo.ID, userInfo.get(UserInfo.ID));
+				dataService.update(UserInfo.ENTITY_NAME, entityFromClient);
+				return getEntityAsMap(entityFromClient, metaUserInfo, null, null);
+			}
+			else{
+				return getEntityAsMap(userInfo, metaUserInfo, null, null);
+			}
 		}
 
-			}
+	}
 
 	/**
 	 * @return time stamp of most recent sensor data of user to which this token belongs! 
@@ -583,7 +562,7 @@ public class AnonymousController extends MolgenisPluginController
 		// entities from admin that have the particular string in id WebAppDatabasePopulatorServiceImpl.ADMINIDPREPOSITION
 		//are standard events
 		MolgenisUser adminUser = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "admin"),MolgenisUser.class);
-		
+
 		Iterable<Entity> dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
 				new QueryImpl().eq(Event.OWNER, adminUser).and().like(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMINIDPREPOSITION));
 		EntityMetaData meta = dataService.getEntityMetaData(ActivityEvent.ENTITY_NAME);

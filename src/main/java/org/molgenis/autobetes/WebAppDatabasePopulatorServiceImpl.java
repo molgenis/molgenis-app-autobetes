@@ -72,7 +72,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setName("Ill");
 		event.setOwner(userAdmin);
 		event.setId(ADMINIDPREPOSITION+idappender);
-		event.setSpecial(true);
+		//event.setSpecial(true);
 		event.setEventType("activity");
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
@@ -82,7 +82,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setName("Stress");
 		event.setOwner(userAdmin);
 		event.setId(ADMINIDPREPOSITION+idappender);
-		event.setSpecial(true);
+		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
@@ -92,7 +92,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setName("Do not track");
 		event.setOwner(userAdmin);
 		event.setId(ADMINIDPREPOSITION+idappender);
-		event.setSpecial(true);
+		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
@@ -102,7 +102,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setName("Sensor inacurrate");
 		event.setOwner(userAdmin);
 		event.setId(ADMINIDPREPOSITION+idappender);
-		event.setSpecial(true);
+		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
@@ -112,7 +112,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setName("Holiday");
 		event.setOwner(userAdmin);
 		event.setId(ADMINIDPREPOSITION+idappender);
-		event.setSpecial(true);
+		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
@@ -122,7 +122,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setName("Party");
 		event.setOwner(userAdmin);
 		event.setId(ADMINIDPREPOSITION+idappender);
-		event.setSpecial(true);
+		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
