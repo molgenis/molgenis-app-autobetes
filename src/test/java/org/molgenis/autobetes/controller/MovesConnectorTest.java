@@ -41,9 +41,7 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 	private MovesConnector movesConnector = new MovesConnectorImpl();
 	
 	private String refresh_token = "kYtxAijz2ITEXN843r5bWkEelq8cBs9KKGHtGcjx43rfW3Y60Tjb9494NCU7ZeqJ";
-	private static final String CLIENT_ID_PARAM_VALUE = "Da6TIHoVori74lacfuVk9QxzlIM5xy9E";
-	private static final String CLIENT_SECRET_PARAM_VALUE = "4jLntt7PFe8c9K05YSh_S3_jA2n7GlnDeIeqwL4EwGrE0G824u97xpS38g21nC2k";
-	
+	/*
 	@BeforeMethod
 	public void setUp()
 	{
@@ -53,8 +51,7 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 		movesEntity.set(MovesToken.ACCESSTOKEN, "al4M5w43HevoqV86paqB5rYM874zO6cLS9GRh0vcd_R6eDIu7RINH7f5Y5sxkt_t");
 	}
 	
-	/*
-	 * 
+	 
 	public boolean accessTokenIsValid(String accessToken);
 	
 	public MapEntity refreshToken(MolgenisUser user, Entity movesEntity, String clientId, String clientSecret);
@@ -77,7 +74,7 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 	@Test
 	public void refreshTokenTest(){
 		//test with invalid token
-		MovesToken newEntity = movesConnector.refreshToken(refresh_token, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+		MovesToken newEntity = movesConnector.refreshToken(refresh_token, user);
 		System.out.println(newEntity.toString());
 		//assertThat(newEntity, not(null));
 	}

@@ -74,7 +74,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setId(ADMINIDPREPOSITION+idappender);
 		event.setSpecial(true);
 		event.setEventType("activity");
-		event.setLastchanged(10000000000l);
+		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
 		idappender++;
@@ -84,7 +84,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setId(ADMINIDPREPOSITION+idappender);
 		event.setSpecial(true);
 		event.setEventType(ACTIVITY);
-		event.setLastchanged(10000000000l);
+		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
 		idappender++;
@@ -94,7 +94,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setId(ADMINIDPREPOSITION+idappender);
 		event.setSpecial(true);
 		event.setEventType(ACTIVITY);
-		event.setLastchanged(10000000000l);
+		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
 		idappender++;
@@ -104,7 +104,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setId(ADMINIDPREPOSITION+idappender);
 		event.setSpecial(true);
 		event.setEventType(ACTIVITY);
-		event.setLastchanged(10000000000l);
+		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
 		idappender++;
@@ -114,7 +114,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setId(ADMINIDPREPOSITION+idappender);
 		event.setSpecial(true);
 		event.setEventType(ACTIVITY);
-		event.setLastchanged(10000000000l);
+		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
 		idappender++;
@@ -124,7 +124,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setId(ADMINIDPREPOSITION+idappender);
 		event.setSpecial(true);
 		event.setEventType(ACTIVITY);
-		event.setLastchanged(10000000000l);
+		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
 	}

@@ -29,6 +29,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
@@ -58,8 +59,10 @@ public class MovesConnectorImpl implements MovesConnector
 	public static final String FROM = "from=";
 	public static final String TO = "to=";
 	private static final String USER_AGENT = "Mozilla/5.0";
-	private static final String CLIENT_ID_PARAM_VALUE = "Da6TIHoVori74lacfuVk9QxzlIM5xy9E";
-	private static final String CLIENT_SECRET_PARAM_VALUE = "4jLntt7PFe8c9K05YSh_S3_jA2n7GlnDeIeqwL4EwGrE0G824u97xpS38g21nC2k";
+	@Value("${movesClientId@null}")
+	private static String CLIENT_ID_PARAM_VALUE;
+	@Value("${movesClientSecret@null}")
+	private static String CLIENT_SECRET_PARAM_VALUE;
 
 	private static final long ONEDAYINMILLISEC = 86400000;
 	private static final String DATEFORMATSTRING = "yyyyMMdd";
@@ -76,7 +79,7 @@ public class MovesConnectorImpl implements MovesConnector
 				if(isValid == false){
 					//token is not valid anymore
 					//get new token
-					MovesToken newMovesToken = refreshToken(movesToken.getRefresh_Token(), user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+					MovesToken newMovesToken = refreshToken(movesToken.getRefresh_Token(), user);
 					//update token
 					newMovesToken.setId(movesToken.getId());
 					dataService.update(MovesToken.ENTITY_NAME, newMovesToken);
@@ -135,9 +138,10 @@ public class MovesConnectorImpl implements MovesConnector
 
 	}
 
-	public MovesToken refreshToken(String refreshToken, MolgenisUser user, String clientId, String clientSecret){
+	public MovesToken refreshToken(String refreshToken, MolgenisUser user){
 
-		String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+REFRESH_TOKEN+"&"+REFRESH_TOKEN+"="+refreshToken+"&"+CLIENT_ID_PARAM+"="+clientId+"&"+CLIENT_SECRET_PARAM+"="+clientSecret;
+		String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+REFRESH_TOKEN+"&"+REFRESH_TOKEN+"="+refreshToken+"&"+CLIENT_ID_PARAM+"="+CLIENT_ID_PARAM_VALUE+"&"+CLIENT_SECRET_PARAM+"="+CLIENT_SECRET_PARAM_VALUE;
+		System.out.println("the url:"+ url);
 		String content = "{}";
 		HttpsURLConnection connection = doPostRequest(url, content);
 		//read response
@@ -146,9 +150,9 @@ public class MovesConnectorImpl implements MovesConnector
 		return movesToken;
 	}
 
-	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String clientId, String secretId){
+	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode){
 		try{
-			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+clientId+"&"+CLIENT_SECRET_PARAM+"="+secretId+"&"+REDIRECT_URI_PARAM+"="+REDIRECT_URL+"?"+TOKEN+"="+token;
+			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+CLIENT_ID_PARAM_VALUE+"&"+CLIENT_SECRET_PARAM+"="+CLIENT_SECRET_PARAM_VALUE+"&"+REDIRECT_URI_PARAM+"="+REDIRECT_URL+"?"+TOKEN+"="+token;
 			//String url = "https://api.moves-app.com/api/1.1/user/activities/daily?from=20141119&to=20141128&access_token=_MJnP57s9Bto6h9qNFyubozuI24y3UI3fZ2q755uVDx1nf8xyV77255YHUEXd9o2";
 			String content = "{}";
 			HttpsURLConnection connection = doPostRequest(url, content);

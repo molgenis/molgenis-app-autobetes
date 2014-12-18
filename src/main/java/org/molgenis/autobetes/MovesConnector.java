@@ -35,7 +35,7 @@ public interface MovesConnector
 	 * @param clientSecret
 	 * @return new MovesToken
 	 */
-	public MovesToken refreshToken(String refreshToken, MolgenisUser user, String clientId, String clientSecret);
+	public MovesToken refreshToken(String refreshToken, MolgenisUser user);
 	
 	/**
 	 * Once user authorizes this server to connect with moves an authorization code is retrieved. Together with the client id, secret id and token
@@ -47,7 +47,7 @@ public interface MovesConnector
 	 * @param secretId
 	 * @return
 	 */
-	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String clientId, String secretId);
+	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode);
 	/**
 	 * Retrieves user profile from Moves
 	 * @param movesToken

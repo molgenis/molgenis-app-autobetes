@@ -556,7 +556,9 @@ public class AnonymousController extends MolgenisPluginController
 		iterateListRecursively(reftoevent, 0, timeStampLastSync, user, entityMap, metaFoodEvent, metaActivityEvent,
 				metaFoodEventInstance, metaActivityEventInstance);
 		// get entities from db and put these in response data
+		//standard activities
 		getStandardEventsFromDBAndAppendToResponseData(responseData);
+		//user specific activities
 		getEntitiesFromDBAndAppendToResponseData(FoodEvent.ENTITY_NAME, user, timeStampLastSync.getTimestamp(),
 				responseData, metaFoodEvent);
 		getEntitiesFromDBAndAppendToResponseData(ActivityEvent.ENTITY_NAME, user, timeStampLastSync.getTimestamp(),
@@ -570,12 +572,16 @@ public class AnonymousController extends MolgenisPluginController
 		return responseData;
 
 			}
-
+	/**
+	 * Get standard events from db and append to response data.
+	 * @param responseData
+	 */
 	private void getStandardEventsFromDBAndAppendToResponseData(List<Map<String, Object>> responseData)
 	{
 
 		//equals 1 of admin
-		// get all entities from a user + adminuser
+		// entities from admin that have the particular string in id WebAppDatabasePopulatorServiceImpl.ADMINIDPREPOSITION
+		//are standard events
 		MolgenisUser adminUser = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "admin"),MolgenisUser.class);
 		
 		Iterable<Entity> dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
@@ -605,7 +611,12 @@ public class AnonymousController extends MolgenisPluginController
 		appendEntitiesToResponseData(responseData, dbEntities, meta);
 
 	}
-
+	/**
+	 * Iterates list with entities and appends to response data
+	 * @param responseData
+	 * @param dbEntities
+	 * @param meta
+	 */
 	private void appendEntitiesToResponseData(List<Map<String, Object>> responseData, Iterable<Entity> dbEntities, EntityMetaData meta){
 		// iterate iterable
 		for (Entity entity : dbEntities)

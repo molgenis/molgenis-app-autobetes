@@ -5,25 +5,6 @@
 <#macro header css=[] js=[]>
 <!DOCTYPE html>
 <html>
-<<<<<<< HEAD
-<head>
-	<title>Autobetes App</title>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="chrome=1">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="/css/jquery.mobile-1.4.2.min.css" />
-	<!-- script src="/js/jquery-1.8.3.min.js"></script-->
-	<script src="/js/jquery.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
-
-	<script src="/js/molgenis.js"></script>
-	<script src="/js/autobetes.js"></script>
-
-	<link rel="icon" href="/img/favicon.ico" type="image/x-icon">
-	<link rel="stylesheet" href="/css/autobetes.css" type="text/css">	
-</head>
-<body>
-=======
 	<head>
 		<title><#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if></title>
 		<meta charset="utf-8">
@@ -153,4 +134,3 @@
 			</div>
 		</nav>
 </#macro>
->>>>>>> e76f205db761d9f42225729155511128622fe63d
