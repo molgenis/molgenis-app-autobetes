@@ -1,7 +1,10 @@
 package org.molgenis.autobetes;
 
+import org.molgenis.autobetes.autobetes.ActivityEvent;
+import org.molgenis.autobetes.autobetes.ActivityEventInstance;
 import org.molgenis.autobetes.controller.AnonymousController;
 import org.molgenis.autobetes.controller.HomeController;
+import org.molgenis.autobetes.controller.MovesController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
@@ -19,7 +22,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 {
 	private final DataService dataService;
 	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
-
+	public static String ADMINIDPREPOSITION = "adminsdf7897dfjgjfug8dfug89ur234sdf";
+	private static String ACTIVITY = "Activity";
+	
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(DataService dataService,
 			MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService)
@@ -47,6 +52,80 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		
+		//same goes for movescontroller
+		anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
+		anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + MovesController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+		//populate with standard activity events 
+		
+		populateDBWithStandardEvents(molgenisSecurityWebAppDatabasePopulatorService.getUserAdmin(), dataService);
+		
+	}
+
+	private void populateDBWithStandardEvents(MolgenisUser userAdmin, DataService dataservice)
+	{
+		int idappender = 0;
+		
+		ActivityEvent event =  new ActivityEvent();
+		event.setName("Ill");
+		event.setOwner(userAdmin);
+		event.setId(ADMINIDPREPOSITION+idappender);
+		//event.setSpecial(true);
+		event.setEventType("activity");
+		event.setLastchanged(0l);
+		dataservice.add(ActivityEvent.ENTITY_NAME, event);
+		
+		idappender++;
+		event =  new ActivityEvent();
+		event.setName("Stress");
+		event.setOwner(userAdmin);
+		event.setId(ADMINIDPREPOSITION+idappender);
+		//event.setSpecial(true);
+		event.setEventType(ACTIVITY);
+		event.setLastchanged(0l);
+		dataservice.add(ActivityEvent.ENTITY_NAME, event);
+		
+		idappender++;
+		event =  new ActivityEvent();
+		event.setName("Do not track");
+		event.setOwner(userAdmin);
+		event.setId(ADMINIDPREPOSITION+idappender);
+		//event.setSpecial(true);
+		event.setEventType(ACTIVITY);
+		event.setLastchanged(0l);
+		dataservice.add(ActivityEvent.ENTITY_NAME, event);
+		
+		idappender++;
+		event =  new ActivityEvent();
+		event.setName("Sensor inacurrate");
+		event.setOwner(userAdmin);
+		event.setId(ADMINIDPREPOSITION+idappender);
+		//event.setSpecial(true);
+		event.setEventType(ACTIVITY);
+		event.setLastchanged(0l);
+		dataservice.add(ActivityEvent.ENTITY_NAME, event);
+		
+		idappender++;
+		event =  new ActivityEvent();
+		event.setName("Holiday");
+		event.setOwner(userAdmin);
+		event.setId(ADMINIDPREPOSITION+idappender);
+		//event.setSpecial(true);
+		event.setEventType(ACTIVITY);
+		event.setLastchanged(0l);
+		dataservice.add(ActivityEvent.ENTITY_NAME, event);
+		
+		idappender++;
+		event =  new ActivityEvent();
+		event.setName("Party");
+		event.setOwner(userAdmin);
+		event.setId(ADMINIDPREPOSITION+idappender);
+		//event.setSpecial(true);
+		event.setEventType(ACTIVITY);
+		event.setLastchanged(0l);
+		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
 	}
 
