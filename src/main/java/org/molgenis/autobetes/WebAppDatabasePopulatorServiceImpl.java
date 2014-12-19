@@ -44,19 +44,29 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	public void populateDatabase()
 	{
 		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(dataService, HomeController.ID);
-		//make anonymous user in order to access AnonymousController without being admin
+		//make anonymous user in order to read and write from AnonymousController without being admin
 		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
 		UserAuthority anonymousHomeAuthority = new UserAuthority();
 		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
 		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + AnonymousController.ID.toUpperCase());
+		//anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + AnonymousController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		
+		anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + AnonymousController.ID.toUpperCase());
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		
 		//same goes for movescontroller
-		anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
+		//anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
 		anonymousHomeAuthority = new UserAuthority();
 		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
 		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + MovesController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+		
+		anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + AnonymousController.ID.toUpperCase());
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		//populate with standard activity events 
 		

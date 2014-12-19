@@ -200,7 +200,19 @@ public class AnonymousController extends MolgenisPluginController
 			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
 					+ HomeController.ID.toUpperCase());
 			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+			
+			anonymousHomeAuthority = new UserAuthority();
+			anonymousHomeAuthority.setMolgenisUser(mu);
+			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX
+					+ AnonymousController.ID.toUpperCase());
+			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 
+			anonymousHomeAuthority = new UserAuthority();
+			anonymousHomeAuthority.setMolgenisUser(mu);
+			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX
+					+ HomeController.ID.toUpperCase());
+			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+	
 		}
 		catch (Exception e)
 		{
@@ -267,20 +279,25 @@ public class AnonymousController extends MolgenisPluginController
 			HttpServletRequest servletRequest)
 			{
 		//System.out.println(entityMap.toString());
-		System.out.println(servletRequest.toString());
+		System.out.println(entityMap.toString());
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
 		EntityMetaData metaUserInfo = dataService.getEntityMetaData(UserInfo.ENTITY_NAME);
-		Entity userInfo = dataService.findOne(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user));
-
+		//get userinfolist
+		Iterable<Entity> userInfoList = dataService.findAll(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user).sort(new Sort(Direction.DESC, UserInfo.LASTCHANGED)));
 		Entity entityFromClient = toEntity(metaUserInfo, entityMap.get(0), user);
-		if(userInfo == null){
+		if(userInfoList.iterator().hasNext() == false){
+			//no userinfo of user, add record
 			dataService.add(UserInfo.ENTITY_NAME, entityFromClient);
 			return getEntityAsMap(entityFromClient, metaUserInfo, null, null);
 		}
 		else{
+			//get userinfo entity with highest timestamp
+			Entity userInfo = userInfoList.iterator().next();
 			if(userInfo.getDouble(TestEvent.LASTCHANGED) < entityFromClient.getDouble(TestEvent.LASTCHANGED)){
-				entityFromClient.set(UserInfo.ID, userInfo.get(UserInfo.ID));
-				dataService.update(UserInfo.ENTITY_NAME, entityFromClient);
+				//entity from client has higher timestamp
+				//add client entity
+				
+				dataService.add(UserInfo.ENTITY_NAME, entityFromClient);
 				return getEntityAsMap(entityFromClient, metaUserInfo, null, null);
 			}
 			else{
