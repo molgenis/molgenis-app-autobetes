@@ -200,7 +200,7 @@ public class AnonymousController extends MolgenisPluginController
 			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
 					+ HomeController.ID.toUpperCase());
 			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-			
+
 			anonymousHomeAuthority = new UserAuthority();
 			anonymousHomeAuthority.setMolgenisUser(mu);
 			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX
@@ -212,7 +212,7 @@ public class AnonymousController extends MolgenisPluginController
 			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX
 					+ HomeController.ID.toUpperCase());
 			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-	
+
 		}
 		catch (Exception e)
 		{
@@ -296,7 +296,7 @@ public class AnonymousController extends MolgenisPluginController
 			if(userInfo.getDouble(TestEvent.LASTCHANGED) < entityFromClient.getDouble(TestEvent.LASTCHANGED)){
 				//entity from client has higher timestamp
 				//add client entity
-				
+
 				dataService.add(UserInfo.ENTITY_NAME, entityFromClient);
 				return getEntityAsMap(entityFromClient, metaUserInfo, null, null);
 			}
@@ -305,7 +305,7 @@ public class AnonymousController extends MolgenisPluginController
 			}
 		}
 
-	}
+			}
 
 	/**
 	 * @return time stamp of most recent sensor data of user to which this token belongs! 
@@ -665,7 +665,6 @@ public class AnonymousController extends MolgenisPluginController
 
 					if (mapEntity.get(Event.EVENTTYPE).equals(FOOD))
 					{
-
 						processMapEntity(mapEntity, metaFoodEvent, user);
 						iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap,
 								metaFoodEvent, metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
@@ -729,9 +728,7 @@ public class AnonymousController extends MolgenisPluginController
 		//get entityfromdb
 		Entity storedEntity = dataService.findOne(meta.getName(),
 				new QueryImpl().eq(Event.OWNER, user).and().eq(Event.ID, entity.get(Event.ID)));
-		if(entity.getIdValue().toString().contains("admin")){
-
-		}
+		
 		if (storedEntity == null)
 		{
 			// no entity in db, add entity
@@ -818,65 +815,67 @@ public class AnonymousController extends MolgenisPluginController
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			try
-			{
-				String paramName = attr.getName();
-				Object paramValue = mapEntity.get(paramName);
-				Object value = null;
-				FieldTypeEnum dataType = attr.getDataType().getEnumType();
-
-				// an undefined javascript object will be processed as a string "undefined"
-				// if datatype is a number the conversion(toEntityValue) will result in an error.
-				// therefore this check
-				if (paramValue != null && paramValue.equals("undefined"))
+			
+			//no conversion of the auto_generated and server attributes(these result in nullpointer exceptions)
+			if(attr.getName() != Event.PRIMARYKEY && attr.getName() != Event.MOMENT && attr.getName() != Event.OWNER && attr.getName() != Event.__TYPE && !attr.isAuto()){
+				try
 				{
-					if (dataType == INT || dataType == LONG || dataType == DECIMAL)
+					String paramName = attr.getName();
+					Object paramValue = mapEntity.get(paramName);
+					Object value = null;
+					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					// an undefined javascript object will be processed as a string "undefined"
+					// if datatype is a number the conversion(toEntityValue) will result in an error.
+					// therefore this check
+					if (paramValue != null && paramValue.equals("undefined"))
 					{
-						value = null;
+						if (dataType == INT || dataType == LONG || dataType == DECIMAL)
+						{
+							value = null;
+						}
 					}
-				}
-				// websql has no true or false, instead it uses 0 and 1,
-				// if datatype is a boolean than use the custom method convertDoubleToBoolean
-				else if (dataType == BOOL)
-				{
-					if (paramValue.equals("undefined"))
+					// websql has no true or false, instead it uses 0 and 1,
+					// if datatype is a boolean than use the custom method convertDoubleToBoolean
+					else if (dataType == BOOL)
 					{
-						value = null;
+						if (paramValue.equals("undefined"))
+						{
+							value = null;
+						}
+						else
+						{
+							value = convertDoubleToBoolean((double) paramValue);
+						}
 					}
 					else
 					{
-						value = convertDoubleToBoolean((double) paramValue);
+						// surround with try catch, if it fails then value will remain null
+						try
+						{
+							value = toEntityValue(attr, paramValue);
+						}
+						catch (Exception e)
+						{
+							System.out.println("Failed to convert parameter value: " + paramValue + " to dataType: "
+									+ dataType.toString());
+							System.out.println(e);
+						}
 					}
+					entity.set(attr.getName(), value);
 				}
-				else
+				catch (Exception e)
 				{
-					// surround with try catch, if it fails then value will remain null
-					try
-					{
-						value = toEntityValue(attr, paramValue);
-					}
-					catch (Exception e)
-					{
-						System.out.println("Failed to convert parameter value: " + paramValue + " to dataType: "
-								+ dataType.toString());
-						System.out.println(e);
-					}
+					writeExceptionToDB(user, mapEntity.toString(), e.toString());
+					entity.set(attr.getName(), null);
+					System.out.println("Could not convert parameter to entityValue: parameter=" + attr.getName() + ", map="
+							+ mapEntity.toString());
+					System.out.println(e);
+
 				}
-				entity.set(attr.getName(), value);
 			}
-			catch (Exception e)
-			{
-				writeExceptionToDB(user, mapEntity.toString(), e.toString());
-				entity.set(attr.getName(), null);
-				System.out.println("Could not convert parameter to entityValue: parameter=" + attr.getName() + ", map="
-						+ mapEntity.toString());
-				System.out.println(e);
-
-			}
+			
 		}
-
 		entity.set(Event.OWNER, user);
-
 		return entity;
 	}
 
@@ -1133,7 +1132,7 @@ public class AnonymousController extends MolgenisPluginController
 			entityMap.put(ServerExceptionLog.ENTITY, entityAsString);
 			entityMap.put(ServerExceptionLog.EXCEPTION, exceptionAsString);
 			Entity entity = toEntity(meta, entityMap, user);
-			System.out.println("entity isss:" + entity);
+			System.out.println("entity is:" + entity);
 			// write to db
 			dataService.add(meta.getName(), entity);
 

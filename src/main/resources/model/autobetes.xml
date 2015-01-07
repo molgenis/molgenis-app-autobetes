@@ -107,6 +107,8 @@
 		<entity name="FoodEvent" extends="Event">
 			<field name="carbs" type="decimal" nillable="true" description="Size of this event in terms of grams of carbs." />
 			<field name="alcoholicUnits" type="decimal" default="0" description="Number of 'alcholic units' in this event. One unit corresponds to a standard glass." />
+			<field name="portionsize" type="decimal" nillable="true" description="Size of this event in terms of." />
+			<field name="estimationCarbs" type="boolean" nillable="true" description="Wheter user estimated the size." />
 		</entity>
 		<entity name="ActivityEvent" extends="Event">
 			<field name="power" type="decimal" default="3" nillable="true" description="Calories / kilo gram body weight / hour." />
