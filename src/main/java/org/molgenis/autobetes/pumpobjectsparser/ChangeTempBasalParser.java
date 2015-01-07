@@ -7,6 +7,8 @@ import org.molgenis.omx.auth.MolgenisUser;
 
 public class ChangeTempBasalParser extends ObjectParser
 {
+	private ChangeTempBasal ctbp = new ChangeTempBasal();
+
 	private final static String RATE = "RATE";
 	private final static String DURATION = "DURATION";
 
@@ -14,7 +16,6 @@ public class ChangeTempBasalParser extends ObjectParser
 	{
 		super(csvEntity, dataService, molgenisUser);
 
-		ChangeTempBasal ctbp = new ChangeTempBasal();
 		ctbp.setDateTimeString(getDateTimeString());
 		ctbp.setUnixtimeOriginal(getDateTimeLong());
 		ctbp.setIdOnPump(getIdOnPump());
@@ -23,7 +24,12 @@ public class ChangeTempBasalParser extends ObjectParser
 		ctbp.setRate(getDouble(RATE));
 		ctbp.setDuration(getInteger(DURATION));
 		
-		save(ctbp.ENTITY_NAME, ctbp);
+//		save(ctbp.ENTITY_NAME, ctbp);
+	}
+
+	public ChangeTempBasal getCtbp()
+	{
+		return ctbp;
 	}
 
 }

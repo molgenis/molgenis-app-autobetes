@@ -22,7 +22,7 @@ public class ChangeCarbRatioGroupParser extends ObjectParser
 		
 		ccrg.setNRatios(getInteger(SIZE));
 		
-		save(ccrg.ENTITY_NAME, ccrg);
+//		save(ccrg.ENTITY_NAME, ccrg);
 	}
 
 }

@@ -1,6 +1,5 @@
 package org.molgenis.autobetes.pumpobjectsparser;
 
-import org.molgenis.autobetes.autobetes.BasalProfileDefinition;
 import org.molgenis.autobetes.autobetes.BasalProfileDefinitionGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -24,7 +23,7 @@ public class BasalProfileDefinitionGroupParser extends ObjectParser
 		bpdg.setName(getString(PATTERN_NAME));
 		bpdg.setNumberOfProfiles(getInteger(NUM_PROFILES));
 		
-		save(bpdg.ENTITY_NAME, bpdg);
+//		save(bpdg.ENTITY_NAME, bpdg);
 	}
 
 }
