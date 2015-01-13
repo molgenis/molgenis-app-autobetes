@@ -23,7 +23,7 @@ public class ChangeInsulinSensitivityGroupParser extends ObjectParser
 		
 		e.setNSensitivities(getInteger(SIZE));
 		
-		save(e.ENTITY_NAME, e);
+//		save(e.ENTITY_NAME, e);
 	}
 
 }

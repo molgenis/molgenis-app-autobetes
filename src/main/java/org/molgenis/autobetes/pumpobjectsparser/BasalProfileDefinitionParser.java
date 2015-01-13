@@ -27,7 +27,7 @@ public class BasalProfileDefinitionParser extends ObjectParser
 		bp.setRate(getDouble(RATE));
 		bp.setStartTime(getLong(START_TIME));
 		
-		save(bp.ENTITY_NAME, bp);
+//		save(bp.ENTITY_NAME, bp);
 	}
 
 }

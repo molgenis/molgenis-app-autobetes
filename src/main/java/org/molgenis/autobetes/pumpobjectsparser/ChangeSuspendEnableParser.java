@@ -7,23 +7,31 @@ import org.molgenis.omx.auth.MolgenisUser;
 
 public class ChangeSuspendEnableParser extends ObjectParser
 {
-	private final static String ENABLE = "ENABLE";
-	private final static String normal_pumping = "normal_pumping";
+	private ChangeSuspendEnable suspend = new ChangeSuspendEnable();
+	
+	private final static String STATE = "STATE";
+	private final static String ACTIONREQUESTOR = "ACTIONREQUESTOR";
+	private final static String PRESTATE = "PRESTATE";	
+	private final static String normal_pumping = "normal_pumping"; // alternative: "user_suspend"
 	
 	public ChangeSuspendEnableParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(csvEntity, dataService, molgenisUser);
-
-		ChangeSuspendEnable e = new ChangeSuspendEnable();
-		e.setDateTimeString(getDateTimeString());
-		e.setUnixtimeOriginal(getDateTimeLong());
-		e.setIdOnPump(getIdOnPump());
-		e.setUploadId(getUploadId());
+		suspend.setDateTimeString(getDateTimeString());
+		suspend.setUnixtimeOriginal(getDateTimeLong());
+		suspend.setIdOnPump(getIdOnPump());
+		suspend.setUploadId(getUploadId());
 		
-		e.setEnable(getString(ENABLE));
-		e.setSuspended(normal_pumping.equals(getString(ENABLE)));
+		suspend.setState(getString(STATE));
+		suspend.setActionRequestor(getString(ACTIONREQUESTOR));
+		suspend.setPreState(getString(PRESTATE));
+		suspend.setSuspended(normal_pumping.equals(getString(STATE)));
 		
-		save(e.ENTITY_NAME, e);
+//		save(e.ENTITY_NAME, e);
 	}
 
+	public ChangeSuspendEnable getE()
+	{
+		return suspend;
+	}
 }

@@ -46,6 +46,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		expressionInterceptUrlRegistry.antMatchers("/").permitAll()
 		// DAS datasource uses the database, unauthenticated users can
 		// not see any data
+				.antMatchers("*").permitAll()
+		
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll()

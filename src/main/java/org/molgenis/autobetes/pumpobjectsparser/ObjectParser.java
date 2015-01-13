@@ -31,18 +31,27 @@ public class ObjectParser
 		this.dataService = dataService;
 		this.molgenisUser = molgenisUser;
 
+		// show progress?
+//		System.out.println(">> #line nr:" + csvEntity.get("Index"));
+
 		// parse date, time
 		dateTimeString = (String) csvEntity.get(DeviceDateTime);
 
-		// first repair string
-		
+		// find correct format and parse
 		try
 		{
 			dateTime = new SimpleDateFormat("dd-MM-yy HH:mm:ss").parse(dateTimeString);
 		}
 		catch (ParseException exeption)
 		{
-			exeption.printStackTrace();
+			try
+			{
+				dateTime = new SimpleDateFormat("dd/MM/yy HH:mm").parse(dateTimeString);
+			}
+			catch (ParseException e)
+			{
+				e.printStackTrace();
+			}
 		}
 
 		// parse pumpId, uploadId
@@ -119,10 +128,8 @@ public class ObjectParser
 		return this.uploadId;
 	}
 
-	// Save entity in DB
-	void save(String entityName, Entity entity)
-	{
-		entity.set("owner", molgenisUser);
-		dataService.add(entityName, entity);
-	}
+	/* WE SAVE ENTITIES AS LIST AND THUS DON'T USE THIS FUNCTION ANYMORE! 
+	 * // Save entity in DB void save(String entityName, Entity entity) { entity.set("owner", molgenisUser);
+	 * dataService.add(entityName, entity); }
+	 */
 }

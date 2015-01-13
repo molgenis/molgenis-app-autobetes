@@ -28,7 +28,7 @@ public class ChangeInsulinSensitivityParser extends ObjectParser
 		e.setAmount(getDouble(AMOUNT));
 		e.setStartTime(getLong(START_TIME));
 		
-		save(e.ENTITY_NAME, e);
+//		save(e.ENTITY_NAME, e);
 	}
 
 }
