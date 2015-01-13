@@ -7,6 +7,8 @@ import org.molgenis.omx.auth.MolgenisUser;
 
 public class BolusNormalParser extends ObjectParser
 {
+	private BolusNormal bn = new BolusNormal();
+
 	private final static String AMOUNT = "AMOUNT";
 	private final static String PROGRAMMED_AMOUNT = "PROGRAMMED_AMOUNT";
 	
@@ -14,7 +16,6 @@ public class BolusNormalParser extends ObjectParser
 	{
 		super(rawvalues, dataService, molgenisUser);
 		
-		BolusNormal bn = new BolusNormal();
 		bn.setDateTimeString(getDateTimeString());
 		bn.setUnixtimeOriginal(getDateTimeLong());
 		bn.setIdOnPump(getIdOnPump());
@@ -23,6 +24,11 @@ public class BolusNormalParser extends ObjectParser
 		bn.setAmount(getDouble(AMOUNT));
 		bn.setProgrammedAmount(getDouble(PROGRAMMED_AMOUNT));
 		
-		save(BolusNormal.ENTITY_NAME, bn);
+//		save(BolusNormal.ENTITY_NAME, bn);
+	}
+	
+	public BolusNormal getBn()
+	{
+		return bn;
 	}
 }

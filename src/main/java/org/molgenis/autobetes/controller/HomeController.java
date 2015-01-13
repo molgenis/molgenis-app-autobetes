@@ -8,53 +8,49 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.Set;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.autobetes.MovesConnector;
 import org.molgenis.autobetes.MovesConnectorImpl;
-import org.molgenis.autobetes.pumpobjectsparser.BasalProfileDefinitionGroupParser;
-import org.molgenis.autobetes.pumpobjectsparser.BasalProfileDefinitionParser;
+import org.molgenis.autobetes.autobetes.BasalProfileStart;
+import org.molgenis.autobetes.autobetes.BgSensor;
+import org.molgenis.autobetes.autobetes.BolusNormal;
+import org.molgenis.autobetes.autobetes.BolusSquare;
+import org.molgenis.autobetes.autobetes.ChangeSuspendEnable;
+import org.molgenis.autobetes.autobetes.ChangeTempBasal;
+import org.molgenis.autobetes.autobetes.ChangeTempBasalPercent;
 import org.molgenis.autobetes.pumpobjectsparser.BasalProfileStartParser;
-import org.molgenis.autobetes.pumpobjectsparser.BgMeterParser;
 import org.molgenis.autobetes.pumpobjectsparser.BgSensorParser;
 import org.molgenis.autobetes.pumpobjectsparser.BolusNormalParser;
 import org.molgenis.autobetes.pumpobjectsparser.BolusSquareParser;
-import org.molgenis.autobetes.pumpobjectsparser.ChangeCarbRatioGroupParser;
-import org.molgenis.autobetes.pumpobjectsparser.ChangeCarbRatioParser;
-import org.molgenis.autobetes.pumpobjectsparser.ChangeInsulinSensitivityGroupParser;
-import org.molgenis.autobetes.pumpobjectsparser.ChangeInsulinSensitivityParser;
 import org.molgenis.autobetes.pumpobjectsparser.ChangeSuspendEnableParser;
 import org.molgenis.autobetes.pumpobjectsparser.ChangeTempBasalParser;
 import org.molgenis.autobetes.pumpobjectsparser.ChangeTempBasalPercentParser;
-import org.molgenis.autobetes.pumpobjectsparser.TimeChangeParser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.FileStore;
-import org.molgenis.data.DataService;
-import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.converters.ValueConverterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,6 +72,8 @@ public class HomeController extends MolgenisPluginController
 	// private static int BASALTIMESTEP = 3 * 60 * 1000; // 3 min
 	private static String HEADER = "HEADER";
 	private static String BODY = "BODY";
+	private static String CSVSEPARATOR = "CSVSEPARATOR";
+
 
 	private final static String RAWTYPE = "Onbewerkt: type";
 //	private static String RAWVALUES = "Onbewerkt: waarden";
@@ -124,53 +122,55 @@ public class HomeController extends MolgenisPluginController
 		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
 		try
 		{
-			File uploadFile = fileStore.store(file.getInputStream(), file.getName());
+			File pumpCsvFile = fileStore.store(file.getInputStream(), file.getName());
 			
-			
-			String baseDir = "/Users/dionkoolhaas/PumpCSVFiles/";
-			String tmpDir = baseDir + "tmp/";
-			String outputDir = baseDir + "split/";
-			split(uploadFile, new File(outputDir), tmpDir);
-			//import activities from moves
+	        String tmpDir = System.getProperty("java.io.tmpdir") + "autobetesCsv" + File.separatorChar;
+
+	        // import pump csv data
+	        importPumpCsvFile(user, pumpCsvFile, new File(tmpDir), tmpDir);
+
+	        // Now also import activities from Moves-app!
 			MovesConnector movesConnector = new MovesConnectorImpl();
 			movesConnector.manageActivities(dataService, user);
-			model.addAttribute("message", "great succes!!");
-			//System.out.println(IOUtils.toString(file.getInputStream(), "UTF-8"));
-			
-			//List<File> uploadedFiles = ZipFileUtil.unzip(uploadFile);
-			//if (uploadedFiles.size() > 0) ontologyIndexer.index(new OntologyLoader(ontologyName, uploadedFiles.get(0)));
-			//model.addAttribute("isIndexRunning", true);
+			model.addAttribute("message", "Import moves success??");
 		}
 		catch (Exception e)
 		{
-			model.addAttribute("message", "Please upload a valid zip file!");
-			model.addAttribute("isCorrectZipFile", false);
+			model.addAttribute("message", "Error uploading CSV!" + e);
+			System.err.println(">> Error uploading CSV!" + e);
 		}
 		
 		return "view-home";
 	}
 
-	private void split(File inputFile, File outputDir, String tmpDir)
+	private void importPumpCsvFile(MolgenisUser molgenisUser, File inputFile, File outputDir, String tmpDir)
 	{
-		// List<Exercise> exerciseListFile = new ArrayList<Exercise>();
-		// List<Carbs> carbListFile = new ArrayList<Carbs>();
-		// List<BgSensor> bgsensorListFile = new ArrayList<BgSensor>();
-		// List<Bolus> bolusListFile = new ArrayList<Bolus>();
-		// List<BasalProgrammed> basalProgrammedListFile = new ArrayList<BasalProgrammed>();
-		// List<BasalTemp> basalTempListFile = new ArrayList<BasalTemp>();
-		// List<BasalSetting> basalList = new ArrayList<BasalSetting>();
-		// List<Basal> basalAsReleased = new ArrayList<Basal>();
-		// List<BgSensor> bgSensorList = new ArrayList<BgSensor>();
+		// First put stuff in list, then add list at once! (Performance optimization)
+		 List<BgSensor> bgSensorList = new ArrayList<BgSensor>();
+		 List<BolusNormal> bolusNormalList = new ArrayList<BolusNormal>();
+		 List<BolusSquare> bolusSquareList = new ArrayList<BolusSquare>();
+		 List<ChangeTempBasal> changeTempBasalList = new ArrayList<ChangeTempBasal>();
+		 List<ChangeTempBasalPercent> changeTempBasalPercentList = new ArrayList<ChangeTempBasalPercent>();
+		 List<BasalProfileStart> basalProfileStartList = new ArrayList<BasalProfileStart>();
+		 List<ChangeSuspendEnable> changeSuspendEnableList = new ArrayList<ChangeSuspendEnable>();
+//		 List<Bolus> bolusListFile = new ArrayList<Bolus>();
+//		 List<BasalProgrammed> basalProgrammedListFile = new ArrayList<BasalProgrammed>();
+//		 List<BasalTemp> basalTempListFile = new ArrayList<BasalTemp>();
+//		 List<BasalSetting> basalList = new ArrayList<BasalSetting>();
+//		 List<Basal> basalAsReleased = new ArrayList<Basal>();
+//		 List<BgSensor> bgSensorList = new ArrayList<BgSensor>();
 
 		// define 'unique' body file name
 		String random = Long.toHexString(Double.doubleToLongBits(Math.random())).substring(0, 4);
 		File bodyFile = new File(tmpDir + random + ".txt");
-
+		Character separator = null;
+		
 		// split header and body
 		try
 		{
 			LinkedHashMap<String, String> fsplit;
 			fsplit = splitInHeaderTail(inputFile);
+			separator = fsplit.get(CSVSEPARATOR).charAt(0);;
 			// work around: save as file so that we can read it in again with csvReader..
 			FileUtils.writeStringToFile(bodyFile, fsplit.get(BODY));
 		}
@@ -180,17 +180,12 @@ public class HomeController extends MolgenisPluginController
 			e.printStackTrace();
 		}
 
-		// read in body
-		CsvRepository csvRepo = new CsvRepository(bodyFile, null, ';');
+		// Read and separate bodyFile 
+		CsvRepository csvRepo = new CsvRepository(bodyFile, null, separator);
 
-		
-		// get current owner
-		String userName = SecurityUtils.getCurrentUsername();
-		MolgenisUser molgenisUser = (MolgenisUser) dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, userName));
-		
-		// list stores which entities cannot be loaded so that we do not show duplicates
+		// Set stores which entities cannot be loaded so that we do not show duplicates
+		System.out.println("Entities that are not yet parsed into db:");
 		Set<String> rawTypeSet = new HashSet<String>();
-		System.out.println("To do:");
 		for (Entity e : csvRepo)
 		{
 			String rawType = (String) e.get(RAWTYPE);
@@ -198,6 +193,7 @@ public class HomeController extends MolgenisPluginController
 			switch (rawType)
 			{
 				// TODO Probably this is not the right variable! Use 'volgnummer' or 'pumpID' to determine which one to take!
+/*
 				case ChangeTimeGH:
 					new TimeChangeParser(e, dataService, molgenisUser);
 					break;
@@ -205,37 +201,41 @@ public class HomeController extends MolgenisPluginController
 				case CalBGForPH:
 					new BgMeterParser(e, dataService, molgenisUser);
 					break;
-					
+*/				
 				case GlucoseSensorData:
-					new BgSensorParser(e, dataService, molgenisUser);
+					bgSensorList.add(new BgSensorParser(e, dataService, molgenisUser).getBgSensor());
 					break;
 
 				case BolusNormal:
-					new BolusNormalParser(e, dataService, molgenisUser);
+					bolusNormalList.add(new BolusNormalParser(e, dataService, molgenisUser).getBn());
 					break;
 
 				case BolusSquare:
-					new BolusSquareParser(e, dataService, molgenisUser);
+					bolusSquareList.add(new BolusSquareParser(e, dataService, molgenisUser).getBs());
 					break;
 
+				case ChangeTempBasal:
+					changeTempBasalList.add(new ChangeTempBasalParser(e, dataService, molgenisUser).getCtbp());
+					break;
+
+				case ChangeTempBasalPercent:
+					changeTempBasalPercentList.add(new ChangeTempBasalPercentParser(e, dataService, molgenisUser).getCtb());
+					break;
+
+				case BasalProfileStart:
+					basalProfileStartList.add(new BasalProfileStartParser(e, dataService, molgenisUser).getBps());
+					break;					
+					
+				case ChangeSuspendEnable:
+					changeSuspendEnableList.add(new ChangeSuspendEnableParser(e, dataService, molgenisUser).getE());
+					break;					
+/*
 				case ChangeBasalProfilePattern: // postfix 'Pre' means 'previous'
 					new BasalProfileDefinitionGroupParser(e, dataService, molgenisUser);
 					break;
 
 				case ChangeBasalProfile: // postfix 'Pre' means 'previous'
 					new BasalProfileDefinitionParser(e, dataService, molgenisUser);
-					break;
-
-				case BasalProfileStart:
-					new BasalProfileStartParser(e, dataService, molgenisUser);
-					break;
-
-				case ChangeTempBasal:
-					new ChangeTempBasalParser(e, dataService, molgenisUser);
-					break;
-
-				case ChangeTempBasalPercent:
-					new ChangeTempBasalPercentParser(e, dataService, molgenisUser);
 					break;
 
 				case ChangeCarbRatioPattern:
@@ -253,12 +253,8 @@ public class HomeController extends MolgenisPluginController
 				case ChangeInsulinSensitivity:
 					new ChangeInsulinSensitivityParser(e, dataService, molgenisUser);
 					break;
-
-				case ChangeSuspendEnable:
-					new ChangeSuspendEnableParser(e, dataService, molgenisUser);
-					break;					
-					
-				default:
+*/				
+				default: // print if not parsed
 					if (!rawTypeSet.contains(rawType))
 					{
 						System.out.println(rawType);// + ":   " + e.toString());
@@ -267,7 +263,17 @@ public class HomeController extends MolgenisPluginController
 					break;
 			}
 		}
-
+		System.out.println(">> Done parsing!");
+		dataService.add(BgSensor.ENTITY_NAME, bgSensorList);
+		dataService.add(org.molgenis.autobetes.autobetes.BolusNormal.ENTITY_NAME, bolusNormalList);
+		dataService.add(org.molgenis.autobetes.autobetes.BolusSquare.ENTITY_NAME, bolusSquareList);
+		dataService.add(org.molgenis.autobetes.autobetes.ChangeTempBasal.ENTITY_NAME, changeTempBasalList);
+		dataService.add(org.molgenis.autobetes.autobetes.ChangeTempBasalPercent.ENTITY_NAME, changeTempBasalPercentList);
+		dataService.add(org.molgenis.autobetes.autobetes.BasalProfileStart.ENTITY_NAME, basalProfileStartList);
+		dataService.add(org.molgenis.autobetes.autobetes.ChangeSuspendEnable.ENTITY_NAME, changeSuspendEnableList);
+		// TODO SUSPEND
+		
+		System.out.println(">> Done importing in db!");
 		IOUtils.closeQuietly(csvRepo);
 	}
 
@@ -282,9 +288,13 @@ public class HomeController extends MolgenisPluginController
 
 		// TODO do this smarter; e.g. assume header ends when number of separaters is
 		// big (or maybe even equal to a certain number)
+		
+		// Replace all \r carriage return, which is ^M on Windows, by \n
+		String newlineChar = "\n";
+		content = content.replace('\r', '\n');
 
-		for (positionNewline = content.indexOf("\n"); positionNewline != -1 && lineIndex < nHeaderLines - 1; positionNewline = content
-				.indexOf("\n", positionNewline + 1))
+		for (positionNewline = content.indexOf(newlineChar); positionNewline != -1 && lineIndex < nHeaderLines - 1; positionNewline = content
+				.indexOf(newlineChar, positionNewline + 1))
 		{
 			lineIndex++;
 		}
@@ -295,6 +305,13 @@ public class HomeController extends MolgenisPluginController
 		LinkedHashMap<String, String> fsplit = new LinkedHashMap<String, String>();
 		fsplit.put(HEADER, header);
 		fsplit.put(BODY, body);
+		
+		// guess sep based on number of occurences of ',' and ';' in header
+		int nComma = StringUtils.countOccurrencesOf(header, ",");
+		int nSemiColon = StringUtils.countOccurrencesOf(header, ";");
+		
+		if (nSemiColon < nComma) fsplit.put(CSVSEPARATOR, ",");
+		else fsplit.put(CSVSEPARATOR, ";");
 
 		return fsplit;
 	}

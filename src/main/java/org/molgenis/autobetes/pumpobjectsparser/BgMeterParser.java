@@ -21,7 +21,7 @@ public class BgMeterParser extends ObjectParser
 
 		bm.setAmount(getDouble(AMOUNT));
 
-		save(BgMeter.ENTITY_NAME, bm);
+//		save(BgMeter.ENTITY_NAME, bm);
 	}
 
 }

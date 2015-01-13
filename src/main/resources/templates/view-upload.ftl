@@ -1,7 +1,7 @@
 <#include "headerOriginal.ftl">
 
 <div class="container" style="margin-top: 20px;">
-	<form id="upload-file-form" method="post" action="/plugin/home/validate" enctype="multipart/form-data" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Work in progress..');});  return true;">
+	<form id="upload-file-form" method="post" action="/menu/main/validate" enctype="multipart/form-data" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Work in progress..');});  return true;">
 	    <div class="row">
 	        <div class="col-lg-6 col-sm-6 col-12">
 				<div class="form-group">
