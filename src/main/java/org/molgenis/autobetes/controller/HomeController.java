@@ -45,6 +45,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -92,6 +93,11 @@ public class HomeController extends MolgenisPluginController
 	private final static String ChangeInsulinSensitivityPattern = "ChangeInsulinSensitivityPattern";
 	private final static String ChangeInsulinSensitivity = "ChangeInsulinSensitivity";
 	private final static String ChangeSuspendEnable = "ChangeSuspendEnable";
+	
+	@Value("${movesClientId}")
+	private String CLIENT_ID_PARAM_VALUE;
+	@Value("${movesClientSecret}")
+	private String CLIENT_SECRET_PARAM_VALUE;
 
 	@Autowired
 	private DataService dataService;
@@ -130,7 +136,7 @@ public class HomeController extends MolgenisPluginController
 
 	        // Now also import activities from Moves-app!
 			MovesConnector movesConnector = new MovesConnectorImpl();
-			movesConnector.manageActivities(dataService, user);
+			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
 			model.addAttribute("message", "Import moves success??");
 		}
 		catch (Exception e)

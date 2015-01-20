@@ -18,7 +18,7 @@ public interface MovesConnector
 	 * @param user for which activities need to be managed
 	 * @return boolean, true is success
 	 */
-	public boolean manageActivities(DataService dataService, MolgenisUser user);
+	public boolean manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE);
 	
 	/**
 	 * Checks if access token from moves is still valid
@@ -35,7 +35,7 @@ public interface MovesConnector
 	 * @param clientSecret
 	 * @return new MovesToken
 	 */
-	public MovesToken refreshToken(String refreshToken, MolgenisUser user);
+	public MovesToken refreshToken(String refreshToken, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE);
 	
 	/**
 	 * Once user authorizes this server to connect with moves an authorization code is retrieved. Together with the client id, secret id and token
@@ -43,11 +43,13 @@ public interface MovesConnector
 	 * @param user
 	 * @param token
 	 * @param authorizationcode
+	 * @param CLIENT_SECRET_PARAM_VALUE2 
+	 * @param CLIENT_ID_PARAM_VALUE 
 	 * @param clientId
 	 * @param secretId
 	 * @return
 	 */
-	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode);
+	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE);
 	/**
 	 * Retrieves user profile from Moves
 	 * @param movesToken

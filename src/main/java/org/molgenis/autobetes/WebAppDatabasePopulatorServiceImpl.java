@@ -66,10 +66,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		
 		anonymousHomeAuthority = new UserAuthority();
 		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
-		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + AnonymousController.ID.toUpperCase());
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + MovesController.ID.toUpperCase());
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-		//populate with standard activity events 
 		
+		//populate with standard activity events 
 		populateDBWithStandardEvents(molgenisSecurityWebAppDatabasePopulatorService.getUserAdmin(), dataService);
 		
 	}
