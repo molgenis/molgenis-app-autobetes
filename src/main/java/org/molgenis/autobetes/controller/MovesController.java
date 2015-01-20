@@ -24,7 +24,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,9 @@
 package org.molgenis.autobetes;
 
+import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.OmxConfig;
-import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{ OmxConfig.class, DataExplorerConfig.class })
+{ WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired

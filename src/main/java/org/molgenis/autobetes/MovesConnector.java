@@ -7,7 +7,7 @@ import org.molgenis.autobetes.autobetes.MovesToken;
 import org.molgenis.autobetes.autobetes.MovesUserProfile;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUser;
 
 public interface MovesConnector
 {

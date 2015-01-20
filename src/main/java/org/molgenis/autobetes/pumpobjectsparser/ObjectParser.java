@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUser;
 
 public class ObjectParser
 {

@@ -32,7 +32,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.jpa.standalone.JpaStandaloneDataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Value;
 

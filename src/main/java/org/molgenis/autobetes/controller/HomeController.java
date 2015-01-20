@@ -41,8 +41,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.converters.ValueConverterException;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -353,7 +352,7 @@ public class HomeController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.POST, value = "/validate")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String validate(HttpServletRequest request, @RequestParam("csvFile") MultipartFile csvFile, Model model)
-			throws IOException, ValueConverterException, MessagingException, Exception
+			throws IOException, MessagingException, Exception
 	{
 		System.err.println("in validate...");
 		boolean submitState = false;
