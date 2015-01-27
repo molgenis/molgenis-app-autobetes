@@ -4,7 +4,7 @@ import org.molgenis.autobetes.autobetes.ChangeCarbRatio;
 import org.molgenis.autobetes.autobetes.ChangeCarbRatioGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUser;
 
 public class ChangeCarbRatioParser extends ObjectParser
 {

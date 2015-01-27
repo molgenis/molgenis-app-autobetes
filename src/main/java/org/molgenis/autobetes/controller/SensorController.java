@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.data.DataService;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.converters.ValueConverterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,7 +67,7 @@ public class SensorController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.POST, value = "/validate")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String validate(HttpServletRequest request, @RequestParam("csvFile") MultipartFile csvFile, Model model)
-			throws IOException, ValueConverterException, MessagingException, Exception
+			throws IOException, MessagingException, Exception
 	{
 		System.err.println("in validate...");
 		boolean submitState = false;

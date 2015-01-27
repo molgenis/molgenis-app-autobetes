@@ -24,7 +24,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,9 +88,12 @@ public class MovesController extends MolgenisPluginController
 		try{
 			
 			MolgenisUser user = getUserFromToken(token);
+			System.out.println(CLIENT_ID_PARAM_VALUE+"||||||||" +CLIENT_SECRET_PARAM_VALUE);
 			MovesConnector movesConnector = new MovesConnectorImpl();
 			//get moves token 
-			MovesToken movesToken = movesConnector.exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode);
+			System.out.println(token+"  "+authorizationcode);
+
+			MovesToken movesToken = movesConnector.exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
 			//check if there allready is a token for the user. If so, overwrite.
 			MovesToken entityFromDB = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
 			Entity userProfile;
@@ -120,7 +123,7 @@ public class MovesController extends MolgenisPluginController
 				}
 			}
 			
-			movesConnector.manageActivities(dataService, user);
+			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
 			
 			model.addAttribute("message", "Congratulations, you are now connected to moves.");
 			return "view-moves";

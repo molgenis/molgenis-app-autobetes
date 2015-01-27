@@ -3,7 +3,7 @@ package org.molgenis.autobetes.pumpobjectsparser;
 import org.molgenis.autobetes.autobetes.BgSensor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUser;
 
 public class BgSensorParser extends ObjectParser
 {

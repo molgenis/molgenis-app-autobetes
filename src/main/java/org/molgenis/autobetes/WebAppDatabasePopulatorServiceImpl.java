@@ -8,8 +8,8 @@ import org.molgenis.autobetes.controller.MovesController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.UserAuthority;
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
@@ -44,22 +44,32 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	public void populateDatabase()
 	{
 		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(dataService, HomeController.ID);
-		//make anonymous user in order to access AnonymousController without being admin
+		//make anonymous user in order to read and write from AnonymousController without being admin
 		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
 		UserAuthority anonymousHomeAuthority = new UserAuthority();
 		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
 		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + AnonymousController.ID.toUpperCase());
+		//anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + AnonymousController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		
+		anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + AnonymousController.ID.toUpperCase());
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 		
 		//same goes for movescontroller
-		anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
+		//anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
 		anonymousHomeAuthority = new UserAuthority();
 		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
 		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + MovesController.ID.toUpperCase());
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-		//populate with standard activity events 
 		
+		anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + MovesController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+		
+		//populate with standard activity events 
 		populateDBWithStandardEvents(molgenisSecurityWebAppDatabasePopulatorService.getUserAdmin(), dataService);
 		
 	}
