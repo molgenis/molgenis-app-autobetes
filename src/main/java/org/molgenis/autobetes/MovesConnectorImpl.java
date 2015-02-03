@@ -38,7 +38,7 @@ public class MovesConnectorImpl implements MovesConnector
 	public static final String ID = "moves";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String BASE_URI = "";
-	private static final String REDIRECT_URL = "http://autobetes.nl";
+	private static final String REDIRECT_URL = "http:%3A//195.169.22.237";
 
 	public static final String MOVES_BASE_URL = "https://api.moves-app.com/";
 	public static final String MOVES_API_BASE_URL =  "api/1.1/";
