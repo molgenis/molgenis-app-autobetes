@@ -15,12 +15,15 @@ import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.molgenis.autobetes.autobetes.MovesActivity;
 import org.molgenis.autobetes.autobetes.MovesToken;
 import org.molgenis.autobetes.autobetes.MovesUserProfile;
+import org.molgenis.autobetes.controller.AnonymousController;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
@@ -35,11 +38,9 @@ import org.springframework.data.domain.Sort.Direction;
 
 public class MovesConnectorImpl implements MovesConnector
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MovesConnectorImpl.class);
 	public static final String ID = "moves";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public static final String BASE_URI = "";
-	private static final String REDIRECT_URL = "http://autobetes.nl";
-
 	public static final String MOVES_BASE_URL = "https://api.moves-app.com/";
 	public static final String MOVES_API_BASE_URL =  "api/1.1/";
 	public static final String MOVES_GET_ACTIVITIES_URL = "user/activities/daily";
@@ -52,6 +53,7 @@ public class MovesConnectorImpl implements MovesConnector
 	public static final String CLIENT_ID_PARAM = "client_id";
 	public static final String CLIENT_SECRET_PARAM = "client_secret";
 	public static final String REDIRECT_URI_PARAM = "redirect_uri";
+	public static final String TOKEN_PARAM = "%3Ftoken%3D";
 	public static final String TOKEN = "token";
 	public static final String TOKEN_INFO ="tokeninfo";
 	public static final String REFRESH_TOKEN = "refresh_token";
@@ -108,7 +110,7 @@ public class MovesConnectorImpl implements MovesConnector
 			}
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return false;
 		}
 		
@@ -128,7 +130,7 @@ public class MovesConnectorImpl implements MovesConnector
 			}
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return false;
 		}
 
@@ -137,7 +139,6 @@ public class MovesConnectorImpl implements MovesConnector
 	public MovesToken refreshToken(String refreshToken, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
 
 		String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+REFRESH_TOKEN+"&"+REFRESH_TOKEN+"="+refreshToken+"&"+CLIENT_ID_PARAM+"="+CLIENT_ID_PARAM_VALUE+"&"+CLIENT_SECRET_PARAM+"="+CLIENT_SECRET_PARAM_VALUE;
-		System.out.println("the url:"+ url);
 		String content = "{}";
 		HttpsURLConnection connection = doPostRequest(url, content);
 		//read response
@@ -146,9 +147,9 @@ public class MovesConnectorImpl implements MovesConnector
 		return movesToken;
 	}
 
-	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
+	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String client_id_param_value, String client_secret_param_value, String moves_redirect_url){
 		try{
-			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+CLIENT_ID_PARAM_VALUE+"&"+CLIENT_SECRET_PARAM+"="+CLIENT_SECRET_PARAM_VALUE+"&"+REDIRECT_URI_PARAM+"="+REDIRECT_URL+"?"+TOKEN+"="+token;
+			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+client_id_param_value+"&"+CLIENT_SECRET_PARAM+"="+client_secret_param_value+"&"+REDIRECT_URI_PARAM+"="+moves_redirect_url+TOKEN_PARAM+token;
 			//String url = "https://api.moves-app.com/api/1.1/user/activities/daily?from=20141119&to=20141128&access_token=_MJnP57s9Bto6h9qNFyubozuI24y3UI3fZ2q755uVDx1nf8xyV77255YHUEXd9o2";
 			String content = "{}";
 			HttpsURLConnection connection = doPostRequest(url, content);
@@ -161,7 +162,7 @@ public class MovesConnectorImpl implements MovesConnector
 
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 	}
@@ -189,7 +190,7 @@ public class MovesConnectorImpl implements MovesConnector
 			return activities;
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 
@@ -284,9 +285,8 @@ public class MovesConnectorImpl implements MovesConnector
 								}
 							}
 							catch(Exception e){
-								System.out.println(e.toString());
-								System.out.println(activity.toString());
-								System.out.println(key.getName());
+								LOG.error(e.toString());
+								
 							}
 							}
 							/*
@@ -308,7 +308,7 @@ public class MovesConnectorImpl implements MovesConnector
 			return entities;
 		}
 		catch(JSONException e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 	}
@@ -334,7 +334,7 @@ public class MovesConnectorImpl implements MovesConnector
 			return entity;
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 	}
@@ -351,7 +351,7 @@ public class MovesConnectorImpl implements MovesConnector
 			return movesToken;
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 	}
@@ -363,7 +363,7 @@ public class MovesConnectorImpl implements MovesConnector
 			return jObject;
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 
@@ -376,7 +376,7 @@ public class MovesConnectorImpl implements MovesConnector
 			return jArray;
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 	}
@@ -395,7 +395,7 @@ public class MovesConnectorImpl implements MovesConnector
 			return response.toString();
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 	}
@@ -418,7 +418,7 @@ public class MovesConnectorImpl implements MovesConnector
 
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 	}
@@ -451,7 +451,7 @@ public class MovesConnectorImpl implements MovesConnector
 			}
 		}
 		catch(Exception e){
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return null;
 		}
 

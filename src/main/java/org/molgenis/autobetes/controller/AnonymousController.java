@@ -34,6 +34,8 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONValue;
@@ -63,6 +65,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisGroupMember;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.script.SavedScriptRunner;
@@ -70,6 +74,7 @@ import org.molgenis.script.ScriptResult;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.usermanager.UserManagerService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.MolgenisDateFormat;
@@ -97,6 +102,7 @@ import com.google.common.collect.Lists;
 @RequestMapping(URI)
 public class AnonymousController extends MolgenisPluginController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(AnonymousController.class);
 	public static final String ID = "anonymous";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String BASE_URI = "";
@@ -106,10 +112,10 @@ public class AnonymousController extends MolgenisPluginController
 	public static final String FOOD = "Food";
 	public static final int MAXLENGTHSTRING = 254;
 	public static final String ADMIN = "admin";
+	public static final String ALLUSERS = "All Users";
 
 	//@Autowired
 	private DataService dataService;
-
 	private JavaMailSender mailSender;
 
 	@Autowired
@@ -163,13 +169,16 @@ public class AnonymousController extends MolgenisPluginController
 	public Map<String, Object> registerUser(@RequestBody RegistrationRequest registrationRequest,
 			HttpServletRequest servletRequest)
 			{
+		
+		MolgenisGroup mg = dataService.findOne(MolgenisGroup.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroup.NAME, ALLUSERS), MolgenisGroup.class);
 		// validate email + pw
 		if (StringUtils.isBlank(registrationRequest.getEmail())
 				|| StringUtils.isBlank(registrationRequest.getPassword()))
 		{
 			return response(false, "Registration failed. Please provide a valid email and password!");
 		}
-
+		
 		MolgenisUser existingUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.EMAIL, registrationRequest.getEmail()), MolgenisUser.class);
 
@@ -185,38 +194,21 @@ public class AnonymousController extends MolgenisPluginController
 		String activationCode = UUID.randomUUID().toString();
 		mu.setActivationCode(activationCode);
 		mu.setActive(false);
+		
 		try
 		{
+			//add user
 			dataService.add(MolgenisUser.ENTITY_NAME, mu);
-
-			UserAuthority anonymousHomeAuthority = new UserAuthority();
-			anonymousHomeAuthority.setMolgenisUser(mu);
-			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
-					+ AnonymousController.ID.toUpperCase());
-			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-
-			anonymousHomeAuthority = new UserAuthority();
-			anonymousHomeAuthority.setMolgenisUser(mu);
-			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
-					+ HomeController.ID.toUpperCase());
-			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-
-			anonymousHomeAuthority = new UserAuthority();
-			anonymousHomeAuthority.setMolgenisUser(mu);
-			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX
-					+ AnonymousController.ID.toUpperCase());
-			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-
-			anonymousHomeAuthority = new UserAuthority();
-			anonymousHomeAuthority.setMolgenisUser(mu);
-			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX
-					+ HomeController.ID.toUpperCase());
-			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+			//add user to 'All Users' group
+			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
+			molgenisGroupMember.setMolgenisGroup(mg);
+			molgenisGroupMember.setMolgenisUser(mu);
+			dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
 
 		}
 		catch (Exception e)
 		{
-			System.out.println("errore: " + e);
+			LOG.error("error: " + e.toString());
 			return response(false, "Registration failed. Please contact the developers.");
 		}
 
@@ -251,7 +243,7 @@ public class AnonymousController extends MolgenisPluginController
 
 			dataService.delete(MolgenisUser.ENTITY_NAME, typedId);
 
-			System.err.println(">> ERRROR >> " + e);
+			LOG.error("error: " + e.toString());
 			return response(false,
 					"Registration failed. Sending email with activation link failed. Please contact the developers if "
 							+ registrationRequest.getEmail() + " is really your email address.");
@@ -347,7 +339,7 @@ public class AnonymousController extends MolgenisPluginController
 		}
 		catch (IOException e)
 		{
-			System.err.println(">> ERROR in sensorJson upload or with saving file in file store");
+			LOG.error("error: " + e.toString());
 			e.printStackTrace();
 			return null;
 		}
@@ -386,7 +378,7 @@ public class AnonymousController extends MolgenisPluginController
 		}
 		catch (IOException e)
 		{
-			System.err.println(">> merging two binary pages went wrong");
+			LOG.error("error: " + e.toString());
 			e.printStackTrace();
 			return null;
 		}
@@ -713,7 +705,7 @@ public class AnonymousController extends MolgenisPluginController
 		catch (Exception e)
 		{
 			writeExceptionToDB(user, entityMap.get(index).toString(), e.toString());
-			System.out.println(e);
+			LOG.error("error: " + e.toString());
 			iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent,
 					metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
 		}
@@ -749,9 +741,7 @@ public class AnonymousController extends MolgenisPluginController
 			catch (Exception e)
 			{
 				writeExceptionToDB(user, entity.toString(), e.toString());
-				System.out.println("exception is:" + e.toString());
-				System.out.println("entity is: " + entity.toString());
-				System.out.println("user is" + user.toString());
+				LOG.error("error: " + e.toString());
 			}
 		}
 		else if(isAdminId(storedEntity.getIdValue().toString())){
@@ -851,9 +841,9 @@ public class AnonymousController extends MolgenisPluginController
 						}
 						catch (Exception e)
 						{
-							System.out.println("Failed to convert parameter value: " + paramValue + " to dataType: "
+							LOG.error("Failed to convert parameter value: " + paramValue + " to dataType: "
 									+ dataType.toString());
-							System.out.println(e);
+							LOG.error(e.toString());
 						}
 					}
 					entity.set(attr.getName(), value);
@@ -862,9 +852,10 @@ public class AnonymousController extends MolgenisPluginController
 				{
 					writeExceptionToDB(user, mapEntity.toString(), e.toString());
 					entity.set(attr.getName(), null);
-					System.out.println("Could not convert parameter to entityValue: parameter=" + attr.getName() + ", map="
+					
+					LOG.error("Could not convert parameter to entityValue: parameter=" + attr.getName() + ", map="
 							+ mapEntity.toString());
-					System.out.println(e);
+					LOG.error(e.toString());
 
 				}
 			}
@@ -1127,7 +1118,6 @@ public class AnonymousController extends MolgenisPluginController
 			entityMap.put(ServerExceptionLog.ENTITY, entityAsString);
 			entityMap.put(ServerExceptionLog.EXCEPTION, exceptionAsString);
 			Entity entity = toEntity(meta, entityMap, user);
-			System.out.println("entity is:" + entity);
 			// write to db
 			dataService.add(meta.getName(), entity);
 
