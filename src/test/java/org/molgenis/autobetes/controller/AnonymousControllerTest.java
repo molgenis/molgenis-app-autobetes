@@ -71,9 +71,6 @@ public class AnonymousControllerTest extends AbstractTestNGSpringContextTests{
 	private DataService dataService;
 	@Autowired
 	private JavaMailSender mailSender;
-	@Autowired 
-	private UserManagerService userManagement;
-	
 	
 	private AnonymousController anonymousController;
 	
@@ -95,7 +92,7 @@ public class AnonymousControllerTest extends AbstractTestNGSpringContextTests{
 	@BeforeMethod
 	public void setUp()
 	{
-		anonymousController = new AnonymousController(dataService, mailSender, userManagement);
+		anonymousController = new AnonymousController(dataService, mailSender);
 		//dataService 
 		//anonymousController =  mock(AnonymousController.class);
 		servletRequest = mock(HttpServletRequest.class);

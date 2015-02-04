@@ -114,7 +114,6 @@ public class AnonymousController extends MolgenisPluginController
 	//@Autowired
 	private DataService dataService;
 	
-	private UserManagerService userManagement;
 
 	private JavaMailSender mailSender;
 
@@ -126,13 +125,12 @@ public class AnonymousController extends MolgenisPluginController
 
 
 	@Autowired
-	public AnonymousController(DataService dataService, JavaMailSender mailSender, UserManagerService userManagement)
+	public AnonymousController(DataService dataService, JavaMailSender mailSender)
 	{
 		super(URI);
 		if (dataService == null) throw new IllegalArgumentException("DataService is null!");
 		if (mailSender == null) throw new IllegalArgumentException("JavaMailSender is null!");
 		this.dataService = dataService;
-		this.userManagement = userManagement;
 		this.mailSender = mailSender;
 
 	}

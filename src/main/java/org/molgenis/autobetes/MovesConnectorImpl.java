@@ -37,9 +37,7 @@ public class MovesConnectorImpl implements MovesConnector
 {
 	public static final String ID = "moves";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public static final String BASE_URI = "";
-	private static final String REDIRECT_URL = "http:%3A//195.169.22.237";
-
+	private static final String REDIRECT_URL = "http:%3A//195.169.22.237%3Ftoken%3D";
 	public static final String MOVES_BASE_URL = "https://api.moves-app.com/";
 	public static final String MOVES_API_BASE_URL =  "api/1.1/";
 	public static final String MOVES_GET_ACTIVITIES_URL = "user/activities/daily";
@@ -148,7 +146,7 @@ public class MovesConnectorImpl implements MovesConnector
 
 	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
 		try{
-			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+CLIENT_ID_PARAM_VALUE+"&"+CLIENT_SECRET_PARAM+"="+CLIENT_SECRET_PARAM_VALUE+"&"+REDIRECT_URI_PARAM+"="+REDIRECT_URL+"?"+TOKEN+"="+token;
+			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+CLIENT_ID_PARAM_VALUE+"&"+CLIENT_SECRET_PARAM+"="+CLIENT_SECRET_PARAM_VALUE+"&"+REDIRECT_URI_PARAM+"="+REDIRECT_URL+token;
 			//String url = "https://api.moves-app.com/api/1.1/user/activities/daily?from=20141119&to=20141128&access_token=_MJnP57s9Bto6h9qNFyubozuI24y3UI3fZ2q755uVDx1nf8xyV77255YHUEXd9o2";
 			String content = "{}";
 			HttpsURLConnection connection = doPostRequest(url, content);
