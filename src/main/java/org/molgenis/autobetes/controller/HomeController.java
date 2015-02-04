@@ -14,6 +14,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
@@ -66,9 +69,7 @@ public class HomeController extends MolgenisPluginController
 	public static final String ID = "home";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String BASE_URI = "";
-	
-
-	
+	private static final Logger LOG = LoggerFactory.getLogger(AnonymousController.class);
 	// private static int BASALTIMESTEP = 3 * 60 * 1000; // 3 min
 	private static String HEADER = "HEADER";
 	private static String BODY = "BODY";
@@ -142,7 +143,8 @@ public class HomeController extends MolgenisPluginController
 		catch (Exception e)
 		{
 			model.addAttribute("message", "Error uploading CSV!" + e);
-			System.err.println(">> Error uploading CSV!" + e);
+			
+			LOG.error(">> Error uploading CSV!"+e.toString());
 		}
 		
 		return "view-home";
@@ -181,7 +183,7 @@ public class HomeController extends MolgenisPluginController
 		}
 		catch (IOException e)
 		{
-			System.err.println(">> ERROR >> when (1) reading input (2) splitting in header/body (3) and save body");
+			LOG.error(">> ERROR >> when (1) reading input (2) splitting in header/body (3) and save body. error: "+e.toString());
 			e.printStackTrace();
 		}
 
@@ -374,7 +376,7 @@ public class HomeController extends MolgenisPluginController
 			}
 			catch (Exception e)
 			{
-				System.err.println("FOUT!");
+				LOG.error(e.toString());
 			}
 		}
 		else

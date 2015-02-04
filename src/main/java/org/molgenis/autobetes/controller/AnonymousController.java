@@ -34,6 +34,8 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONValue;
@@ -100,6 +102,7 @@ import com.google.common.collect.Lists;
 @RequestMapping(URI)
 public class AnonymousController extends MolgenisPluginController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(AnonymousController.class);
 	public static final String ID = "anonymous";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String BASE_URI = "";
@@ -207,7 +210,7 @@ public class AnonymousController extends MolgenisPluginController
 		}
 		catch (Exception e)
 		{
-			System.out.println("error: " + e);
+			LOG.error("error: " + e.toString());
 			return response(false, "Registration failed. Please contact the developers.");
 		}
 
@@ -242,7 +245,7 @@ public class AnonymousController extends MolgenisPluginController
 
 			dataService.delete(MolgenisUser.ENTITY_NAME, typedId);
 
-			System.err.println(">> ERRROR >> " + e);
+			LOG.error("error: " + e.toString());
 			return response(false,
 					"Registration failed. Sending email with activation link failed. Please contact the developers if "
 							+ registrationRequest.getEmail() + " is really your email address.");
@@ -338,7 +341,7 @@ public class AnonymousController extends MolgenisPluginController
 		}
 		catch (IOException e)
 		{
-			System.err.println(">> ERROR in sensorJson upload or with saving file in file store");
+			LOG.error("error: " + e.toString());
 			e.printStackTrace();
 			return null;
 		}
@@ -377,7 +380,7 @@ public class AnonymousController extends MolgenisPluginController
 		}
 		catch (IOException e)
 		{
-			System.err.println(">> merging two binary pages went wrong");
+			LOG.error("error: " + e.toString());
 			e.printStackTrace();
 			return null;
 		}
@@ -704,7 +707,7 @@ public class AnonymousController extends MolgenisPluginController
 		catch (Exception e)
 		{
 			writeExceptionToDB(user, entityMap.get(index).toString(), e.toString());
-			System.out.println(e);
+			LOG.error("error: " + e.toString());
 			iterateListRecursively(reftoevent, index + 1, timeStampLastSync, user, entityMap, metaFoodEvent,
 					metaActivityEvent, metaFoodEventInstance, metaActivityEventInstance);
 		}
@@ -740,9 +743,7 @@ public class AnonymousController extends MolgenisPluginController
 			catch (Exception e)
 			{
 				writeExceptionToDB(user, entity.toString(), e.toString());
-				System.out.println("exception is:" + e.toString());
-				System.out.println("entity is: " + entity.toString());
-				System.out.println("user is" + user.toString());
+				LOG.error("error: " + e.toString());
 			}
 		}
 		else if(isAdminId(storedEntity.getIdValue().toString())){
@@ -842,9 +843,9 @@ public class AnonymousController extends MolgenisPluginController
 						}
 						catch (Exception e)
 						{
-							System.out.println("Failed to convert parameter value: " + paramValue + " to dataType: "
+							LOG.error("Failed to convert parameter value: " + paramValue + " to dataType: "
 									+ dataType.toString());
-							System.out.println(e);
+							LOG.error(e.toString());
 						}
 					}
 					entity.set(attr.getName(), value);
@@ -853,9 +854,10 @@ public class AnonymousController extends MolgenisPluginController
 				{
 					writeExceptionToDB(user, mapEntity.toString(), e.toString());
 					entity.set(attr.getName(), null);
-					System.out.println("Could not convert parameter to entityValue: parameter=" + attr.getName() + ", map="
+					
+					LOG.error("Could not convert parameter to entityValue: parameter=" + attr.getName() + ", map="
 							+ mapEntity.toString());
-					System.out.println(e);
+					LOG.error(e.toString());
 
 				}
 			}
@@ -1118,7 +1120,6 @@ public class AnonymousController extends MolgenisPluginController
 			entityMap.put(ServerExceptionLog.ENTITY, entityAsString);
 			entityMap.put(ServerExceptionLog.EXCEPTION, exceptionAsString);
 			Entity entity = toEntity(meta, entityMap, user);
-			System.out.println("entity is:" + entity);
 			// write to db
 			dataService.add(meta.getName(), entity);
 

@@ -49,7 +49,7 @@ public interface MovesConnector
 	 * @param secretId
 	 * @return
 	 */
-	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE);
+	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String client_id_param_value, String client_secret_param_value, String moves_redirect_url);
 	/**
 	 * Retrieves user profile from Moves
 	 * @param movesToken

@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.codehaus.jettison.json.JSONObject;
 import org.elasticsearch.http.HttpStats;
 import org.molgenis.autobetes.MovesConnector;
@@ -54,7 +56,9 @@ public class MovesController extends MolgenisPluginController
 	private String CLIENT_ID_PARAM_VALUE;
 	@Value("${movesClientSecret}")
 	private String CLIENT_SECRET_PARAM_VALUE;
-	
+	@Value("${movesRedirect_URL}")
+	private String MOVES_REDIRECT_URL;
+	private static final Logger LOG = LoggerFactory.getLogger(AnonymousController.class);
 
 	// private static int BASALTIMESTEP = 3 * 60 * 1000; // 3 min
 	private static String HEADER = "HEADER";
@@ -93,7 +97,7 @@ public class MovesController extends MolgenisPluginController
 			//get moves token 
 			System.out.println(token+"  "+authorizationcode);
 
-			MovesToken movesToken = movesConnector.exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+			MovesToken movesToken = movesConnector.exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE, MOVES_REDIRECT_URL);
 			//check if there allready is a token for the user. If so, overwrite.
 			MovesToken entityFromDB = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
 			Entity userProfile;
@@ -131,7 +135,7 @@ public class MovesController extends MolgenisPluginController
 		catch(Exception e){
 			
 			model.addAttribute("message", "Oops something went wrong, please try again later.");
-			System.out.println(e.toString());
+			LOG.error(e.toString());
 			return "view-moves";
 		}
 		
