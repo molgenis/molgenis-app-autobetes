@@ -58,7 +58,7 @@ public class MovesController extends MolgenisPluginController
 	private String CLIENT_SECRET_PARAM_VALUE;
 	@Value("${movesRedirect_URL}")
 	private String MOVES_REDIRECT_URL;
-	private static final Logger LOG = LoggerFactory.getLogger(AnonymousController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MovesController.class);
 
 	// private static int BASALTIMESTEP = 3 * 60 * 1000; // 3 min
 	private static String HEADER = "HEADER";

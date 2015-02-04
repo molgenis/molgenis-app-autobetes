@@ -116,8 +116,6 @@ public class AnonymousController extends MolgenisPluginController
 
 	//@Autowired
 	private DataService dataService;
-	
-
 	private JavaMailSender mailSender;
 
 	@Autowired

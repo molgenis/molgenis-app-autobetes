@@ -69,7 +69,7 @@ public class HomeController extends MolgenisPluginController
 	public static final String ID = "home";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String BASE_URI = "";
-	private static final Logger LOG = LoggerFactory.getLogger(AnonymousController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HomeController.class);
 	// private static int BASALTIMESTEP = 3 * 60 * 1000; // 3 min
 	private static String HEADER = "HEADER";
 	private static String BODY = "BODY";

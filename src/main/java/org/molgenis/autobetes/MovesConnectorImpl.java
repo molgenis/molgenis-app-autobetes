@@ -38,7 +38,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 public class MovesConnectorImpl implements MovesConnector
 {
-	private static final Logger LOG = LoggerFactory.getLogger(AnonymousController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MovesConnectorImpl.class);
 	public static final String ID = "moves";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String MOVES_BASE_URL = "https://api.moves-app.com/";
