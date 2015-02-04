@@ -31,6 +31,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.token.MolgenisToken;
+import org.molgenis.security.usermanager.UserManagerService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -70,6 +71,9 @@ public class AnonymousControllerTest extends AbstractTestNGSpringContextTests{
 	private DataService dataService;
 	@Autowired
 	private JavaMailSender mailSender;
+	@Autowired 
+	private UserManagerService userManagement;
+	
 	
 	private AnonymousController anonymousController;
 	
@@ -91,7 +95,7 @@ public class AnonymousControllerTest extends AbstractTestNGSpringContextTests{
 	@BeforeMethod
 	public void setUp()
 	{
-		anonymousController = new AnonymousController(dataService, mailSender);
+		anonymousController = new AnonymousController(dataService, mailSender, userManagement);
 		//dataService 
 		//anonymousController =  mock(AnonymousController.class);
 		servletRequest = mock(HttpServletRequest.class);

@@ -63,6 +63,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisGroupMember;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.script.SavedScriptRunner;
@@ -70,6 +72,7 @@ import org.molgenis.script.ScriptResult;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.usermanager.UserManagerService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.MolgenisDateFormat;
@@ -106,9 +109,12 @@ public class AnonymousController extends MolgenisPluginController
 	public static final String FOOD = "Food";
 	public static final int MAXLENGTHSTRING = 254;
 	public static final String ADMIN = "admin";
+	public static final String ALLUSERS = "All Users";
 
 	//@Autowired
 	private DataService dataService;
+	
+	private UserManagerService userManagement;
 
 	private JavaMailSender mailSender;
 
@@ -120,12 +126,13 @@ public class AnonymousController extends MolgenisPluginController
 
 
 	@Autowired
-	public AnonymousController(DataService dataService, JavaMailSender mailSender)
+	public AnonymousController(DataService dataService, JavaMailSender mailSender, UserManagerService userManagement)
 	{
 		super(URI);
 		if (dataService == null) throw new IllegalArgumentException("DataService is null!");
 		if (mailSender == null) throw new IllegalArgumentException("JavaMailSender is null!");
 		this.dataService = dataService;
+		this.userManagement = userManagement;
 		this.mailSender = mailSender;
 
 	}
@@ -163,13 +170,16 @@ public class AnonymousController extends MolgenisPluginController
 	public Map<String, Object> registerUser(@RequestBody RegistrationRequest registrationRequest,
 			HttpServletRequest servletRequest)
 			{
+		
+		MolgenisGroup mg = dataService.findOne(MolgenisGroup.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroup.NAME, ALLUSERS), MolgenisGroup.class);
 		// validate email + pw
 		if (StringUtils.isBlank(registrationRequest.getEmail())
 				|| StringUtils.isBlank(registrationRequest.getPassword()))
 		{
 			return response(false, "Registration failed. Please provide a valid email and password!");
 		}
-
+		
 		MolgenisUser existingUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.EMAIL, registrationRequest.getEmail()), MolgenisUser.class);
 
@@ -185,38 +195,21 @@ public class AnonymousController extends MolgenisPluginController
 		String activationCode = UUID.randomUUID().toString();
 		mu.setActivationCode(activationCode);
 		mu.setActive(false);
+		
 		try
 		{
+			//add user
 			dataService.add(MolgenisUser.ENTITY_NAME, mu);
-
-			UserAuthority anonymousHomeAuthority = new UserAuthority();
-			anonymousHomeAuthority.setMolgenisUser(mu);
-			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
-					+ AnonymousController.ID.toUpperCase());
-			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-
-			anonymousHomeAuthority = new UserAuthority();
-			anonymousHomeAuthority.setMolgenisUser(mu);
-			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
-					+ HomeController.ID.toUpperCase());
-			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-
-			anonymousHomeAuthority = new UserAuthority();
-			anonymousHomeAuthority.setMolgenisUser(mu);
-			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX
-					+ AnonymousController.ID.toUpperCase());
-			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
-
-			anonymousHomeAuthority = new UserAuthority();
-			anonymousHomeAuthority.setMolgenisUser(mu);
-			anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX
-					+ HomeController.ID.toUpperCase());
-			dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+			//add user to 'All Users' group
+			MolgenisGroupMember molgenisGroupMember = new MolgenisGroupMember();
+			molgenisGroupMember.setMolgenisGroup(mg);
+			molgenisGroupMember.setMolgenisUser(mu);
+			dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember);
 
 		}
 		catch (Exception e)
 		{
-			System.out.println("errore: " + e);
+			System.out.println("error: " + e);
 			return response(false, "Registration failed. Please contact the developers.");
 		}
 
