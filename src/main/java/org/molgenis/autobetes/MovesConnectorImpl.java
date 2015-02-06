@@ -90,14 +90,19 @@ public class MovesConnectorImpl implements MovesConnector
 				int to = getCurrentDate();
 				
 				//max 31 of days allowed and the requested range must be between user profiles first date and today
-				//check if from and to are in range of 31 days
+				//retrieve activities from moves per 29 days
+				
 				long fromInMillisec = convertDateformatToUnixTimestamp(from);
 				long toInMillisec = convertDateformatToUnixTimestamp(to);
 				
 				while(fromInMillisec+TWENTYNINEDAYSINMILLISEC < toInMillisec){
+					//get activities from fromInMillisec to fromInMillisec+29 days
 					getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(fromInMillisec+TWENTYNINEDAYSINMILLISEC));
+					//add 29 days to fromInMillisec
 					fromInMillisec += TWENTYNINEDAYSINMILLISEC;
 				}
+				//while loop is stopped, so fromInMillisec+29 days is now greater than current date.
+				//get activities from fromInMillisec to current date
 				getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(toInMillisec));
 				return true;
 			}
@@ -473,19 +478,30 @@ public class MovesConnectorImpl implements MovesConnector
 
 	}
 	
-	
+	/**
+	 * Gets current date in yyyyMMdd format
+	 * @return date in yyyyMMdd format
+	 */
 	private static int getCurrentDate(){
 		//get current date in yyyyMMdd format
 		Date date = new Date();
 		return Integer.parseInt(DATEFORMAT.format(date));
 	}
-	
+	/**
+	 * Converts unix timestamp to date in yyyyMMdd format
+	 * @param unixTimestamp
+	 * @return date in yyyyMMdd format
+	 */
 	private static int convertUnixTimestampToDateFormat(long unixTimestamp){
 		//get date in yyyyMMdd format
 		Date date = new Date(unixTimestamp);
 		return Integer.parseInt(DATEFORMAT.format(date));
 	}
-	
+	/**
+	 * Converts date in yyyyMMdd format to Unix timestamp
+	 * @param dateInFormat
+	 * @return unixTimestamp
+	 */
 	private static long convertDateformatToUnixTimestamp(int dateInFormat){
 		Date date =null;
 		try
