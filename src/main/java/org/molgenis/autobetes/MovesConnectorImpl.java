@@ -53,7 +53,7 @@ public class MovesConnectorImpl implements MovesConnector
 	public static final String CLIENT_ID_PARAM = "client_id";
 	public static final String CLIENT_SECRET_PARAM = "client_secret";
 	public static final String REDIRECT_URI_PARAM = "redirect_uri";
-	public static final String TOKEN_PARAM = "%3Ftoken%3D";
+	public static final String TOKEN_PARAM = "?token=";
 	public static final String TOKEN = "token";
 	public static final String TOKEN_INFO ="tokeninfo";
 	public static final String REFRESH_TOKEN = "refresh_token";
@@ -61,8 +61,8 @@ public class MovesConnectorImpl implements MovesConnector
 	public static final String TO = "to=";
 	private static final String USER_AGENT = "Mozilla/5.0";
 	
-
 	private static final long ONEDAYINMILLISEC = 86400000;
+	private static final long TWENTYNINEDAYSINMILLISEC = 2505600000L;
 	private static final String DATEFORMATSTRING = "yyyyMMdd";
 	private static final DateFormat DATEFORMAT = new SimpleDateFormat(DATEFORMATSTRING);
 	
@@ -88,20 +88,22 @@ public class MovesConnectorImpl implements MovesConnector
 				//get the from date 
 				int from = getFromDate(dataService, user, movesToken);
 				int to = getCurrentDate();
-				//get activities from Moves
-				List<MovesActivity> activities = getActivities(movesToken, from, to);
-				for(MovesActivity activity : activities){
-					//check if user has activity in db with the same start time, if so we asume that it are the same activity
-					MovesActivity dbCheck = dataService.findOne(MovesActivity.ENTITY_NAME,  new QueryImpl().eq(MovesActivity.OWNER, user).and().eq(MovesActivity.STARTTIME, activity.getStartTime()), MovesActivity.class);
-					if(dbCheck == null){
-						//no activity in db
-						dataService.add(MovesActivity.ENTITY_NAME, activity);
-					}
-					else{
-						activity.setId(dbCheck.getId());
-						dataService.update(MovesActivity.ENTITY_NAME, activity);
-					}
+				
+				//max 31 of days allowed and the requested range must be between user profiles first date and today
+				//retrieve activities from moves per 29 days
+				
+				long fromInMillisec = convertDateformatToUnixTimestamp(from);
+				long toInMillisec = convertDateformatToUnixTimestamp(to);
+				
+				while(fromInMillisec+TWENTYNINEDAYSINMILLISEC < toInMillisec){
+					//get activities from fromInMillisec to fromInMillisec+29 days
+					getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(fromInMillisec+TWENTYNINEDAYSINMILLISEC));
+					//add 29 days to fromInMillisec
+					fromInMillisec += TWENTYNINEDAYSINMILLISEC;
 				}
+				//while loop is stopped, so fromInMillisec+29 days is now greater than current date.
+				//get activities from fromInMillisec to current date
+				getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(toInMillisec));
 				return true;
 			}
 			else{
@@ -115,6 +117,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		
 	}
+	
 
 	public boolean accessTokenIsValid(String accessToken){
 		try{
@@ -151,6 +154,7 @@ public class MovesConnectorImpl implements MovesConnector
 		try{
 			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+client_id_param_value+"&"+CLIENT_SECRET_PARAM+"="+client_secret_param_value+"&"+REDIRECT_URI_PARAM+"="+moves_redirect_url+TOKEN_PARAM+token;
 			//String url = "https://api.moves-app.com/api/1.1/user/activities/daily?from=20141119&to=20141128&access_token=_MJnP57s9Bto6h9qNFyubozuI24y3UI3fZ2q755uVDx1nf8xyV77255YHUEXd9o2";
+			System.out.println(url);
 			String content = "{}";
 			HttpsURLConnection connection = doPostRequest(url, content);
 			//read response
@@ -196,16 +200,33 @@ public class MovesConnectorImpl implements MovesConnector
 
 	}
 	
+	private void getActivitiesAndAddToDB(MolgenisUser user, DataService dataService, MovesToken movesToken, int from, int to){
+		//get activities from Moves
+		List<MovesActivity> activities = getActivities(movesToken, from, to);
+		for(MovesActivity activity : activities){
+			//check if user has activity in db with the same start time, if so we asume that it are the same activity
+			MovesActivity dbCheck = dataService.findOne(MovesActivity.ENTITY_NAME,  new QueryImpl().eq(MovesActivity.OWNER, user).and().eq(MovesActivity.STARTTIME, activity.getStartTime()), MovesActivity.class);
+			if(dbCheck == null){
+				//no activity in db
+				dataService.add(MovesActivity.ENTITY_NAME, activity);
+			}
+			else{
+				activity.setId(dbCheck.getId());
+				dataService.update(MovesActivity.ENTITY_NAME, activity);
+			}
+		}
+	}
+	
 	private int getFromDate(DataService dataService, MolgenisUser user, MovesToken movesToken){
 		//get the last day that activities are stored in db
 		//sot.setSort(MovesActivity.STARTTIME);
 		
-		Iterable<MovesActivity> activities = dataService.findAll(MovesActivity.ENTITY_NAME, new QueryImpl().eq(MovesActivity.OWNER, user).and().sort(Direction.DESC, MovesActivity.STARTTIME), MovesActivity.class);
-		if(activities != null){
+		Iterator<MovesActivity> activities = dataService.findAll(MovesActivity.ENTITY_NAME, new QueryImpl().eq(MovesActivity.OWNER, user).and().sort(Direction.DESC, MovesActivity.STARTTIME), MovesActivity.class).iterator();
+		if(activities.hasNext()){
 			
 			
 			//get the first activity, because it is sorted on starttime descending, this will be the last day of recordings
-			MovesActivity activity = activities.iterator().next();
+			MovesActivity activity = activities.next();
 			Long startTime = activity.getStartTime();
 			//starttime minus one day as a security
 			startTime -= ONEDAYINMILLISEC;
@@ -216,7 +237,7 @@ public class MovesConnectorImpl implements MovesConnector
 			//no activities stored in db
 			//get the date that user started recording
 			//get profile
-			MovesUserProfile profile =  dataService.findOne(MovesUserProfile.ENTITY_NAME, new QueryImpl().eq(MovesActivity.OWNER, user), MovesUserProfile.class);
+			MovesUserProfile profile =  dataService.findOne(MovesUserProfile.ENTITY_NAME, new QueryImpl().eq(MovesUserProfile.MOVESTOKEN, movesToken), MovesUserProfile.class);
 			if(profile == null){
 				//no profile stored in db
 				//get profile from Moves
@@ -427,7 +448,7 @@ public class MovesConnectorImpl implements MovesConnector
 		try{
 			URL obj = new URL(url);
 			HttpsURLConnection connection = (HttpsURLConnection) obj.openConnection();
-
+			
 			//add reuqest header
 			connection.setDoOutput(true);
 			connection.setRequestMethod("POST");
@@ -457,10 +478,42 @@ public class MovesConnectorImpl implements MovesConnector
 
 	}
 	
+	/**
+	 * Gets current date in yyyyMMdd format
+	 * @return date in yyyyMMdd format
+	 */
 	private static int getCurrentDate(){
 		//get current date in yyyyMMdd format
 		Date date = new Date();
 		return Integer.parseInt(DATEFORMAT.format(date));
+	}
+	/**
+	 * Converts unix timestamp to date in yyyyMMdd format
+	 * @param unixTimestamp
+	 * @return date in yyyyMMdd format
+	 */
+	private static int convertUnixTimestampToDateFormat(long unixTimestamp){
+		//get date in yyyyMMdd format
+		Date date = new Date(unixTimestamp);
+		return Integer.parseInt(DATEFORMAT.format(date));
+	}
+	/**
+	 * Converts date in yyyyMMdd format to Unix timestamp
+	 * @param dateInFormat
+	 * @return unixTimestamp
+	 */
+	private static long convertDateformatToUnixTimestamp(int dateInFormat){
+		Date date =null;
+		try
+		{
+			date = DATEFORMAT.parse(Integer.toString(dateInFormat));
+		}
+		catch (ParseException e)
+		{
+			// TODO Auto-generated catch block
+			LOG.error(e.toString());
+		}
+		return date.getTime();
 	}
 
 
