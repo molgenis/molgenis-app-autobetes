@@ -2,33 +2,23 @@ package org.molgenis.autobetes.controller;
 
 import static org.molgenis.autobetes.controller.MovesController.URI;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.codehaus.jettison.json.JSONObject;
-import org.elasticsearch.http.HttpStats;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.autobetes.MovesConnector;
 import org.molgenis.autobetes.MovesConnectorImpl;
-import org.molgenis.autobetes.autobetes.Event;
-import org.molgenis.autobetes.autobetes.MovesActivity;
 import org.molgenis.autobetes.autobetes.MovesToken;
 import org.molgenis.autobetes.autobetes.MovesUserProfile;
 import org.molgenis.data.DataService;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.util.FileStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -37,10 +27,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import 	javax.net.ssl.HttpsURLConnection;
-
-import org.molgenis.data.Entity;
 
 /**
  * Controller that handles home page requests

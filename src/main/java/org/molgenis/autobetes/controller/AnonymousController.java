@@ -27,19 +27,19 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONValue;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisGroupMember;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.autobetes.WebAppDatabasePopulatorServiceImpl;
 import org.molgenis.autobetes.autobetes.ActivityEvent;
 import org.molgenis.autobetes.autobetes.ActivityEventInstance;
@@ -49,8 +49,8 @@ import org.molgenis.autobetes.autobetes.Event;
 import org.molgenis.autobetes.autobetes.EventInstance;
 import org.molgenis.autobetes.autobetes.FoodEvent;
 import org.molgenis.autobetes.autobetes.FoodEventInstance;
-import org.molgenis.autobetes.autobetes.TestEvent;
 import org.molgenis.autobetes.autobetes.ServerExceptionLog;
+import org.molgenis.autobetes.autobetes.TestEvent;
 import org.molgenis.autobetes.autobetes.UserInfo;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -63,25 +63,18 @@ import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisGroupMember;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.UserAuthority;
 import org.molgenis.script.SavedScriptRunner;
 import org.molgenis.script.ScriptResult;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
-import org.molgenis.security.usermanager.UserManagerService;
 import org.molgenis.util.FileStore;
-import org.molgenis.util.FileUploadUtils;
 import org.molgenis.util.MolgenisDateFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.instrument.classloading.tomcat.TomcatLoadTimeWeaver;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
@@ -107,10 +100,10 @@ public class AnonymousController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String BASE_URI = "";
 	public static final String TIME_STAMP_LAST_SYNC = "timeStampLastSync";
-	public static final String NOTINREQUESTCONTENT = "notInRequestContent";
+	public static final String NOT_IN_REQUEST_CONTENT = "notInRequestContent";
 	public static final String TRUE = "True";
 	public static final String FOOD = "Food";
-	public static final int MAXLENGTHSTRING = 254;
+	public static final int MAX_LENGTH_STRING = 254;
 	public static final String ADMIN = "admin";
 	public static final String ALLUSERS = "All Users";
 
@@ -147,8 +140,6 @@ public class AnonymousController extends MolgenisPluginController
 	@ResponseBody
 	public Map<String, Object> activateUser(@PathVariable String activationCode)
 	{
-		System.out.println(">> Activation code: " + activationCode);
-
 		MolgenisUser mu = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.ACTIVATIONCODE, activationCode), MolgenisUser.class);
 
@@ -233,7 +224,6 @@ public class AnonymousController extends MolgenisPluginController
 			mailMessage.setSubject("Registration Autobetes");
 			mailMessage.setText("To activate your account, please visit " + activationUri);
 			mailMessage.setFrom("info@diadvies.com");
-			// System.out.println(mailMessage.toString());
 			mailSender.send(mailMessage);
 		}
 		catch (Exception e)
@@ -582,7 +572,7 @@ public class AnonymousController extends MolgenisPluginController
 		MolgenisUser adminUser = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "admin"),MolgenisUser.class);
 
 		Iterable<Entity> dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
-				new QueryImpl().eq(Event.OWNER, adminUser).and().like(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMINIDPREPOSITION));
+				new QueryImpl().eq(Event.OWNER, adminUser).and().like(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMIN_ID_PREPOSITION));
 		EntityMetaData meta = dataService.getEntityMetaData(ActivityEvent.ENTITY_NAME);
 		appendEntitiesToResponseData(responseData, dbEntities, meta);
 	}
@@ -1097,13 +1087,13 @@ public class AnonymousController extends MolgenisPluginController
 	private void writeExceptionToDB(MolgenisUser user, String entityAsString, String exceptionAsString)
 	{
 		// make a substring of strings if the string is longer than possible
-		if (entityAsString.length() > MAXLENGTHSTRING)
+		if (entityAsString.length() > MAX_LENGTH_STRING)
 		{
-			entityAsString = entityAsString.substring(0, MAXLENGTHSTRING);
+			entityAsString = entityAsString.substring(0, MAX_LENGTH_STRING);
 		}
-		if (exceptionAsString.length() > MAXLENGTHSTRING)
+		if (exceptionAsString.length() > MAX_LENGTH_STRING)
 		{
-			exceptionAsString = exceptionAsString.substring(0, MAXLENGTHSTRING);
+			exceptionAsString = exceptionAsString.substring(0, MAX_LENGTH_STRING);
 		}
 		// first check if exception is allready in db
 		Entity dbEntity = dataService.findOne(ServerExceptionLog.ENTITY_NAME,

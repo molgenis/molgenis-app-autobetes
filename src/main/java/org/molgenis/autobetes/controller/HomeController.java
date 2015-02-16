@@ -138,7 +138,7 @@ public class HomeController extends MolgenisPluginController
 	        // Now also import activities from Moves-app!
 			MovesConnector movesConnector = new MovesConnectorImpl();
 			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-			model.addAttribute("message", "Import moves success??");
+			model.addAttribute("message", "Import success!");
 		}
 		catch (Exception e)
 		{
