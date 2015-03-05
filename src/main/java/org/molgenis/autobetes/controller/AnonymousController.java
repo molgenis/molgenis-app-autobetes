@@ -66,6 +66,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.script.SavedScriptRunner;
 import org.molgenis.script.ScriptResult;
+import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.util.FileStore;
@@ -138,6 +139,7 @@ public class AnonymousController extends MolgenisPluginController
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
 	@ResponseBody
+	@RunAsSystem
 	public Map<String, Object> activateUser(@PathVariable String activationCode)
 	{
 		MolgenisUser mu = dataService.findOne(MolgenisUser.ENTITY_NAME,
@@ -157,6 +159,7 @@ public class AnonymousController extends MolgenisPluginController
 
 	@RequestMapping(value = "/registerUser", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@RunAsSystem
 	public Map<String, Object> registerUser(@RequestBody RegistrationRequest registrationRequest,
 			HttpServletRequest servletRequest)
 			{
@@ -260,8 +263,6 @@ public class AnonymousController extends MolgenisPluginController
 	public Map<String, Object> setUserInfo(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
 			{
-		//System.out.println(entityMap.toString());
-		System.out.println(entityMap.toString());
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
 		EntityMetaData metaUserInfo = dataService.getEntityMetaData(UserInfo.ENTITY_NAME);
 		//get userinfolist
@@ -325,7 +326,6 @@ public class AnonymousController extends MolgenisPluginController
 		try
 		{
 			page2 = fileStore.store(file.getInputStream(), newFileName);
-			System.out.println(">> Imported " + newFileName);
 		}
 		catch (IOException e)
 		{
@@ -398,7 +398,6 @@ public class AnonymousController extends MolgenisPluginController
 		String json = scriptResult.getOutput();
 
 		// save json in db
-		System.out.println(">> Parse sensor values");
 		Object jsonObject = JSONValue.parse(json);
 
 		java.util.Date lastRecTimestamp = null;
@@ -484,13 +483,11 @@ public class AnonymousController extends MolgenisPluginController
 			fis.close();
 			fos.close();
 
-			System.out.println(">> saved 2 pages in " + binaryDataToBeAnalyzedFileName);
 		}
 		else
 		{
 			// only copy file
 			FileUtils.copyFile(page2, binaryDataToBeAnalyzedFile);
-			System.out.println(">> saved 1 pages in " + binaryDataToBeAnalyzedFileName);
 		}
 
 		return binaryDataToBeAnalyzedFileName;
@@ -524,7 +521,6 @@ public class AnonymousController extends MolgenisPluginController
 	public List<Map<String, Object>> sync(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
 			{
-		System.out.println(entityMap.toString());
 		// declare objects
 		TimestampLastUpdate timeStampLastSync = new TimestampLastUpdate(0);// timestamp of the last sync of client,
 		// send along in requestbody, if not it remains 0
@@ -741,7 +737,6 @@ public class AnonymousController extends MolgenisPluginController
 		}
 		else
 		{
-			System.out.println(">>"+storedEntity.toString());
 			// entity is in db
 			// check if entity from client is more recently modified than the one from db
 			if (storedEntity.getDouble(TestEvent.LASTCHANGED) < entity.getDouble(TestEvent.LASTCHANGED))

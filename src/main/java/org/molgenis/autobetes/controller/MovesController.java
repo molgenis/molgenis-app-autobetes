@@ -15,6 +15,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.util.FileStore;
 import org.slf4j.Logger;
@@ -68,21 +69,18 @@ public class MovesController extends MolgenisPluginController
 	@RequestMapping
 	public String init()
 	{
-		//System.out.println(SecurityUtils.)
 		return "view-home";
 	}
 
 	@RequestMapping(value = "/connect", method = RequestMethod.GET)
+	@RunAsSystem
 	public String connectToMoves(@RequestParam(value = "code") String authorizationcode, Model model,@RequestParam(value = "token") String token )
 	{	
 		try{
 			
 			MolgenisUser user = getUserFromToken(token);
-			System.out.println(CLIENT_ID_PARAM_VALUE+"||||||||" +CLIENT_SECRET_PARAM_VALUE);
 			MovesConnector movesConnector = new MovesConnectorImpl();
 			//get moves token 
-			System.out.println(token+"  "+authorizationcode);
-
 			MovesToken movesToken = movesConnector.exchangeAutorizationcodeForAccesstoken(user, token, authorizationcode, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE, MOVES_REDIRECT_URL);
 			//check if there allready is a token for the user. If so, overwrite.
 			MovesToken entityFromDB = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
