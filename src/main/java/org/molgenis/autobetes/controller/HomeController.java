@@ -138,7 +138,7 @@ public class HomeController extends MolgenisPluginController
 	        // Now also import activities from Moves-app!
 			MovesConnector movesConnector = new MovesConnectorImpl();
 			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-			model.addAttribute("message", "Import moves success??");
+			model.addAttribute("message", "Import success!");
 		}
 		catch (Exception e)
 		{
@@ -191,7 +191,6 @@ public class HomeController extends MolgenisPluginController
 		CsvRepository csvRepo = new CsvRepository(bodyFile, null, separator);
 
 		// Set stores which entities cannot be loaded so that we do not show duplicates
-		System.out.println("Entities that are not yet parsed into db:");
 		Set<String> rawTypeSet = new HashSet<String>();
 		for (Entity e : csvRepo)
 		{
@@ -270,7 +269,6 @@ public class HomeController extends MolgenisPluginController
 					break;
 			}
 		}
-		System.out.println(">> Done parsing!");
 		dataService.add(BgSensor.ENTITY_NAME, bgSensorList);
 		dataService.add(org.molgenis.autobetes.autobetes.BolusNormal.ENTITY_NAME, bolusNormalList);
 		dataService.add(org.molgenis.autobetes.autobetes.BolusSquare.ENTITY_NAME, bolusSquareList);
@@ -279,8 +277,6 @@ public class HomeController extends MolgenisPluginController
 		dataService.add(org.molgenis.autobetes.autobetes.BasalProfileStart.ENTITY_NAME, basalProfileStartList);
 		dataService.add(org.molgenis.autobetes.autobetes.ChangeSuspendEnable.ENTITY_NAME, changeSuspendEnableList);
 		// TODO SUSPEND
-		
-		System.out.println(">> Done importing in db!");
 		IOUtils.closeQuietly(csvRepo);
 	}
 

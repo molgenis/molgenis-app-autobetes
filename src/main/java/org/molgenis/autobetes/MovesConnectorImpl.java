@@ -15,25 +15,21 @@ import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.autobetes.autobetes.MovesActivity;
 import org.molgenis.autobetes.autobetes.MovesToken;
 import org.molgenis.autobetes.autobetes.MovesUserProfile;
-import org.molgenis.autobetes.controller.AnonymousController;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.auth.MolgenisUser;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Sort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
 
 public class MovesConnectorImpl implements MovesConnector
@@ -60,18 +56,18 @@ public class MovesConnectorImpl implements MovesConnector
 	public static final String FROM = "from=";
 	public static final String TO = "to=";
 	private static final String USER_AGENT = "Mozilla/5.0";
-	
-	private static final long ONEDAYINMILLISEC = 86400000;
-	private static final long TWENTYNINEDAYSINMILLISEC = 2505600000L;
-	private static final String DATEFORMATSTRING = "yyyyMMdd";
-	private static final DateFormat DATEFORMAT = new SimpleDateFormat(DATEFORMATSTRING);
-	
+
+	private static final long ONE_DAY_IN_MILLISEC = 86400000;
+	private static final long TWENTY_NINE_DAYS_IN_MILLISEC = 2505600000L;
+	private static final String DATE_FORMAT_STRING = "yyyyMMdd";
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
+
 	public boolean manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
 		try{
 			//get movestoken from db
-			
+
 			MovesToken movesToken = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
-			
+
 			if(movesToken != null){
 				boolean isValid = accessTokenIsValid(movesToken.getAccessToken());
 				if(isValid == false){
@@ -82,24 +78,24 @@ public class MovesConnectorImpl implements MovesConnector
 					newMovesToken.setId(movesToken.getId());
 					dataService.update(MovesToken.ENTITY_NAME, newMovesToken);
 					movesToken = newMovesToken;
-					
+
 				}
 				//we now have a valid token that enables us to retrieve activities
 				//get the from date 
 				int from = getFromDate(dataService, user, movesToken);
 				int to = getCurrentDate();
-				
+
 				//max 31 of days allowed and the requested range must be between user profiles first date and today
 				//retrieve activities from moves per 29 days
-				
+
 				long fromInMillisec = convertDateformatToUnixTimestamp(from);
 				long toInMillisec = convertDateformatToUnixTimestamp(to);
-				
-				while(fromInMillisec+TWENTYNINEDAYSINMILLISEC < toInMillisec){
+
+				while(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC < toInMillisec){
 					//get activities from fromInMillisec to fromInMillisec+29 days
-					getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(fromInMillisec+TWENTYNINEDAYSINMILLISEC));
+					getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC));
 					//add 29 days to fromInMillisec
-					fromInMillisec += TWENTYNINEDAYSINMILLISEC;
+					fromInMillisec += TWENTY_NINE_DAYS_IN_MILLISEC;
 				}
 				//while loop is stopped, so fromInMillisec+29 days is now greater than current date.
 				//get activities from fromInMillisec to current date
@@ -113,11 +109,11 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return false;
+			throw new RuntimeException(e);
 		}
-		
+
 	}
-	
+
 
 	public boolean accessTokenIsValid(String accessToken){
 		try{
@@ -134,7 +130,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return false;
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -154,7 +150,6 @@ public class MovesConnectorImpl implements MovesConnector
 		try{
 			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+client_id_param_value+"&"+CLIENT_SECRET_PARAM+"="+client_secret_param_value+"&"+REDIRECT_URI_PARAM+"="+moves_redirect_url+TOKEN_PARAM+token;
 			//String url = "https://api.moves-app.com/api/1.1/user/activities/daily?from=20141119&to=20141128&access_token=_MJnP57s9Bto6h9qNFyubozuI24y3UI3fZ2q755uVDx1nf8xyV77255YHUEXd9o2";
-			System.out.println(url);
 			String content = "{}";
 			HttpsURLConnection connection = doPostRequest(url, content);
 			//read response
@@ -167,7 +162,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -195,11 +190,11 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 
 	}
-	
+
 	private void getActivitiesAndAddToDB(MolgenisUser user, DataService dataService, MovesToken movesToken, int from, int to){
 		//get activities from Moves
 		List<MovesActivity> activities = getActivities(movesToken, from, to);
@@ -216,22 +211,20 @@ public class MovesConnectorImpl implements MovesConnector
 			}
 		}
 	}
-	
+
 	private int getFromDate(DataService dataService, MolgenisUser user, MovesToken movesToken){
 		//get the last day that activities are stored in db
 		//sot.setSort(MovesActivity.STARTTIME);
-		
+
 		Iterator<MovesActivity> activities = dataService.findAll(MovesActivity.ENTITY_NAME, new QueryImpl().eq(MovesActivity.OWNER, user).and().sort(Direction.DESC, MovesActivity.STARTTIME), MovesActivity.class).iterator();
 		if(activities.hasNext()){
-			
-			
 			//get the first activity, because it is sorted on starttime descending, this will be the last day of recordings
 			MovesActivity activity = activities.next();
 			Long startTime = activity.getStartTime();
 			//starttime minus one day as a security
-			startTime -= ONEDAYINMILLISEC;
+			startTime -= ONE_DAY_IN_MILLISEC;
 			Date date = new Date(startTime);
-			return Integer.parseInt(DATEFORMAT.format(date));
+			return Integer.parseInt(DATE_FORMAT.format(date));
 		}
 		else{
 			//no activities stored in db
@@ -246,9 +239,9 @@ public class MovesConnectorImpl implements MovesConnector
 				dataService.add(MovesUserProfile.ENTITY_NAME, profile);	
 			}
 			return profile.getFirstdate();
-			
+
 		}
-		
+
 	}
 
 	private List<MovesActivity> getActivitiesFromJson(JSONArray jArray, MovesToken movesToken)
@@ -275,48 +268,42 @@ public class MovesConnectorImpl implements MovesConnector
 							//iterate values per activity and add them to entity
 							for(AttributeMetaData key : metadata.getAtomicAttributes()){
 								try{
-								if(activity.has(key.getName())|| key.getName() == MovesActivity.GROUPNAME){
-									if(key.getName() == "startTime" || key.getName() == "endTime"){
-										//startTime and endTime need to be converted to unix timestamp
-										try
-										{
-											Date time = new SimpleDateFormat("yyyyMMdd'T'HHmmssX").parse(activity.getString(key.getName()));
-											entity.set(key.getName(), time.getTime());
+									if(activity.has(key.getName())|| key.getName() == MovesActivity.GROUPNAME){
+										if(key.getName() == "startTime" || key.getName() == "endTime"){
+											//startTime and endTime need to be converted to unix timestamp
+											try
+											{
+												Date time = new SimpleDateFormat("yyyyMMdd'T'HHmmssX").parse(activity.getString(key.getName()));
+												entity.set(key.getName(), time.getTime());
+											}
+											catch (ParseException e)
+											{
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+											}
 										}
-										catch (ParseException e)
-										{
-											// TODO Auto-generated catch block
-											e.printStackTrace();
+										else if(key.getName() == MovesActivity.GROUPNAME){
+											//group is a reserved JAVA and/or SQL word, therefore it is named groupName in datamodel
+											entity.set(MovesActivity.GROUPNAME, activity.get("group"));
 										}
-									}
-									else if(key.getName() == MovesActivity.GROUPNAME){
-										//group is a reserved JAVA and/or SQL word, therefore it is named groupName in datamodel
-										entity.set(MovesActivity.GROUPNAME, activity.get("group"));
-									}
-									else if(key.getName() == MovesActivity.ID){
-										//id need to be auto_generated, don't do nothing
-									}
-									else{
-										
-										Object value = DataConverter.convert(activity.get(key.getName()), key);
-										entity.set(key.getName(), value);
-										
-										
+										else if(key.getName() == MovesActivity.ID){
+											//id need to be auto_generated, don't do nothing
+										}
+										else{
+
+											Object value = DataConverter.convert(activity.get(key.getName()), key);
+											entity.set(key.getName(), value);
+
+
+										}
 									}
 								}
+								catch(Exception e){
+									LOG.error(e.toString());
+									throw new RuntimeException(e);
+
+								}
 							}
-							catch(Exception e){
-								LOG.error(e.toString());
-								
-							}
-							}
-							/*
-							catch(Exception e){
-								System.out.println(e.toString());
-								System.out.println(activity.toString());
-								System.out.println(key.getName());
-							}
-							*/
 							entity.set(MovesActivity.OWNER, movesToken.get(MovesToken.OWNER));
 							entities.add(entity);
 
@@ -330,7 +317,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(JSONException e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -338,8 +325,8 @@ public class MovesConnectorImpl implements MovesConnector
 		try{
 			//TODO there might be a better way to implement this. The problem with this json is the three structure, because the nodes are not all on the same level.
 			//Json is documented at https://dev.moves-app.com/docs/api_profile
-			
-			
+
+
 			MovesUserProfile entity = new MovesUserProfile();
 			//Object value = DataConverter.convert(activity.get(key.getName()), key);
 			entity.set(MovesUserProfile.MOVESTOKEN, movesToken);
@@ -356,7 +343,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -373,7 +360,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -385,7 +372,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -398,7 +385,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -417,7 +404,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -440,7 +427,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -448,7 +435,7 @@ public class MovesConnectorImpl implements MovesConnector
 		try{
 			URL obj = new URL(url);
 			HttpsURLConnection connection = (HttpsURLConnection) obj.openConnection();
-			
+
 			//add reuqest header
 			connection.setDoOutput(true);
 			connection.setRequestMethod("POST");
@@ -473,11 +460,11 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
-			return null;
+			throw new RuntimeException(e);
 		}
 
 	}
-	
+
 	/**
 	 * Gets current date in yyyyMMdd format
 	 * @return date in yyyyMMdd format
@@ -485,7 +472,7 @@ public class MovesConnectorImpl implements MovesConnector
 	private static int getCurrentDate(){
 		//get current date in yyyyMMdd format
 		Date date = new Date();
-		return Integer.parseInt(DATEFORMAT.format(date));
+		return Integer.parseInt(DATE_FORMAT.format(date));
 	}
 	/**
 	 * Converts unix timestamp to date in yyyyMMdd format
@@ -495,7 +482,7 @@ public class MovesConnectorImpl implements MovesConnector
 	private static int convertUnixTimestampToDateFormat(long unixTimestamp){
 		//get date in yyyyMMdd format
 		Date date = new Date(unixTimestamp);
-		return Integer.parseInt(DATEFORMAT.format(date));
+		return Integer.parseInt(DATE_FORMAT.format(date));
 	}
 	/**
 	 * Converts date in yyyyMMdd format to Unix timestamp
@@ -506,12 +493,12 @@ public class MovesConnectorImpl implements MovesConnector
 		Date date =null;
 		try
 		{
-			date = DATEFORMAT.parse(Integer.toString(dateInFormat));
+			date = DATE_FORMAT.parse(Integer.toString(dateInFormat));
 		}
 		catch (ParseException e)
 		{
-			// TODO Auto-generated catch block
 			LOG.error(e.toString());
+			throw new RuntimeException(e);
 		}
 		return date.getTime();
 	}

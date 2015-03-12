@@ -1,7 +1,6 @@
 package org.molgenis.autobetes;
 
 import org.molgenis.autobetes.autobetes.ActivityEvent;
-import org.molgenis.autobetes.autobetes.ActivityEventInstance;
 import org.molgenis.autobetes.controller.AnonymousController;
 import org.molgenis.autobetes.controller.HomeController;
 import org.molgenis.autobetes.controller.MovesController;
@@ -22,7 +21,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 {
 	private final DataService dataService;
 	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
-	public static String ADMINIDPREPOSITION = "adminsdf7897dfjgjfug8dfug89ur234sdf";
+	public static String ADMIN_ID_PREPOSITION = "adminsdf7897dfjgjfug8dfug89ur234sdf";
 	private static String ACTIVITY = "Activity";
 	
 	@Autowired
@@ -81,7 +80,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		ActivityEvent event =  new ActivityEvent();
 		event.setName("Ill");
 		event.setOwner(userAdmin);
-		event.setId(ADMINIDPREPOSITION+idappender);
+		event.setId(ADMIN_ID_PREPOSITION+idappender);
 		//event.setSpecial(true);
 		event.setEventType("activity");
 		event.setLastchanged(0l);
@@ -91,7 +90,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event =  new ActivityEvent();
 		event.setName("Stress");
 		event.setOwner(userAdmin);
-		event.setId(ADMINIDPREPOSITION+idappender);
+		event.setId(ADMIN_ID_PREPOSITION+idappender);
 		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
@@ -101,7 +100,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event =  new ActivityEvent();
 		event.setName("Do not track");
 		event.setOwner(userAdmin);
-		event.setId(ADMINIDPREPOSITION+idappender);
+		event.setId(ADMIN_ID_PREPOSITION+idappender);
 		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
@@ -111,7 +110,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event =  new ActivityEvent();
 		event.setName("Sensor inacurrate");
 		event.setOwner(userAdmin);
-		event.setId(ADMINIDPREPOSITION+idappender);
+		event.setId(ADMIN_ID_PREPOSITION+idappender);
 		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
@@ -121,7 +120,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event =  new ActivityEvent();
 		event.setName("Holiday");
 		event.setOwner(userAdmin);
-		event.setId(ADMINIDPREPOSITION+idappender);
+		event.setId(ADMIN_ID_PREPOSITION+idappender);
 		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
@@ -131,7 +130,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event =  new ActivityEvent();
 		event.setName("Party");
 		event.setOwner(userAdmin);
-		event.setId(ADMINIDPREPOSITION+idappender);
+		event.setId(ADMIN_ID_PREPOSITION+idappender);
 		//event.setSpecial(true);
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
