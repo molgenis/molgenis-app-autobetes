@@ -3,8 +3,10 @@
 
 <@header/>
 
-<#if message?has_content><h1>${message}</h1></#if>
+<div class="jumbotron">
+	<h1>Registration failed.</h1>
+	<p>Please try again later.</p>
+</div>
 
-<h1>Registration failed, please try again later</h1>
 
 <@footer/>

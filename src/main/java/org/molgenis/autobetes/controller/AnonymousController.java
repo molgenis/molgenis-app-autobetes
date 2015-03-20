@@ -79,6 +79,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -138,9 +139,8 @@ public class AnonymousController extends MolgenisPluginController
 
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
-	@ResponseBody
 	@RunAsSystem
-	public String activateUser(@PathVariable String activationCode)
+	public String activateUser(@PathVariable String activationCode, Model model)
 	{
 		MolgenisUser mu = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.ACTIVATIONCODE, activationCode), MolgenisUser.class);
@@ -149,12 +149,14 @@ public class AnonymousController extends MolgenisPluginController
 		{
 			return "registration-fail";
 		}
+		else{
 
-		mu.setActive(true);
+			mu.setActive(true);
 
-		dataService.update(MolgenisUser.ENTITY_NAME, mu);
+			dataService.update(MolgenisUser.ENTITY_NAME, mu);
 
-		return "registration-success";
+			return "registration-success";
+		}
 	}
 
 	@RequestMapping(value = "/registerUser", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -247,8 +249,8 @@ public class AnonymousController extends MolgenisPluginController
 				"Registration successful! We have sent you an email with a link to activate your account. NB The email may have ended up in your spam folder.");
 
 			}
-	
-	
+
+
 
 
 	/**

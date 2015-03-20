@@ -3,7 +3,10 @@
 
 <@header/>
 
-<h1>Welcome!</h1>
-<h3>Registration success.</h3>
+
+<div class="jumbotron">
+	<h1>Welcome to Autobetes!</h1>
+	<p>You completed the registration. You can now use the application.</p>
+</div>
 
 <@footer/>
