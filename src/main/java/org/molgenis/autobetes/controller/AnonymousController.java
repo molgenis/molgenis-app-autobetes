@@ -272,7 +272,7 @@ public class AnonymousController extends MolgenisPluginController
 		//get userinfolist
 		Iterable<Entity> userInfoList = dataService.findAll(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user).sort(new Sort(Direction.DESC, UserInfo.LASTCHANGED)));
 		Entity entityFromClient = toEntity(metaUserInfo, entityMap.get(0), user);
-		if(userInfoList.iterator().hasNext() == false){
+		if(!userInfoList.iterator().hasNext()){
 			//no userinfo of user, add record
 			dataService.add(UserInfo.ENTITY_NAME, entityFromClient);
 			return getEntityAsMap(entityFromClient, metaUserInfo, null, null);

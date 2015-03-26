@@ -78,14 +78,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		int idappender = 0;
 		
 		ActivityEvent event =  new ActivityEvent();
-		event.setName("Ill");
-		event.setOwner(userAdmin);
-		event.setId(ADMIN_ID_PREPOSITION+idappender);
-		//event.setSpecial(true);
-		event.setEventType("activity");
-		event.setLastchanged(0l);
-		dataservice.add(ActivityEvent.ENTITY_NAME, event);
-		
+
 		idappender++;
 		event =  new ActivityEvent();
 		event.setName("Stress");
@@ -96,45 +89,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
-		idappender++;
-		event =  new ActivityEvent();
-		event.setName("Do not track");
-		event.setOwner(userAdmin);
-		event.setId(ADMIN_ID_PREPOSITION+idappender);
-		//event.setSpecial(true);
-		event.setEventType(ACTIVITY);
-		event.setLastchanged(0l);
-		dataservice.add(ActivityEvent.ENTITY_NAME, event);
-		
-		idappender++;
-		event =  new ActivityEvent();
-		event.setName("Sensor inacurrate");
-		event.setOwner(userAdmin);
-		event.setId(ADMIN_ID_PREPOSITION+idappender);
-		//event.setSpecial(true);
-		event.setEventType(ACTIVITY);
-		event.setLastchanged(0l);
-		dataservice.add(ActivityEvent.ENTITY_NAME, event);
-		
-		idappender++;
-		event =  new ActivityEvent();
-		event.setName("Holiday");
-		event.setOwner(userAdmin);
-		event.setId(ADMIN_ID_PREPOSITION+idappender);
-		//event.setSpecial(true);
-		event.setEventType(ACTIVITY);
-		event.setLastchanged(0l);
-		dataservice.add(ActivityEvent.ENTITY_NAME, event);
-		
-		idappender++;
-		event =  new ActivityEvent();
-		event.setName("Party");
-		event.setOwner(userAdmin);
-		event.setId(ADMIN_ID_PREPOSITION+idappender);
-		//event.setSpecial(true);
-		event.setEventType(ACTIVITY);
-		event.setLastchanged(0l);
-		dataservice.add(ActivityEvent.ENTITY_NAME, event);
+	
 		
 	}
 
