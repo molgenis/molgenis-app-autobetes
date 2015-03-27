@@ -31,6 +31,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.Async;
 
 public class MovesConnectorImpl implements MovesConnector
 {
@@ -62,7 +63,8 @@ public class MovesConnectorImpl implements MovesConnector
 	private static final String DATE_FORMAT_STRING = "yyyyMMdd";
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
 
-	public boolean manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
+	@Async
+	public void manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
 		try{
 			//get movestoken from db
 
@@ -70,7 +72,7 @@ public class MovesConnectorImpl implements MovesConnector
 
 			if(movesToken != null){
 				boolean isValid = accessTokenIsValid(movesToken.getAccessToken());
-				if(isValid == false){
+				if(!isValid){
 					//token is not valid anymore
 					//get new token
 					MovesToken newMovesToken = refreshToken(movesToken.getRefresh_Token(), user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
@@ -100,11 +102,6 @@ public class MovesConnectorImpl implements MovesConnector
 				//while loop is stopped, so fromInMillisec+29 days is now greater than current date.
 				//get activities from fromInMillisec to current date
 				getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(toInMillisec));
-				return true;
-			}
-			else{
-				//user is not connected to moves.
-				return false;
 			}
 		}
 		catch(Exception e){
@@ -120,7 +117,7 @@ public class MovesConnectorImpl implements MovesConnector
 			String url = MOVES_BASE_URL+OAUTH_URL+TOKEN_INFO+"?"+ACCESS_TOKEN+"="+accessToken;
 			HttpsURLConnection connection = doGetRequest(url);
 			int responseCode = connection.getResponseCode();
-			if(responseCode == 404){
+			if(responseCode == HttpsURLConnection.HTTP_NOT_FOUND){
 				//status code not found, token is not valid
 				return false;
 			}
@@ -194,7 +191,7 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 
 	}
-
+	@Async
 	private void getActivitiesAndAddToDB(MolgenisUser user, DataService dataService, MovesToken movesToken, int from, int to){
 		//get activities from Moves
 		List<MovesActivity> activities = getActivities(movesToken, from, to);

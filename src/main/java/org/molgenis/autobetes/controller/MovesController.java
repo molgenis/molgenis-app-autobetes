@@ -1,10 +1,15 @@
 package org.molgenis.autobetes.controller;
 
 import static org.molgenis.autobetes.controller.MovesController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.autobetes.MovesConnector;
@@ -17,6 +22,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.token.MolgenisToken;
+import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.util.FileStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +34,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Controller that handles home page requests
@@ -77,7 +84,7 @@ public class MovesController extends MolgenisPluginController
 	public String connectToMoves(@RequestParam(value = "code") String authorizationcode, Model model,@RequestParam(value = "token") String token )
 	{	
 		try{
-			
+
 			MolgenisUser user = getUserFromToken(token);
 			MovesConnector movesConnector = new MovesConnectorImpl();
 			//get moves token 
@@ -101,7 +108,7 @@ public class MovesController extends MolgenisPluginController
 				dataService.update(MovesToken.ENTITY_NAME, movesToken);
 				//check if there allready is a user profile for the
 				userProfile = dataService.findOne(MovesUserProfile.ENTITY_NAME, new QueryImpl().eq(MovesUserProfile.MOVESTOKEN,movesToken));
-				
+
 				if(userProfile == null){
 					//no user profile in db
 					//get user profile from moves
@@ -110,20 +117,86 @@ public class MovesController extends MolgenisPluginController
 					dataService.add(MovesUserProfile.ENTITY_NAME, userProfile);
 				}
 			}
-			
+
 			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-			
+
 			model.addAttribute("message", "Congratulations, you are now connected to moves.");
 			return "view-moves";
 		}
 		catch(Exception e){
-			
+
 			model.addAttribute("message", "Oops something went wrong, please try again later.");
 			LOG.error(e.toString());
 			return "view-moves";
 		}
-		
 
+
+	}
+
+	/**
+	 * Checks if moves is connected
+	 * 
+	 * Example url: /api/v1/person/99
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param entityMap
+	 */
+
+	@RequestMapping(value = "/manageActivities", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> manageActivities(HttpServletRequest servletRequest)
+	{
+		try{
+			MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+			MovesConnector movesConnector = new MovesConnectorImpl();
+			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+			return response(
+					true,
+					"success");
+		}
+		catch(Exception e){
+			return response(
+					false,
+					"something went wrong");
+
+
+		}
+	}
+
+
+	/**
+	 * Checks if moves is connected
+	 * 
+	 * Example url: /api/v1/person/99
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param entityMap
+	 */
+
+	@RequestMapping(value = "/checkIfMovesIsConnected", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> checkIfMovesIsConnected(HttpServletRequest servletRequest)
+	{
+		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+		MovesToken movesToken = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
+
+		if(movesToken == null){
+			return response(
+					false,
+					"not connected");
+
+
+		}
+
+		else{
+			return response(
+					true,
+					"connected");
+
+
+		}
 	}
 
 	private static int getCurrentDate(){
@@ -145,6 +218,23 @@ public class MovesController extends MolgenisPluginController
 		MolgenisToken tokenEntity = dataService.findOne(MolgenisToken.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
 		return tokenEntity.getMolgenisUser();
+	}
+
+	/**
+	 * Returns response object.
+	 * 
+	 * @param success
+	 * @param msg
+	 * @return
+	 */
+	private Map<String, Object> response(boolean success, String msg)
+	{
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		result.put("success", success);
+		result.put("message", msg);
+
+		return result;
 	}
 
 

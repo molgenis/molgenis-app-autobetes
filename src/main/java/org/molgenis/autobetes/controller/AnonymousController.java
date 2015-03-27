@@ -79,6 +79,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -138,23 +139,24 @@ public class AnonymousController extends MolgenisPluginController
 
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
-	@ResponseBody
 	@RunAsSystem
-	public Map<String, Object> activateUser(@PathVariable String activationCode)
+	public String activateUser(@PathVariable String activationCode, Model model)
 	{
 		MolgenisUser mu = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.ACTIVATIONCODE, activationCode), MolgenisUser.class);
 
 		if (null == mu)
 		{
-			return response(false, "Registration failed. No user with this activation code.");
+			return "registration-fail";
 		}
+		else{
 
-		mu.setActive(true);
+			mu.setActive(true);
 
-		dataService.update(MolgenisUser.ENTITY_NAME, mu);
+			dataService.update(MolgenisUser.ENTITY_NAME, mu);
 
-		return response(true, "You're account is now active!");
+			return "registration-success";
+		}
 	}
 
 	@RequestMapping(value = "/registerUser", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -163,7 +165,7 @@ public class AnonymousController extends MolgenisPluginController
 	public Map<String, Object> registerUser(@RequestBody RegistrationRequest registrationRequest,
 			HttpServletRequest servletRequest)
 			{
-		
+
 		MolgenisGroup mg = dataService.findOne(MolgenisGroup.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroup.NAME, ALLUSERS), MolgenisGroup.class);
 		// validate email + pw
@@ -172,7 +174,7 @@ public class AnonymousController extends MolgenisPluginController
 		{
 			return response(false, "Registration failed. Please provide a valid email and password!");
 		}
-		
+
 		MolgenisUser existingUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.EMAIL, registrationRequest.getEmail()), MolgenisUser.class);
 
@@ -188,7 +190,7 @@ public class AnonymousController extends MolgenisPluginController
 		String activationCode = UUID.randomUUID().toString();
 		mu.setActivationCode(activationCode);
 		mu.setActive(false);
-		
+
 		try
 		{
 			//add user
@@ -249,6 +251,8 @@ public class AnonymousController extends MolgenisPluginController
 			}
 
 
+
+
 	/**
 	 * Updates an entity using PUT
 	 * 
@@ -268,7 +272,7 @@ public class AnonymousController extends MolgenisPluginController
 		//get userinfolist
 		Iterable<Entity> userInfoList = dataService.findAll(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, user).sort(new Sort(Direction.DESC, UserInfo.LASTCHANGED)));
 		Entity entityFromClient = toEntity(metaUserInfo, entityMap.get(0), user);
-		if(userInfoList.iterator().hasNext() == false){
+		if(!userInfoList.iterator().hasNext()){
 			//no userinfo of user, add record
 			dataService.add(UserInfo.ENTITY_NAME, entityFromClient);
 			return getEntityAsMap(entityFromClient, metaUserInfo, null, null);
@@ -502,11 +506,11 @@ public class AnonymousController extends MolgenisPluginController
 	@ResponseBody
 	public int getInsulinAdvice(@RequestBody Map<String, Object> carbs,
 			HttpServletRequest servletRequest)
-			{
-				return -1;
-			}
-	
-	
+	{
+		return -1;
+	}
+
+
 	/**
 	 * Updates an entity using PUT
 	 * 
@@ -715,10 +719,10 @@ public class AnonymousController extends MolgenisPluginController
 		//get entityfromdb
 		Entity storedEntity = dataService.findOne(meta.getName(),
 				new QueryImpl().eq(Event.OWNER, user).and().eq(Event.ID, entity.get(Event.ID)));
-		
+
 		if (storedEntity == null)
 		{
-			
+
 			// no entity in db, add entity
 			try
 			{
@@ -743,7 +747,7 @@ public class AnonymousController extends MolgenisPluginController
 			{
 				// indeed client entity more resent
 
-				
+
 				// set primary key
 				entity.set(Event.PRIMARYKEY, storedEntity.get(Event.PRIMARYKEY));
 
@@ -785,7 +789,7 @@ public class AnonymousController extends MolgenisPluginController
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			
+
 			//no conversion of the auto_generated and server attributes(these result in nullpointer exceptions)
 			if(attr.getName() != Event.PRIMARYKEY && attr.getName() != Event.MOMENT && attr.getName() != Event.OWNER && attr.getName() != Event.__TYPE && !attr.isAuto()){
 				try
@@ -837,14 +841,14 @@ public class AnonymousController extends MolgenisPluginController
 				{
 					writeExceptionToDB(user, mapEntity.toString(), e.toString());
 					entity.set(attr.getName(), null);
-					
+
 					LOG.error("Could not convert parameter to entityValue: parameter=" + attr.getName() + ", map="
 							+ mapEntity.toString());
 					LOG.error(e.toString());
 
 				}
 			}
-			
+
 		}
 		entity.set(Event.OWNER, user);
 		return entity;

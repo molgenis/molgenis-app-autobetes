@@ -67,6 +67,7 @@
 			<field name="length" type="int" nillable="true" description="Length of user. Together with bodyweight BMI can be computed." />
 			<field name="birthYear" type="int" nillable="true" description="Year that user is born." />
 			<field name="lastchanged" type="long" description="Timestamp user switched on or of." />
+			<field name="timeOffset" type="int" nillable="true" description="Time offset (h) added to UTC (= GMT0)." />
 			<field name="owner" type="xref" xref_entity="MolgenisUser" description="User to which this record belongs. Is nillable for development purposes." />
 		</entity>
 		<entity name="UserActivity">
