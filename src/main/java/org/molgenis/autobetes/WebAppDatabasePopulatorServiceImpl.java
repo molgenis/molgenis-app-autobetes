@@ -76,9 +76,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private void populateDBWithStandardEvents(MolgenisUser userAdmin, DataService dataservice)
 	{
 		int idappender = 0;
-		
 		ActivityEvent event =  new ActivityEvent();
-
 		idappender++;
 		event =  new ActivityEvent();
 		event.setName("Stress");
@@ -88,8 +86,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setEventType(ACTIVITY);
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
-		
-	
 		
 	}
 

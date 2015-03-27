@@ -18,7 +18,7 @@ public interface MovesConnector
 	 * @param user for which activities need to be managed
 	 * @return boolean, true is success
 	 */
-	public boolean manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE);
+	public void manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE);
 	
 	/**
 	 * Checks if access token from moves is still valid

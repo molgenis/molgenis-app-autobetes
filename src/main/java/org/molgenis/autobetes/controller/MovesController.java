@@ -84,7 +84,7 @@ public class MovesController extends MolgenisPluginController
 	public String connectToMoves(@RequestParam(value = "code") String authorizationcode, Model model,@RequestParam(value = "token") String token )
 	{	
 		try{
-			
+
 			MolgenisUser user = getUserFromToken(token);
 			MovesConnector movesConnector = new MovesConnectorImpl();
 			//get moves token 
@@ -108,7 +108,7 @@ public class MovesController extends MolgenisPluginController
 				dataService.update(MovesToken.ENTITY_NAME, movesToken);
 				//check if there allready is a user profile for the
 				userProfile = dataService.findOne(MovesUserProfile.ENTITY_NAME, new QueryImpl().eq(MovesUserProfile.MOVESTOKEN,movesToken));
-				
+
 				if(userProfile == null){
 					//no user profile in db
 					//get user profile from moves
@@ -117,23 +117,54 @@ public class MovesController extends MolgenisPluginController
 					dataService.add(MovesUserProfile.ENTITY_NAME, userProfile);
 				}
 			}
-			
+
 			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-			
+
 			model.addAttribute("message", "Congratulations, you are now connected to moves.");
 			return "view-moves";
 		}
 		catch(Exception e){
-			
+
 			model.addAttribute("message", "Oops something went wrong, please try again later.");
 			LOG.error(e.toString());
 			return "view-moves";
 		}
-		
+
 
 	}
-	
-	
+
+	/**
+	 * Checks if moves is connected
+	 * 
+	 * Example url: /api/v1/person/99
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param entityMap
+	 */
+
+	@RequestMapping(value = "/manageActivities", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> manageActivities(HttpServletRequest servletRequest)
+	{
+		try{
+			MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
+			MovesConnector movesConnector = new MovesConnectorImpl();
+			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+			return response(
+					true,
+					"success");
+		}
+		catch(Exception e){
+			return response(
+					false,
+					"something went wrong");
+
+
+		}
+	}
+
+
 	/**
 	 * Checks if moves is connected
 	 * 
@@ -147,7 +178,7 @@ public class MovesController extends MolgenisPluginController
 	@RequestMapping(value = "/checkIfMovesIsConnected", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> checkIfMovesIsConnected(HttpServletRequest servletRequest)
-			{
+	{
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
 		MovesToken movesToken = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
 
@@ -166,7 +197,7 @@ public class MovesController extends MolgenisPluginController
 
 
 		}
-			}
+	}
 
 	private static int getCurrentDate(){
 		//get current date in yyyyMMdd format
@@ -188,7 +219,7 @@ public class MovesController extends MolgenisPluginController
 				new QueryImpl().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
 		return tokenEntity.getMolgenisUser();
 	}
-	
+
 	/**
 	 * Returns response object.
 	 * 
