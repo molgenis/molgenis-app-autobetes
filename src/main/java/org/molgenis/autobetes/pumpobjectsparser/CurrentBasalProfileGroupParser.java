@@ -25,7 +25,6 @@ public class CurrentBasalProfileGroupParser extends ObjectParser
 		
 		cbpdg.setName(getString(PATTERN_NAME));
 		cbpdg.setNumberOfProfiles(getInteger(NUM_PROFILES));
-		System.out.println(cbpdg.toString());
 //		save(bpdg.ENTITY_NAME, bpdg);
 	}
 
