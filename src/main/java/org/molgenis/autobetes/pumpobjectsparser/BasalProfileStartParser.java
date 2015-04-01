@@ -17,10 +17,12 @@ public class BasalProfileStartParser extends ObjectParser
 	public BasalProfileStartParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(csvEntity, dataService, molgenisUser);
+		bps.setOwner(molgenisUser);
 		bps.setDateTimeString(getDateTimeString());
 		bps.setUnixtimeOriginal(getDateTimeLong());
 		bps.setIdOnPump(getIdOnPump());
 		bps.setUploadId(getUploadId());
+		bps.setFollowNumber(getFollowNumber());
 
 		bps.setGroupName(getString(PATTERN_NAME));
 		bps.setProfileIndex(getInteger(PROFILE_INDEX));

@@ -16,6 +16,7 @@ public class ObjectParser
 	private final static String RAWVALUES = "Onbewerkt: waarden";
 	private final static String DeviceID = "Onbewerkt: ID";
 	private final static String UploadID = "Onbewerkt: upload-ID";
+	private final static String FOLLOWNUMBER = "Onbewerkt: volgnummer";
 
 	private DataService dataService = null;
 	private Map<String, String> keyValueMap = new HashMap<String, String>();
@@ -25,6 +26,7 @@ public class ObjectParser
 	private Date dateTime;
 	private String idOnPump;
 	private String uploadId;
+	private String followNumber;
 
 	public ObjectParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
@@ -36,7 +38,7 @@ public class ObjectParser
 
 		// parse date, time
 		dateTimeString = (String) csvEntity.get(DeviceDateTime);
-
+		followNumber = (String) csvEntity.get(FOLLOWNUMBER);
 		// find correct format and parse
 		try
 		{
@@ -126,6 +128,10 @@ public class ObjectParser
 	String getUploadId()
 	{
 		return this.uploadId;
+	}
+	String getFollowNumber()
+	{
+		return this.followNumber;
 	}
 
 	/* WE SAVE ENTITIES AS LIST AND THUS DON'T USE THIS FUNCTION ANYMORE! 

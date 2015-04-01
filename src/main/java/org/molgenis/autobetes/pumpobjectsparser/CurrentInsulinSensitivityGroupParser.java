@@ -1,19 +1,18 @@
 package org.molgenis.autobetes.pumpobjectsparser;
 
-import org.molgenis.autobetes.autobetes.ChangeInsulinSensitivityGroup;
+import org.molgenis.autobetes.autobetes.CurrentInsulinSensitivityGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.auth.MolgenisUser;
 
-public class ChangeInsulinSensitivityGroupParser extends ObjectParser
+public class CurrentInsulinSensitivityGroupParser extends ObjectParser
 {
 //	private final static String ORIGINAL_UNITS = "ORIGINAL_UNITS";
 	private final static String SIZE = "SIZE";
-	ChangeInsulinSensitivityGroup cisg = new ChangeInsulinSensitivityGroup();
-	
+	CurrentInsulinSensitivityGroup cisg = new CurrentInsulinSensitivityGroup();
 	
 
-	public ChangeInsulinSensitivityGroupParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
+	public CurrentInsulinSensitivityGroupParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(csvEntity, dataService, molgenisUser);
 		cisg.setOwner(molgenisUser);
@@ -33,7 +32,7 @@ public class ChangeInsulinSensitivityGroupParser extends ObjectParser
 //		save(e.ENTITY_NAME, e);
 	}
 
-	public ChangeInsulinSensitivityGroup getCisg()
+	public CurrentInsulinSensitivityGroup getCisg()
 	{
 		return cisg;
 	}

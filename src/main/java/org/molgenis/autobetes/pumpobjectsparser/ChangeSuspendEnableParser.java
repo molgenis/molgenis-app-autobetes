@@ -17,10 +17,12 @@ public class ChangeSuspendEnableParser extends ObjectParser
 	public ChangeSuspendEnableParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(csvEntity, dataService, molgenisUser);
+		suspend.setOwner(molgenisUser);
 		suspend.setDateTimeString(getDateTimeString());
 		suspend.setUnixtimeOriginal(getDateTimeLong());
 		suspend.setIdOnPump(getIdOnPump());
 		suspend.setUploadId(getUploadId());
+		suspend.setFollowNumber(getFollowNumber());
 		
 		suspend.setState(getString(STATE));
 		suspend.setActionRequestor(getString(ACTIONREQUESTOR));
@@ -30,7 +32,7 @@ public class ChangeSuspendEnableParser extends ObjectParser
 //		save(e.ENTITY_NAME, e);
 	}
 
-	public ChangeSuspendEnable getE()
+	public ChangeSuspendEnable getSuspend()
 	{
 		return suspend;
 	}

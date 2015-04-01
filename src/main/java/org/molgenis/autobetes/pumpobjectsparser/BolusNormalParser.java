@@ -15,11 +15,12 @@ public class BolusNormalParser extends ObjectParser
 	public BolusNormalParser(Entity rawvalues, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(rawvalues, dataService, molgenisUser);
-		
+		bn.setOwner(molgenisUser);
 		bn.setDateTimeString(getDateTimeString());
 		bn.setUnixtimeOriginal(getDateTimeLong());
 		bn.setIdOnPump(getIdOnPump());
 		bn.setUploadId(getUploadId());
+		bn.setFollowNumber(getFollowNumber());
 		
 		bn.setAmount(getDouble(AMOUNT));
 		bn.setProgrammedAmount(getDouble(PROGRAMMED_AMOUNT));

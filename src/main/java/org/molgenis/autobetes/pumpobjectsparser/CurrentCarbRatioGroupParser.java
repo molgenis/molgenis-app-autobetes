@@ -1,19 +1,17 @@
 package org.molgenis.autobetes.pumpobjectsparser;
 
-import org.molgenis.autobetes.autobetes.BasalProfileDefinitionGroup;
-import org.molgenis.autobetes.autobetes.BolusSquare;
-import org.molgenis.autobetes.autobetes.ChangeCarbRatioGroup;
+import org.molgenis.autobetes.autobetes.CurrentCarbRatioGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.auth.MolgenisUser;
 
-public class ChangeCarbRatioGroupParser extends ObjectParser
+public class CurrentCarbRatioGroupParser extends ObjectParser
 {
 	private final static String SIZE = "SIZE";
 
-	ChangeCarbRatioGroup ccrg = new ChangeCarbRatioGroup();
+	CurrentCarbRatioGroup ccrg = new CurrentCarbRatioGroup();
 	
-	public ChangeCarbRatioGroupParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
+	public CurrentCarbRatioGroupParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(csvEntity, dataService, molgenisUser);
 
@@ -29,7 +27,7 @@ public class ChangeCarbRatioGroupParser extends ObjectParser
 //		save(ccrg.ENTITY_NAME, ccrg);
 	}
 	
-	public ChangeCarbRatioGroup getCcrg()
+	public CurrentCarbRatioGroup getCcrg()
 	{
 		return ccrg;
 	}
