@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -41,16 +42,20 @@ public class ObjectParser
 		// parse date, time
 		dateTimeString = (String) csvEntity.get(DeviceDateTime);
 		followNumber = (String) csvEntity.get(FOLLOWNUMBER);
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
+		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+		
 		// find correct format and parse
 		try
 		{
-			dateTime = new SimpleDateFormat("dd-MM-yy HH:mm:ss").parse(dateTimeString);
+			dateTime = sdf.parse(dateTimeString);
 		}
 		catch (ParseException exeption)
 		{
 			try
 			{
-				dateTime = new SimpleDateFormat("dd/MM/yy HH:mm").parse(dateTimeString);
+				dateTime = sdf.parse(dateTimeString);
 			}
 			catch (ParseException e)
 			{
