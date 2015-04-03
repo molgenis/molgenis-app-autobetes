@@ -23,7 +23,8 @@ public class BasalProfileStartParser extends ObjectParser
 		bps.setIdOnPump(getIdOnPump());
 		bps.setUploadId(getUploadId());
 		bps.setFollowNumber(getFollowNumber());
-
+		bps.setOrigin(getOrigin());
+		
 		bps.setGroupName(getString(PATTERN_NAME));
 		bps.setProfileIndex(getInteger(PROFILE_INDEX));
 		bps.setRate(getDouble(RATE));

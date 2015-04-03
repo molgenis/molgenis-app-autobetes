@@ -262,6 +262,7 @@ public class AnonymousController extends MolgenisPluginController
 	 * @param id
 	 * @param entityMap
 	 */
+	@RunAsSystem
 	@RequestMapping(value = "/syncUserInfo", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> setUserInfo(@RequestBody List<Map<String, Object>> entityMap,

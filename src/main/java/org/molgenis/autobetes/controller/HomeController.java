@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +26,6 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.jgroups.protocols.EXAMPLE;
 import org.molgenis.autobetes.MovesConnector;
 import org.molgenis.autobetes.MovesConnectorImpl;
 import org.molgenis.autobetes.autobetes.BasalProfileDefinition;
@@ -84,12 +84,16 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -164,13 +168,14 @@ public class HomeController extends MolgenisPluginController
 	{
 		return "view-home";
 	}
-
+	
+	@RunAsSystem
 	@RequestMapping(value = "/uploadCSV", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String uploadCSV( @RequestParam
-			Part file, Model model, HttpServletRequest servletRequest)
+			Part file, Model model, HttpServletRequest servletRequest, Principal principal)
 	{
-		String username = SecurityUtils.getCurrentUsername();
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
+		
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, principal.getName()), MolgenisUser.class);
 		try
 		{
 			File pumpCsvFile = fileStore.store(file.getInputStream(), file.getName());
@@ -194,7 +199,7 @@ public class HomeController extends MolgenisPluginController
 
 		return "view-home";
 	}
-
+	
 	private void importPumpCsvFile(MolgenisUser molgenisUser, File inputFile, File outputDir, String tmpDir)
 	{
 		// First put stuff in hashmap with IdOnPump as key, then check entities in db if those IdOnPump are in Hashmap(remove if so)
@@ -417,7 +422,7 @@ public class HomeController extends MolgenisPluginController
 		// TODO SUSPEND
 		IOUtils.closeQuietly(csvRepo);
 	}
-
+	
 	private HashSet<String> getExistingIDS(MolgenisUser molgenisUser)
 	{
 		HashSet<String> hashSetIDs = new HashSet<String>();

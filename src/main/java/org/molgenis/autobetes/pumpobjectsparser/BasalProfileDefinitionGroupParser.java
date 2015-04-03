@@ -5,7 +5,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.auth.MolgenisUser;
 
-import scala.annotation.meta.setter;
 
 public class BasalProfileDefinitionGroupParser extends ObjectParser
 {
@@ -23,6 +22,7 @@ public class BasalProfileDefinitionGroupParser extends ObjectParser
 		bpdg.setIdOnPump(getIdOnPump());
 		bpdg.setUploadId(getUploadId());
 		bpdg.setFollowNumber(getFollowNumber());
+		bpdg.setOrigin(getOrigin());
 		
 		bpdg.setName(getString(PATTERN_NAME));
 		bpdg.setNumberOfProfiles(getInteger(NUM_PROFILES));

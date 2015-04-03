@@ -23,6 +23,7 @@ public class BasalProfileDefinitionParser extends ObjectParser
 		bp.setIdOnPump(getIdOnPump());
 		bp.setUploadId(getUploadId());
 		bp.setFollowNumber(getFollowNumber());
+		bp.setOrigin(getOrigin());
 		
 		bp.setGroupId(getString(PATTERN_DATUM));
 		bp.setProfileIndex(getInteger(PROFILE_INDEX));

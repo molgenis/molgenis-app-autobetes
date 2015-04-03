@@ -23,6 +23,7 @@ public class ChangeSuspendEnableParser extends ObjectParser
 		suspend.setIdOnPump(getIdOnPump());
 		suspend.setUploadId(getUploadId());
 		suspend.setFollowNumber(getFollowNumber());
+		suspend.setOrigin(getOrigin());
 		
 		suspend.setState(getString(STATE));
 		suspend.setActionRequestor(getString(ACTIONREQUESTOR));

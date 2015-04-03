@@ -23,6 +23,7 @@ public class CurrentBasalProfileParser extends ObjectParser
 		cbp.setIdOnPump(getIdOnPump());
 		cbp.setUploadId(getUploadId());
 		cbp.setFollowNumber(getFollowNumber());
+		cbp.setOrigin(getOrigin());
 		
 		cbp.setGroupId(getString(PATTERN_DATUM));
 		cbp.setProfileIndex(getInteger(PROFILE_INDEX));

@@ -22,7 +22,8 @@ public class BolusSquareParser extends ObjectParser
 		bs.setIdOnPump(getIdOnPump());
 		bs.setUploadId(getUploadId());
 		bs.setFollowNumber(getFollowNumber());
-
+		bs.setOrigin(getOrigin());
+		
 		bs.setAmount(getDouble(AMOUNT));
 		bs.setProgrammedAmount(getDouble(PROGRAMMED_AMOUNT));
 		bs.setDuration(getLong(DURATION));

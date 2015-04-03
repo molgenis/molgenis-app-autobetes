@@ -25,6 +25,7 @@ public class ChangeInsulinSensitivityParser extends ObjectParser
 		cis.setIdOnPump(getIdOnPump());
 		cis.setUploadId(getUploadId());
 		cis.setFollowNumber(getFollowNumber());
+		cis.setOrigin(getOrigin());
 		
 		cis.setGroupId(getString(PATTERN_DATUM));
 		cis.setSensitivityIndex(getInteger(INDEX));

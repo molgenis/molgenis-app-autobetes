@@ -18,6 +18,7 @@ public class ObjectParser
 	private final static String UploadID = "Onbewerkt: upload-ID";
 	private final static String FOLLOWNUMBER = "Onbewerkt: volgnummer";
 
+	
 	private DataService dataService = null;
 	private Map<String, String> keyValueMap = new HashMap<String, String>();
 
@@ -27,6 +28,7 @@ public class ObjectParser
 	private String idOnPump;
 	private String uploadId;
 	private String followNumber;
+	private String origin = "medtronic";
 
 	public ObjectParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
@@ -132,6 +134,10 @@ public class ObjectParser
 	String getFollowNumber()
 	{
 		return this.followNumber;
+	}
+	public String getOrigin()
+	{
+		return origin;
 	}
 
 	/* WE SAVE ENTITIES AS LIST AND THUS DON'T USE THIS FUNCTION ANYMORE! 

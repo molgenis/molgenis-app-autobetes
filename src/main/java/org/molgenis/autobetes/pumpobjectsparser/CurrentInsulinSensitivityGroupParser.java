@@ -21,6 +21,7 @@ public class CurrentInsulinSensitivityGroupParser extends ObjectParser
 		cisg.setIdOnPump(getIdOnPump());
 		cisg.setUploadId(getUploadId());
 		cisg.setFollowNumber(getFollowNumber());
+		cisg.setOrigin(getOrigin());
 		
 		cisg.setDateTimeString(getDateTimeString());
 		cisg.setUnixtimeOriginal(getDateTimeLong());

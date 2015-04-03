@@ -27,6 +27,7 @@ public class CurrentCarbRatioParser extends ObjectParser
 		ccr.setIdOnPump(getIdOnPump());
 		ccr.setUploadId(getUploadId());
 		ccr.setFollowNumber(getFollowNumber());
+		ccr.setOrigin(getOrigin());
 		
 		ccr.setGroupId(getString(PATTERN_DATUM));
 		ccr.setRatioIndex(getInteger(INDEX));

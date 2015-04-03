@@ -28,6 +28,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.security.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
@@ -62,7 +63,7 @@ public class MovesConnectorImpl implements MovesConnector
 	private static final long TWENTY_NINE_DAYS_IN_MILLISEC = 2505600000L;
 	private static final String DATE_FORMAT_STRING = "yyyyMMdd";
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
-
+	
 	@Async
 	public void manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
 		try{

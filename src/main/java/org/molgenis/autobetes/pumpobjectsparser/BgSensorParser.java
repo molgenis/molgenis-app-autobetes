@@ -24,7 +24,8 @@ public class BgSensorParser extends ObjectParser
 		bgSensor.setIdOnPump(getIdOnPump());
 		bgSensor.setUploadId(getUploadId());
 		bgSensor.setFollowNumber(getFollowNumber());
-
+		bgSensor.setOrigin(getOrigin());
+		
 		bgSensor.setAmount(getDouble(AMOUNT));
 		bgSensor.setIsig(getDouble(ISIG));
 		bgSensor.setVcntr(getDouble(VCNTR));

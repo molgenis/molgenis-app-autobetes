@@ -21,7 +21,8 @@ public class ChangeTempBasalPercentParser extends ObjectParser
 		ctb.setIdOnPump(getIdOnPump());
 		ctb.setUploadId(getUploadId());
 		ctb.setFollowNumber(getFollowNumber());
-
+		ctb.setOrigin(getOrigin());
+		
 		ctb.setFraction(getDouble(PERCENT_OF_RATE) / 100D);
 		ctb.setDuration(getInteger(DURATION));
 		

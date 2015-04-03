@@ -21,6 +21,7 @@ public class CurrentCarbRatioGroupParser extends ObjectParser
 		ccrg.setIdOnPump(getIdOnPump());
 		ccrg.setUploadId(getUploadId());
 		ccrg.setFollowNumber(getFollowNumber());
+		ccrg.setOrigin(getOrigin());
 		
 		ccrg.setNRatios(getInteger(SIZE));
 		

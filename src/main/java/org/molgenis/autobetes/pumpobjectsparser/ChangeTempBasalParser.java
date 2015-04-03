@@ -21,7 +21,8 @@ public class ChangeTempBasalParser extends ObjectParser
 		ctbp.setIdOnPump(getIdOnPump());
 		ctbp.setUploadId(getUploadId());
 		ctbp.setFollowNumber(getFollowNumber());
-
+		ctbp.setOrigin(getOrigin());
+		
 		ctbp.setRate(getDouble(RATE));
 		ctbp.setDuration(getInteger(DURATION));
 		

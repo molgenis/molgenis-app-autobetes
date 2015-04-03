@@ -20,6 +20,7 @@ public class TimeChangeParser extends ObjectParser
 		tc.setIdOnPump(getIdOnPump());
 		tc.setUploadId(getUploadId());
 		tc.setFollowNumber(getFollowNumber());
+		tc.setOrigin(getOrigin());
 		
 		tc.setNewTime(getLong(NEW_TIME));
 	}
