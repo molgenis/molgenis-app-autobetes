@@ -16,12 +16,14 @@ public class BolusSquareParser extends ObjectParser
 	public BolusSquareParser(Entity rawvalues, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(rawvalues, dataService, molgenisUser);
-
+		bs.setOwner(molgenisUser);
 		bs.setDateTimeString(getDateTimeString());
 		bs.setUnixtimeOriginal(getDateTimeLong());
 		bs.setIdOnPump(getIdOnPump());
 		bs.setUploadId(getUploadId());
-
+		bs.setFollowNumber(getFollowNumber());
+		bs.setOrigin(getOrigin());
+		
 		bs.setAmount(getDouble(AMOUNT));
 		bs.setProgrammedAmount(getDouble(PROGRAMMED_AMOUNT));
 		bs.setDuration(getLong(DURATION));

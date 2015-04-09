@@ -87,6 +87,15 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		event.setLastchanged(0l);
 		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 		
+		idappender++;
+		event =  new ActivityEvent();
+		event.setName("Tracking OFF");
+		event.setOwner(userAdmin);
+		event.setId(ADMIN_ID_PREPOSITION+idappender);
+		//event.setSpecial(true);
+		event.setEventType(ACTIVITY);
+		event.setLastchanged(0l);
+		dataservice.add(ActivityEvent.ENTITY_NAME, event);
 	}
 
 	@Override

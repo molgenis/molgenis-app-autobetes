@@ -15,12 +15,14 @@ public class ChangeTempBasalParser extends ObjectParser
 	public ChangeTempBasalParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(csvEntity, dataService, molgenisUser);
-
+		ctbp.setOwner(molgenisUser);
 		ctbp.setDateTimeString(getDateTimeString());
 		ctbp.setUnixtimeOriginal(getDateTimeLong());
 		ctbp.setIdOnPump(getIdOnPump());
 		ctbp.setUploadId(getUploadId());
-
+		ctbp.setFollowNumber(getFollowNumber());
+		ctbp.setOrigin(getOrigin());
+		
 		ctbp.setRate(getDouble(RATE));
 		ctbp.setDuration(getInteger(DURATION));
 		

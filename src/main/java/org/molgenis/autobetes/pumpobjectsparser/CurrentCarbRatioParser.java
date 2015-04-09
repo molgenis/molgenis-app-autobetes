@@ -1,22 +1,22 @@
 package org.molgenis.autobetes.pumpobjectsparser;
 
-import org.molgenis.autobetes.autobetes.ChangeCarbRatio;
-import org.molgenis.autobetes.autobetes.ChangeCarbRatioGroup;
+import org.molgenis.autobetes.autobetes.CurrentCarbRatio;
+import org.molgenis.autobetes.autobetes.CurrentCarbRatioGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.auth.MolgenisUser;
 
-public class ChangeCarbRatioParser extends ObjectParser
+public class CurrentCarbRatioParser extends ObjectParser
 {
-	private final static String PATTERN_DATUM = "PATTERN_DATUM";
+	private final static String PATTERN_DATUM = "PATTERN_DATUM_ID";
 	private final static String INDEX = "INDEX";
 	private final static String AMOUNT = "AMOUNT";
 	private final static String UNITS = "UNITS";
 	private final static String START_TIME = "START_TIME";
-	private ChangeCarbRatio ccr = new ChangeCarbRatio();
+	private CurrentCarbRatio ccr = new CurrentCarbRatio();
 	
 
-	public ChangeCarbRatioParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
+	public CurrentCarbRatioParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
 		super(csvEntity, dataService, molgenisUser);
 
@@ -38,7 +38,7 @@ public class ChangeCarbRatioParser extends ObjectParser
 //		save(e.ENTITY_NAME, e);
 	}
 	
-	public ChangeCarbRatio getCcr()
+	public CurrentCarbRatio getCcr()
 	{
 		return ccr;
 	}

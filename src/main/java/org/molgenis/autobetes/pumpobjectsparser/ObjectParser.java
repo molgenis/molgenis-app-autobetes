@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -16,6 +17,8 @@ public class ObjectParser
 	private final static String RAWVALUES = "Onbewerkt: waarden";
 	private final static String DeviceID = "Onbewerkt: ID";
 	private final static String UploadID = "Onbewerkt: upload-ID";
+	private final static String FOLLOWNUMBER = "Onbewerkt: volgnummer";
+
 
 	private DataService dataService = null;
 	private Map<String, String> keyValueMap = new HashMap<String, String>();
@@ -25,6 +28,8 @@ public class ObjectParser
 	private Date dateTime;
 	private String idOnPump;
 	private String uploadId;
+	private String followNumber;
+	private String origin = "medtronic";
 
 	public ObjectParser(Entity csvEntity, DataService dataService, MolgenisUser molgenisUser)
 	{
@@ -32,21 +37,27 @@ public class ObjectParser
 		this.molgenisUser = molgenisUser;
 
 		// show progress?
-//		System.out.println(">> #line nr:" + csvEntity.get("Index"));
+		//		System.out.println(">> #line nr:" + csvEntity.get("Index"));
 
 		// parse date, time
 		dateTimeString = (String) csvEntity.get(DeviceDateTime);
+		followNumber = (String) csvEntity.get(FOLLOWNUMBER);
+
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
+		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
 		// find correct format and parse
 		try
 		{
-			dateTime = new SimpleDateFormat("dd-MM-yy HH:mm:ss").parse(dateTimeString);
+			dateTime = sdf.parse(dateTimeString);
 		}
 		catch (ParseException exeption)
 		{
 			try
 			{
-				dateTime = new SimpleDateFormat("dd/MM/yy HH:mm").parse(dateTimeString);
+				sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+				dateTime = sdf.parse(dateTimeString);
 			}
 			catch (ParseException e)
 			{
@@ -60,16 +71,19 @@ public class ObjectParser
 
 		// parse raw values
 		Object rawvalues = csvEntity.get(RAWVALUES);
-		String raw = (String) rawvalues;
-		String[] keyValuePairs = raw.split(", ");
-
-		for (String keyValuePair : keyValuePairs)
+		if(rawvalues !=null)
 		{
-			String[] pair = keyValuePair.split("=");
-			String key = pair[0];
-			String value = pair[1];
+			String raw = (String) rawvalues;
+			String[] keyValuePairs = raw.split(", ");
 
-			keyValueMap.put(key, value);
+			for (String keyValuePair : keyValuePairs)
+			{
+				String[] pair = keyValuePair.split("=");
+				String key = pair[0];
+				String value = pair[1];
+
+				keyValueMap.put(key, value);
+			}
 		}
 	}
 
@@ -126,6 +140,14 @@ public class ObjectParser
 	String getUploadId()
 	{
 		return this.uploadId;
+	}
+	String getFollowNumber()
+	{
+		return this.followNumber;
+	}
+	public String getOrigin()
+	{
+		return origin;
 	}
 
 	/* WE SAVE ENTITIES AS LIST AND THUS DON'T USE THIS FUNCTION ANYMORE! 

@@ -262,6 +262,7 @@ public class AnonymousController extends MolgenisPluginController
 	 * @param id
 	 * @param entityMap
 	 */
+	@RunAsSystem
 	@RequestMapping(value = "/syncUserInfo", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> setUserInfo(@RequestBody List<Map<String, Object>> entityMap,
@@ -522,9 +523,11 @@ public class AnonymousController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/sync", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@RunAsSystem
 	public List<Map<String, Object>> sync(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
 			{
+		
 		// declare objects
 		TimestampLastUpdate timeStampLastSync = new TimestampLastUpdate(0);// timestamp of the last sync of client,
 		// send along in requestbody, if not it remains 0

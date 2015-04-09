@@ -209,6 +209,5 @@
 			<artifactId>molgenis-data-import</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
 	</dependencies>
 </project>
