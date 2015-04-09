@@ -41,7 +41,7 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 	private MovesConnector movesConnector = new MovesConnectorImpl();
 	
 	private String refresh_token = "kYtxAijz2ITEXN843r5bWkEelq8cBs9KKGHtGcjx43rfW3Y60Tjb9494NCU7ZeqJ";
-	/*
+	
 	@BeforeMethod
 	public void setUp()
 	{
@@ -51,7 +51,7 @@ public class MovesConnectorTest extends AbstractTestNGSpringContextTests{
 		movesEntity.set(MovesToken.ACCESSTOKEN, "al4M5w43HevoqV86paqB5rYM874zO6cLS9GRh0vcd_R6eDIu7RINH7f5Y5sxkt_t");
 	}
 	
-	 
+	 /*
 	public boolean accessTokenIsValid(String accessToken);
 	
 	public MapEntity refreshToken(MolgenisUser user, Entity movesEntity, String clientId, String clientSecret);

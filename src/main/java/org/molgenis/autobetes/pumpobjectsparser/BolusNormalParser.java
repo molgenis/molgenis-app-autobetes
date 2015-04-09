@@ -22,7 +22,7 @@ public class BolusNormalParser extends ObjectParser
 		bn.setUploadId(getUploadId());
 		bn.setFollowNumber(getFollowNumber());
 		bn.setOrigin(getOrigin());
-		
+			
 		bn.setAmount(getDouble(AMOUNT));
 		bn.setProgrammedAmount(getDouble(PROGRAMMED_AMOUNT));
 		

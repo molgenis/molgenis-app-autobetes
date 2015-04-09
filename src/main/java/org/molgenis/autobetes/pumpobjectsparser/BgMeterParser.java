@@ -21,7 +21,7 @@ public class BgMeterParser extends ObjectParser
 		bm.setUploadId(getUploadId());
 		bm.setFollowNumber(getFollowNumber());
 		bm.setOrigin(getOrigin());
-		
+			
 		bm.setAmount(getDouble(AMOUNT));
 		bm.setParadigmLinkId(getInteger(PARADIGMLINKID));
 //		save(BgMeter.ENTITY_NAME, bm);

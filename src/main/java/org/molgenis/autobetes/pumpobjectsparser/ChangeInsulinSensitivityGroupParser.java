@@ -23,7 +23,7 @@ public class ChangeInsulinSensitivityGroupParser extends ObjectParser
 		cisg.setUploadId(getUploadId());
 		cisg.setFollowNumber(getFollowNumber());
 		cisg.setOrigin(getOrigin());
-		
+			
 		cisg.setDateTimeString(getDateTimeString());
 		cisg.setUnixtimeOriginal(getDateTimeLong());
 		cisg.setIdOnPump(getIdOnPump());

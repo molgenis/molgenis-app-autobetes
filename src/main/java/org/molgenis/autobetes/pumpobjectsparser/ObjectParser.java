@@ -19,7 +19,7 @@ public class ObjectParser
 	private final static String UploadID = "Onbewerkt: upload-ID";
 	private final static String FOLLOWNUMBER = "Onbewerkt: volgnummer";
 
-	
+
 	private DataService dataService = null;
 	private Map<String, String> keyValueMap = new HashMap<String, String>();
 
@@ -37,15 +37,15 @@ public class ObjectParser
 		this.molgenisUser = molgenisUser;
 
 		// show progress?
-//		System.out.println(">> #line nr:" + csvEntity.get("Index"));
+		//		System.out.println(">> #line nr:" + csvEntity.get("Index"));
 
 		// parse date, time
 		dateTimeString = (String) csvEntity.get(DeviceDateTime);
 		followNumber = (String) csvEntity.get(FOLLOWNUMBER);
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		
+
 		// find correct format and parse
 		try
 		{
@@ -55,6 +55,8 @@ public class ObjectParser
 		{
 			try
 			{
+				sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				dateTime = sdf.parse(dateTimeString);
 			}
 			catch (ParseException e)
@@ -69,16 +71,19 @@ public class ObjectParser
 
 		// parse raw values
 		Object rawvalues = csvEntity.get(RAWVALUES);
-		String raw = (String) rawvalues;
-		String[] keyValuePairs = raw.split(", ");
-
-		for (String keyValuePair : keyValuePairs)
+		if(rawvalues !=null)
 		{
-			String[] pair = keyValuePair.split("=");
-			String key = pair[0];
-			String value = pair[1];
+			String raw = (String) rawvalues;
+			String[] keyValuePairs = raw.split(", ");
 
-			keyValueMap.put(key, value);
+			for (String keyValuePair : keyValuePairs)
+			{
+				String[] pair = keyValuePair.split("=");
+				String key = pair[0];
+				String value = pair[1];
+
+				keyValueMap.put(key, value);
+			}
 		}
 	}
 

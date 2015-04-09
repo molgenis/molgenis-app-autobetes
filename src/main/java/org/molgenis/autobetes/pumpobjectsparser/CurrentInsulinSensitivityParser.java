@@ -23,7 +23,7 @@ public class CurrentInsulinSensitivityParser extends ObjectParser
 		cis.setUploadId(getUploadId());
 		cis.setFollowNumber(getFollowNumber());
 		cis.setOrigin(getOrigin());
-		
+			
 		cis.setGroupId(getString(PATTERN_DATUM));
 		cis.setSensitivityIndex(getInteger(INDEX));
 		cis.setAmount(getDouble(AMOUNT));

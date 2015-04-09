@@ -262,7 +262,45 @@
 			<field name="rate" type="decimal" description="IE/hour" />
 			<field name="startTime" type="long" description="Start time of this basal profile (in ms since 0:00h)." />
 		</entity>
-
+		<entity name="SensorCal" extends="IdentificationServer">
+			<field name="cal_type" description="" />
+			<field name="isig" type="decimal" description="Sensor current in subcutaneous interstitial fluid." />
+			<field name="vcntr" type="decimal" nillable="true" description="Counter electrode voltage" />
+			<field name="backfill_indicator" type="boolean" nillable="true" default="false" />
+		</entity>
+		<entity name="SensorCalBG" extends="IdentificationServer">
+			<field name="amount" type="decimal" description="" />
+			<field name="origin_type" description="" />
+		</entity>
+		<entity name="SensorCalFactor" extends="IdentificationServer">
+			<field name="cal_factor" type="decimal" description="" />
+		</entity>
+		<entity name="SensorPacket" extends="IdentificationServer">
+			<field name="packet_type" description="" />
+			<field name="vcntr" type="decimal" nillable="true" description="Counter electrode voltage" />
+			<field name="backfill_indicator" type="boolean" nillable="true" default="false" />
+		</entity>
+		<entity name="SensorWeakSignal" extends="IdentificationServer">
+			<!-- Nothing but IdentificationServer -->
+		</entity>
+		<entity name="BGCapturedOnPump" extends="IdentificationServer">
+			<field name="amount" type="decimal" description="" />
+			<field name="action_requestor" description="" />
+		</entity>
+		<entity name="BGReceived" extends="IdentificationServer">
+			<field name="amount" type="decimal" description="" />
+			<field name="action_requestor" description="" />
+			<field name="paradigm_link_id" nillable="true" description="" />
+		</entity>
+		<entity name="UnabsorbedInsulin" extends="IdentificationServer">
+			<field name="bolus_estimate_datum_id" nillable="true" description="" />
+			<field name="ins_index" type="decimal" description="cannot be index, because that is a reserverd JAVA and/or SQL word" />
+			<field name="amount" type="decimal" description="" />
+			<field name="record_age" type="int" description="" />
+		</entity>
+		<entity name="CurrentSensorBGUnits" extends="IdentificationServer">
+			<field name="units" description="" />
+		</entity>
 
 		<!-- Derived data -->
 		<entity name="BasalSetting" extends="IdentificationServer" description="Basal profile setting, taking into account the programmed amount and the temporal change.">
