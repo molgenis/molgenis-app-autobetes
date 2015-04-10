@@ -89,7 +89,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		
 		idappender++;
 		event =  new ActivityEvent();
-		event.setName("Tracking OFF");
+		event.setName("Pause tracking");
 		event.setOwner(userAdmin);
 		event.setId(ADMIN_ID_PREPOSITION+idappender);
 		//event.setSpecial(true);

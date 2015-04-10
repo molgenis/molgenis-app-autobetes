@@ -126,7 +126,7 @@
 			<field name="amount" type="decimal" nillable="false" description="Number of times this food is consumed." />
 		</entity>
 		<entity name="ActivityEventInstance" extends="EventInstance">
-			<field name="intensity" type="decimal" default="3.0" nillable="false" description="Intensity of activity. 1=v. light, ..., 3=normal, ..., 10=v. heavy." />
+			<field name="intensity" type="decimal" nillable="true" description="Intensity of activity. 1=v. light, ..., 3=normal, ..., 10=v. heavy." />
 			<field name="endTime" type="long" description="Moment when event ends. In milliseconds since 1970 in GMT. Null for Food events." nillable="true" />
 		</entity>
 		<entity name="IdentificationApp" abstract="true">
