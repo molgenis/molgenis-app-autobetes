@@ -177,6 +177,7 @@ public class MovesController extends MolgenisPluginController
 
 	@RequestMapping(value = "/checkIfMovesIsConnected", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@RunAsSystem
 	public Map<String, Object> checkIfMovesIsConnected(HttpServletRequest servletRequest)
 	{
 		MolgenisUser user = getUserFromToken(TokenExtractor.getToken(servletRequest));
