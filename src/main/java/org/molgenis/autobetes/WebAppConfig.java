@@ -38,19 +38,19 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		return new Object();
 	}
 
-	@Override
-	public void addInterceptors(InterceptorRegistry registry)
-	{
-		super.addInterceptors(registry);
-		// enable cross origin
-		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
-		String corsInterceptPattern = "/api/**";
-		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
-		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
-
-		corsInterceptPattern = "/plugin/anonymous/**";
-		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
-		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
-
-	}
+//	@Override
+//	public void addInterceptors(InterceptorRegistry registry)
+//	{
+//		super.addInterceptors(registry);
+//		// enable cross origin
+//		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
+//		String corsInterceptPattern = "/api/**";
+//		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
+//		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
+//
+//		corsInterceptPattern = "/plugin/anonymous/**";
+//		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
+//		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
+//
+//	}
 }

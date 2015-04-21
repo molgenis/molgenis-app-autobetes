@@ -22,7 +22,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private final DataService dataService;
 	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
 	public static String ADMIN_ID_PREPOSITION = "adminsdf7897dfjgjfug8dfug89ur234sdf";
-	private static String ACTIVITY = "Activity";
+	private static String ACTIVITY = "activity";
 	
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(DataService dataService,

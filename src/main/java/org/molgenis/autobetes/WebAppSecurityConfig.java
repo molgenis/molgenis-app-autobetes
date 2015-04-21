@@ -51,8 +51,12 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll()
-
+				
+				.antMatchers("/scripts/**").authenticated()
+				
 				.antMatchers("/charts/**").authenticated();
+		
+		
 	}
 
 	@Override
