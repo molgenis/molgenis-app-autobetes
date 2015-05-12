@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.molgenis</groupId>
@@ -8,6 +7,7 @@
 	</parent>
 	<artifactId>molgenis-autobetes</artifactId>
 	<packaging>war</packaging>
+
 	<build>
 		<resources>
 			<resource>
@@ -21,137 +21,6 @@
 		</resources>
 		<plugins>
 			<!-- make molgenis server properties available in pom.xml -->
-
-
-
-
-<plugin>
-
-                    <groupId>org.eclipse.jetty</groupId>
-
-<artifactId>jetty-maven-plugin</artifactId>
-
-<version>9.2.6.v20141205</version>
-
-                    <configuration>
-
-                        <stopPort>8079</stopPort>
-
-                        <stopKey>jetty-stop</stopKey>
-
-                        <reload>manual</reload>
-
-                        <systemProperties>
-
-<systemProperty>
-
-<name>molgenis.home</name>
-
-<value>${user.home}${file.separator}.molgenis${file.separator}autobetes</value>
-
-</systemProperty>
-
-</systemProperties>
-
-                        <webAppConfig>
-
-                            <contextPath>/</contextPath>
-
-                            <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-
-      <resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
-
-    </baseResource>
-
-<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
-
-                            </webInfIncludeJarPattern>
-
-                        </webAppConfig>
-
-                    </configuration>
-
-                    <!-- use jetty to run integration tests  -->
-
-                    <executions>
-
-                        <execution>
-
-                            <id>start-jetty</id>
-
-                            <phase>pre-integration-test</phase>
-
-                            <goals>
-
-                                <goal>run</goal>
-
-                            </goals>
-
-                            <configuration>
-
-                                <scanIntervalSeconds>0</scanIntervalSeconds>
-
-                                <daemon>true</daemon>
-
-                                <connectors>
-
-                                    <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-
-                                        <port>${selenium.http.port}</port>
-
-                                        <maxIdleTime>60000</maxIdleTime>
-
-                                    </connector>
-
-                                </connectors>
-
-                            </configuration>
-
-                        </execution>
-
-                        <execution>
-
-                            <id>stop-jetty</id>
-
-                            <phase>post-integration-test</phase>
-
-                            <goals>
-
-                                <goal>stop</goal>
-
-                            </goals>
-
-                        </execution>
-
-                    </executions>
-
-                    <dependencies>
-
-                        <dependency>
-
-                            <groupId>mysql</groupId>
-
-                            <artifactId>mysql-connector-java</artifactId>
-
-                            <version>${mysql.connector.java.version}</version>
-
-                        </dependency>
-
-                    </dependencies>
-
-                </plugin>
-
-
-
-
-
-
-
-
-
-
-
-			
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>properties-maven-plugin</artifactId>
@@ -216,29 +85,70 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!-- web server -->
+				<!-- servlet container -->
 				<plugin>
-					<groupId>org.mortbay.jetty</groupId>
+					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
+					<version>9.2.6.v20141205</version>
 					<configuration>
 						<stopPort>8079</stopPort>
 						<stopKey>jetty-stop</stopKey>
+						<reload>manual</reload>
 						<systemProperties>
 							<systemProperty>
 								<name>molgenis.home</name>
 								<value>${user.home}${file.separator}.molgenis${file.separator}autobetes</value>
 							</systemProperty>
-							<systemProperty>
-								<name>log4j.configuration</name>
-								<value>log4j-molgenis.properties</value>
-							</systemProperty>
 						</systemProperties>
+						<webAppConfig>
+							<contextPath>/</contextPath>
+							<baseResource
+								implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+								<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
+							</baseResource>
+							<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
+							</webInfIncludeJarPattern>
+						</webAppConfig>
 					</configuration>
+					<!-- use jetty to run integration tests -->
+					<executions>
+						<execution>
+							<id>start-jetty</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+								<goal>run</goal>
+							</goals>
+							<configuration>
+								<scanIntervalSeconds>0</scanIntervalSeconds>
+								<daemon>true</daemon>
+								<connectors>
+									<connector
+										implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+										<port>${selenium.http.port}</port>
+										<maxIdleTime>60000</maxIdleTime>
+									</connector>
+								</connectors>
+							</configuration>
+						</execution>
+						<execution>
+							<id>stop-jetty</id>
+							<phase>post-integration-test</phase>
+							<goals>
+								<goal>stop</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>mysql</groupId>
+							<artifactId>mysql-connector-java</artifactId>
+							<version>${mysql.connector.java.version}</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
