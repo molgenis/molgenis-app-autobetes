@@ -574,9 +574,19 @@ public class AnonymousController extends MolgenisPluginController
 		//are standard events
 		MolgenisUser adminUser = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "admin"),MolgenisUser.class);
 
+		//Iterable<Entity> dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
+		//		new QueryImpl().eq(Event.OWNER, adminUser).and().like(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMIN_ID_PREPOSITION));
+		//EntityMetaData meta = dataService.getEntityMetaData(ActivityEvent.ENTITY_NAME);
+		//appendEntitiesToResponseData(responseData, dbEntities, meta);
+
+		//like() stopt working unfortunately
+		//TODO fix like() and use commented code above and rm code below
 		Iterable<Entity> dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
-				new QueryImpl().eq(Event.OWNER, adminUser).and().like(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMIN_ID_PREPOSITION));
+			new QueryImpl().eq(Event.OWNER, adminUser).and().eq(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMIN_ID_PREPOSITION+1));
 		EntityMetaData meta = dataService.getEntityMetaData(ActivityEvent.ENTITY_NAME);
+		appendEntitiesToResponseData(responseData, dbEntities, meta);
+		dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
+				new QueryImpl().eq(Event.OWNER, adminUser).and().eq(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMIN_ID_PREPOSITION+2));
 		appendEntitiesToResponseData(responseData, dbEntities, meta);
 	}
 
