@@ -858,9 +858,19 @@ public class HomeController extends MolgenisPluginController
 		Iterator<UserInfo> userrecords = dataService.findAll(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, molgenisUser).and().sort(Direction.ASC, UserInfo.LASTCHANGED), UserInfo.class).iterator();
 		UserInfo ra1 = null;
 		if(userrecords.hasNext()){
-			ra1 = userrecords.next();
+			while(userrecords.hasNext()){
+				//iterate through user records, get the first one that hase the time offset info
+				UserInfo userrecord = userrecords.next();
+				if(userrecord.getTimeOffset()!=null)
+				{
+					if(ra1==null)
+					{
+						ra1 = userrecord;
+					}
+				}
+			}
 		}
-		else{
+		if(ra1==null){
 			//no app records yet
 			//we cannot correct
 			throw new RuntimeException("An error occurred. We do not know you timezone, please go to the Autobetes app and press 'Force synchronization' at the settings screen.");
