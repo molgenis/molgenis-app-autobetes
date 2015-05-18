@@ -30,13 +30,16 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.script.SavedScriptRunner;
 import org.molgenis.security.token.MolgenisToken;
+import org.molgenis.security.token.TokenService;
 import org.molgenis.security.usermanager.UserManagerService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -71,6 +74,12 @@ public class AnonymousControllerTest extends AbstractTestNGSpringContextTests{
 	private DataService dataService;
 	@Autowired
 	private JavaMailSender mailSender;
+	@Autowired
+	private SavedScriptRunner savedScriptRunner;
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	@Autowired
+	private TokenService tokenService;
 	
 	private AnonymousController anonymousController;
 	
@@ -92,7 +101,7 @@ public class AnonymousControllerTest extends AbstractTestNGSpringContextTests{
 	@BeforeMethod
 	public void setUp()
 	{
-		anonymousController = new AnonymousController(dataService, mailSender);
+		anonymousController = new AnonymousController(dataService, mailSender, savedScriptRunner, authenticationManager, tokenService);
 		//dataService 
 		//anonymousController =  mock(AnonymousController.class);
 		servletRequest = mock(HttpServletRequest.class);

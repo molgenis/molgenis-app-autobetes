@@ -12,12 +12,21 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.autobetes.controller.AnonymousController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.Principal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,9 +38,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.zip.GZIPInputStream;
 
+import sun.net.www.protocol.http.HttpURLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +76,8 @@ import org.molgenis.data.rest.AttributeMetaDataResponse;
 import org.molgenis.data.rest.EntityCollectionRequest;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.rest.LoginRequest;
+import org.molgenis.data.rest.LoginResponse;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -69,6 +86,7 @@ import org.molgenis.script.ScriptResult;
 import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.token.MolgenisToken;
 import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.token.TokenService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
@@ -76,10 +94,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -108,6 +134,8 @@ public class AnonymousController extends MolgenisPluginController
 	public static final int MAX_LENGTH_STRING = 254;
 	public static final String ADMIN = "admin";
 	public static final String ALLUSERS = "All Users";
+	private static final String USER_AGENT = "Mozilla/5.0";
+	private final SavedScriptRunner savedScriptRunner;
 
 	//@Autowired
 	private DataService dataService;
@@ -118,17 +146,29 @@ public class AnonymousController extends MolgenisPluginController
 
 	@Autowired
 	private SavedScriptRunner scriptRunner;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private TokenService tokenService;
 
 
 	@Autowired
-	public AnonymousController(DataService dataService, JavaMailSender mailSender)
+	public AnonymousController(DataService dataService, JavaMailSender mailSender, SavedScriptRunner savedScriptRunner,
+			AuthenticationManager authenticationManager, TokenService tokenService)
 	{
 		super(URI);
 		if (dataService == null) throw new IllegalArgumentException("DataService is null!");
 		if (mailSender == null) throw new IllegalArgumentException("JavaMailSender is null!");
+		if (savedScriptRunner == null) throw new IllegalArgumentException("SavedScriptRunner is null!");
+		if (authenticationManager == null) throw new IllegalArgumentException("AuthenticationManager is null!");
+		if (tokenService == null) throw new IllegalArgumentException("TokenService is null!");
 		this.dataService = dataService;
 		this.mailSender = mailSender;
-
+		this.savedScriptRunner = savedScriptRunner;
+		this.authenticationManager = authenticationManager;
+		this.tokenService = tokenService;
 	}
 
 	@RequestMapping
@@ -136,7 +176,6 @@ public class AnonymousController extends MolgenisPluginController
 	{
 		return "view-home";
 	}
-
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
 	@RunAsSystem
@@ -158,6 +197,88 @@ public class AnonymousController extends MolgenisPluginController
 			return "registration-success";
 		}
 	}
+	/**
+	 * Copied from RestController. Everything is the same, but for some reason the RunAsSystem does work here but not in the RestController.
+	 * 
+	 * @param login
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/login", method = POST, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@RunAsSystem
+	public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request)
+	{
+		if (login == null)
+		{
+			throw new HttpMessageNotReadableException("Missing login");
+		}
+
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(login.getUsername(),
+				login.getPassword());
+		authToken.setDetails(new WebAuthenticationDetails(request));
+
+		// Authenticate the login
+		Authentication authentication = authenticationManager.authenticate(authToken);
+		if (!authentication.isAuthenticated())
+		{
+			throw new BadCredentialsException("Unknown username or password");
+		}
+
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
+
+		// User authenticated, log the user in
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		// Generate a new token for the user
+		String token = tokenService.generateAndStoreToken(authentication.getName(), "Rest api login");
+
+		return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
+	}
+
+	/**
+	 * Copied from ScriptRunnerController, only thing changed is the RunAsSystem annotation, this way we can execute scripts without 
+	 * them being readable.
+	 * @param scriptName
+	 * @param parameters
+	 * @param response
+	 * @throws IOException
+	 */
+	@RequestMapping(value= "/scripts/{name}/run")
+	@RunAsSystem
+	public void runScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,
+			HttpServletResponse response) throws IOException
+	{
+		ScriptResult result = savedScriptRunner.runScript(scriptName, parameters);
+
+		if (result.getOutputFile() != null)
+		{
+			File f = new File(result.getOutputFile());
+			if (f.exists())
+			{
+				String guessedContentType = URLConnection.guessContentTypeFromName(f.getName());
+				if (guessedContentType != null)
+				{
+					response.setContentType(guessedContentType);
+				}
+
+				FileCopyUtils.copy(new FileInputStream(f), response.getOutputStream());
+				f.delete();
+			}
+		}
+		else if (StringUtils.isNotBlank(result.getOutput()))
+		{
+			response.setContentType("text/plain");
+
+			PrintWriter pw = response.getWriter();
+			pw.write(result.getOutput());
+			pw.flush();
+		}
+	}
+
+
+
 
 	@RequestMapping(value = "/registerUser", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -527,7 +648,7 @@ public class AnonymousController extends MolgenisPluginController
 	public List<Map<String, Object>> sync(@RequestBody List<Map<String, Object>> entityMap,
 			HttpServletRequest servletRequest)
 			{
-		
+
 		// declare objects
 		TimestampLastUpdate timeStampLastSync = new TimestampLastUpdate(0);// timestamp of the last sync of client,
 		// send along in requestbody, if not it remains 0
@@ -582,7 +703,7 @@ public class AnonymousController extends MolgenisPluginController
 		//like() stopt working unfortunately
 		//TODO fix like() and use commented code above and rm code below
 		Iterable<Entity> dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
-			new QueryImpl().eq(Event.OWNER, adminUser).and().eq(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMIN_ID_PREPOSITION+1));
+				new QueryImpl().eq(Event.OWNER, adminUser).and().eq(Event.ID, WebAppDatabasePopulatorServiceImpl.ADMIN_ID_PREPOSITION+1));
 		EntityMetaData meta = dataService.getEntityMetaData(ActivityEvent.ENTITY_NAME);
 		appendEntitiesToResponseData(responseData, dbEntities, meta);
 		dbEntities = dataService.findAll(ActivityEvent.ENTITY_NAME,
