@@ -55,7 +55,7 @@ public class HomeControllerTest
 				new QueryImpl().eq(UserInfo.OWNER, molgenisUser)
 				.and().sort(Direction.ASC, UserInfo.LASTCHANGED), UserInfo.class)).thenReturn(userInfoIterable);
 		when(userInfoIterable.iterator()).thenReturn(userInfoIterator);
-		when(userInfoIterator.hasNext()).thenReturn(true);
+		when(userInfoIterator.hasNext()).thenReturn(true,false,true,false,true,false,true,false);
 		when(userInfoIterator.next()).thenReturn(userInfo);
 		when(userInfo.getLastchanged()).thenReturn(1407402485l);
 		when(userInfo.getTimeOffset()).thenReturn(2);

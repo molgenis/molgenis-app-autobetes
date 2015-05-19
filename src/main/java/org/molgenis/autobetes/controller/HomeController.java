@@ -166,7 +166,7 @@ public class HomeController extends MolgenisPluginController
 	private final static String CurrentInsulinSensitivityString = "CurrentInsulinSensitivity";
 	private final static String CurrentCarbRatioPatternString = "CurrentCarbRatioPattern";
 	private final static String CurrentCarbRatioString = "CurrentCarbRatio";
-	
+
 	private final static String SensorCalString = "SensorCal";
 	private final static String SensorCalBGString = "SensorCalBg";
 	private final static String SensorCalFactorString = "SensorCalFactor";
@@ -176,8 +176,8 @@ public class HomeController extends MolgenisPluginController
 	private final static String UnabsorbedInsulinString = "UnabsorbedInsulin";
 	private final static String SensorPacketString = "SensorPacket";
 	private final static String CurrentSensorBGUnitsString = "CurrentSensorBGUnits";
-	
-	
+
+
 	private Long HOURS_IN_MILLISEC = 1000l*60l*60l;
 	@Value("${movesClientId}")
 	private String CLIENT_ID_PARAM_VALUE;
@@ -263,7 +263,7 @@ public class HomeController extends MolgenisPluginController
 		List<CurrentInsulinSensitivity> currentInsulinSensitivityList = new ArrayList<CurrentInsulinSensitivity>();
 		List<CurrentCarbRatioGroup> currentCarbRatioGroupList = new ArrayList<CurrentCarbRatioGroup>();
 		List<CurrentCarbRatio> currentCarbRatioList = new ArrayList<CurrentCarbRatio>();
-		
+
 		List<SensorCal> sensorCalList = new ArrayList<SensorCal>();
 		List<SensorCalBG> sensorCalBGList = new ArrayList<SensorCalBG>();
 		List<SensorCalFactor> sensorCalFactorList = new ArrayList<SensorCalFactor>();
@@ -273,7 +273,7 @@ public class HomeController extends MolgenisPluginController
 		List<SensorPacket> sensorPacketList = new ArrayList<SensorPacket>();
 		List<SensorWeakSignal> sensorWeakSignalList = new ArrayList<SensorWeakSignal>();
 		List<CurrentSensorBGUnits> currentSensorBGUnitsList = new ArrayList<CurrentSensorBGUnits>();
-		
+
 		// define 'unique' body file name
 		String random = Long.toHexString(Double.doubleToLongBits(Math.random())).substring(0, 4);
 		File bodyFile = new File(tmpDir + random + ".txt");
@@ -311,7 +311,7 @@ public class HomeController extends MolgenisPluginController
 			//			System.out.println(">> Parsing: " + rawType + ": " + e.toString());
 			switch (rawType)
 			{
-				
+
 				case ChangeTimeGHString:
 					TimeChange tc = new TimeChangeParser(e, dataService, molgenisUser).getTc();
 					if (!alreadyExists(tc.getIdOnPump(), existingIDs))
@@ -510,7 +510,7 @@ public class HomeController extends MolgenisPluginController
 				default: // print if not parsed
 					if (!rawTypeSet.containsKey(rawType))
 					{
-						
+
 						rawTypeSet.put(rawType, 1);
 					}
 					else{
@@ -548,7 +548,7 @@ public class HomeController extends MolgenisPluginController
 		dataService.add(CurrentInsulinSensitivity.ENTITY_NAME, currentInsulinSensitivityList); 
 		dataService.add(CurrentCarbRatioGroup.ENTITY_NAME, currentCarbRatioGroupList); 
 		dataService.add(CurrentCarbRatio.ENTITY_NAME, currentCarbRatioList);
-		
+
 		dataService.add(SensorCal.ENTITY_NAME, sensorCalList);
 		dataService.add(SensorCalBG.ENTITY_NAME, sensorCalBGList);
 		dataService.add(SensorCalFactor.ENTITY_NAME, sensorCalFactorList);
@@ -558,13 +558,13 @@ public class HomeController extends MolgenisPluginController
 		dataService.add(UnabsorbedInsulin.ENTITY_NAME, unabsorbedInsulinList);
 		dataService.add(SensorPacket.ENTITY_NAME, sensorPacketList);
 		dataService.add(CurrentSensorBGUnits.ENTITY_NAME,currentSensorBGUnitsList);
-		
-		
+
+
 
 		// TODO SUSPEND
 		IOUtils.closeQuietly(csvRepo);
 	}
-	
+
 	private void addIdsOfEntityToSet(HashSet<String> hashSetIDs, MolgenisUser molgenisUser,String entityname)
 	{
 		Iterable<Entity> extendedEntities = dataService.findAll(entityname, new QueryImpl().eq(IdentificationServer.OWNER, molgenisUser));
@@ -576,8 +576,8 @@ public class HomeController extends MolgenisPluginController
 
 	private HashSet<String> getExistingIDS(MolgenisUser molgenisUser)
 	{
-		
-		
+
+
 		HashSet<String> hashSetIDs = new HashSet<String>();
 		addIdsOfEntityToSet(hashSetIDs, molgenisUser, BgSensor.ENTITY_NAME);
 		addIdsOfEntityToSet(hashSetIDs, molgenisUser, TimeChange.ENTITY_NAME);
@@ -857,19 +857,19 @@ public class HomeController extends MolgenisPluginController
 	private UserInfo getFirstUserRecord(DataService dataService, MolgenisUser molgenisUser){
 		Iterator<UserInfo> userrecords = dataService.findAll(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, molgenisUser).and().sort(Direction.ASC, UserInfo.LASTCHANGED), UserInfo.class).iterator();
 		UserInfo ra1 = null;
-		if(userrecords.hasNext()){
-			while(userrecords.hasNext()){
-				//iterate through user records, get the first one that hase the time offset info
-				UserInfo userrecord = userrecords.next();
-				if(userrecord.getTimeOffset()!=null)
+
+		while(userrecords.hasNext()){
+			//iterate through user records, get the first one that hase the time offset info
+			UserInfo userrecord = userrecords.next();
+			if(userrecord.getTimeOffset()!=null)
+			{
+				if(ra1==null)
 				{
-					if(ra1==null)
-					{
-						ra1 = userrecord;
-					}
+					ra1 = userrecord;
 				}
 			}
 		}
+
 		if(ra1==null){
 			//no app records yet
 			//we cannot correct
