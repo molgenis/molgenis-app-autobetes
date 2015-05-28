@@ -127,7 +127,7 @@ public class MovesController extends MolgenisPluginController
 
 			model.addAttribute("message", "Oops something went wrong, please try again later.");
 			LOG.error(e.toString());
-			return "view-moves";
+			return "view-moves-error";
 		}
 
 
