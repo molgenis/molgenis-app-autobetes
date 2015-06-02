@@ -673,7 +673,7 @@ public class HomeController extends MolgenisPluginController
 			stream.close();
 		}
 	}
-
+	
 	@RequestMapping("upload-csv")
 	public String uploadForm() throws InterruptedException
 	{

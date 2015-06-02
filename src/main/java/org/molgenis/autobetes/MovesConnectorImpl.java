@@ -33,7 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 
+@EnableAsync
 public class MovesConnectorImpl implements MovesConnector
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MovesConnectorImpl.class);
@@ -63,52 +65,56 @@ public class MovesConnectorImpl implements MovesConnector
 	private static final long TWENTY_NINE_DAYS_IN_MILLISEC = 2505600000L;
 	private static final String DATE_FORMAT_STRING = "yyyyMMdd";
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
-	
-	@Async
+
 	public void manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
 		try{
-			//get movestoken from db
+			Thread thread = new Thread(){
+				public void run(){
+					//get movestoken from db
+					MovesToken movesToken = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
 
-			MovesToken movesToken = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
+					if(movesToken != null){
+						boolean isValid = accessTokenIsValid(movesToken.getAccessToken());
+						if(!isValid){
+							//token is not valid anymore
+							//get new token
+							MovesToken newMovesToken = refreshToken(movesToken.getRefresh_Token(), user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+							//update token
+							newMovesToken.setId(movesToken.getId());
+							dataService.update(MovesToken.ENTITY_NAME, newMovesToken);
+							movesToken = newMovesToken;
 
-			if(movesToken != null){
-				boolean isValid = accessTokenIsValid(movesToken.getAccessToken());
-				if(!isValid){
-					//token is not valid anymore
-					//get new token
-					MovesToken newMovesToken = refreshToken(movesToken.getRefresh_Token(), user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-					//update token
-					newMovesToken.setId(movesToken.getId());
-					dataService.update(MovesToken.ENTITY_NAME, newMovesToken);
-					movesToken = newMovesToken;
+						}
+						//we now have a valid token that enables us to retrieve activities
+						//get the from date 
+						int from = getFromDate(dataService, user, movesToken);
+						int to = getCurrentDate();
 
+						//max 31 of days allowed and the requested range must be between user profiles first date and today
+						//retrieve activities from moves per 29 days
+
+						long fromInMillisec = convertDateformatToUnixTimestamp(from);
+						long toInMillisec = convertDateformatToUnixTimestamp(to);
+
+						while(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC < toInMillisec){
+							//get activities from fromInMillisec to fromInMillisec+29 days
+							getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC));
+							//add 29 days to fromInMillisec
+							fromInMillisec += TWENTY_NINE_DAYS_IN_MILLISEC;
+						}
+						//while loop is stopped, so fromInMillisec+29 days is now greater than current date.
+						//get activities from fromInMillisec to current date
+						getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(toInMillisec));
+					}
 				}
-				//we now have a valid token that enables us to retrieve activities
-				//get the from date 
-				int from = getFromDate(dataService, user, movesToken);
-				int to = getCurrentDate();
-
-				//max 31 of days allowed and the requested range must be between user profiles first date and today
-				//retrieve activities from moves per 29 days
-
-				long fromInMillisec = convertDateformatToUnixTimestamp(from);
-				long toInMillisec = convertDateformatToUnixTimestamp(to);
-
-				while(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC < toInMillisec){
-					//get activities from fromInMillisec to fromInMillisec+29 days
-					getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC));
-					//add 29 days to fromInMillisec
-					fromInMillisec += TWENTY_NINE_DAYS_IN_MILLISEC;
-				}
-				//while loop is stopped, so fromInMillisec+29 days is now greater than current date.
-				//get activities from fromInMillisec to current date
-				getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(toInMillisec));
-			}
+			};
+			thread.start();
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
 			throw new RuntimeException(e);
 		}
+
 
 	}
 

@@ -117,7 +117,7 @@ public class MovesController extends MolgenisPluginController
 					dataService.add(MovesUserProfile.ENTITY_NAME, userProfile);
 				}
 			}
-
+			
 			movesConnector.manageActivities(dataService, user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
 
 			model.addAttribute("message", "Congratulations, you are now connected to moves.");
