@@ -189,7 +189,12 @@ public class HomeController extends MolgenisPluginController
 
 	//@Autowired
 	private FileStore fileStore;
-
+	/**
+	 * Class constructor
+	 * @param f
+	 * @return
+	 * @throws IOException
+	 */
 	@Autowired
 	public HomeController(DataService dataService, FileStore fileStore)
 	{
@@ -199,22 +204,33 @@ public class HomeController extends MolgenisPluginController
 		this.dataService = dataService;
 		this.fileStore = fileStore;	
 	}
-
+	/**
+	 * Default request mapping
+	 * @return home page
+	 */
 	@RequestMapping
 	public String init()
 	{
 		return "view-home";
 	}
-
+	/**
+	 * Upload csv plugin
+	 * @param file
+	 * @param model
+	 * @param servletRequest
+	 * @param principal
+	 * @return homepage
+	 */
 	@RunAsSystem
 	@RequestMapping(value = "/uploadCSV", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String uploadCSV( @RequestParam
 			Part file, Model model, HttpServletRequest servletRequest, Principal principal)
 	{
-
+		//get user
 		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, principal.getName()), MolgenisUser.class);
 		try
 		{
+			//get csv
 			File pumpCsvFile = fileStore.store(file.getInputStream(), file.getName());
 
 			String tmpDir = System.getProperty("java.io.tmpdir") + "autobetesCsv" + File.separatorChar;
@@ -236,12 +252,18 @@ public class HomeController extends MolgenisPluginController
 
 		return "view-home";
 	}
-
+	/**
+	 * Iterates, parses and saves csv rows
+	 * @param molgenisUser
+	 * @param inputFile
+	 * @param outputDir
+	 * @param tmpDir
+	 */
 	private void importPumpCsvFile(MolgenisUser molgenisUser, File inputFile, File outputDir, String tmpDir)
 	{
 		List<IdentificationServer> tsToBeCorrected = new ArrayList<IdentificationServer>();
-		// First put stuff in hashmap with IdOnPump as key, then check entities in db if those IdOnPump are in Hashmap(remove if so)
-		//then add list at once! (Performance optimization)
+		//Put entities first in list and then add list at once! (Performance optimization)
+		//TODO: make a generic list
 		List<BasalProfileDefinitionGroup> basalProfileDefinitionGroupList = new ArrayList<BasalProfileDefinitionGroup>();
 		List<BasalProfileDefinition> basalProfileDefinitionList = new ArrayList<BasalProfileDefinition>();
 		List<BasalProfileStart> basalProfileStartList = new ArrayList<BasalProfileStart>();
@@ -263,7 +285,6 @@ public class HomeController extends MolgenisPluginController
 		List<CurrentInsulinSensitivity> currentInsulinSensitivityList = new ArrayList<CurrentInsulinSensitivity>();
 		List<CurrentCarbRatioGroup> currentCarbRatioGroupList = new ArrayList<CurrentCarbRatioGroup>();
 		List<CurrentCarbRatio> currentCarbRatioList = new ArrayList<CurrentCarbRatio>();
-
 		List<SensorCal> sensorCalList = new ArrayList<SensorCal>();
 		List<SensorCalBG> sensorCalBGList = new ArrayList<SensorCalBG>();
 		List<SensorCalFactor> sensorCalFactorList = new ArrayList<SensorCalFactor>();
@@ -297,11 +318,9 @@ public class HomeController extends MolgenisPluginController
 		// Read and separate bodyFile 
 		CsvRepository csvRepo = new CsvRepository(bodyFile, null, separator);
 
-		// Set stores which entities cannot be loaded so that we do not show duplicates
+		// Make hashmap containing unparsed entity types
 		HashMap<String, Integer> rawTypeSet = new HashMap<String, Integer>();
-
-		//Iterable<Entity> extendedEntities = dataService.query(EntityMetaDataMetaData.ENTITY_NAME).eq(EntityMetaDataMetaData.EXTENDS, IdentificationServer.ENTITY_NAME);
-		//Iterable<Entity> extendedEntities = dataService.findAll(EntityMetaDataMetaData.ENTITY_NAME, new QueryImpl().eq(EntityMetaDataMetaData.EXTENDS, IdentificationServer.ENTITY_NAME));
+		//get ids in order to check if id is allready in db
 		HashSet<String> existingIDs = getExistingIDS(molgenisUser);
 
 
@@ -526,7 +545,7 @@ public class HomeController extends MolgenisPluginController
 		}
 		performTimeCorrection(dataService, molgenisUser, tsToBeCorrected, timeChangeList);
 
-
+		//add entities to db
 		dataService.add(BasalProfileDefinitionGroup.ENTITY_NAME, basalProfileDefinitionGroupList);
 		dataService.add(BasalProfileDefinition.ENTITY_NAME, basalProfileDefinitionList);
 		dataService.add(BasalProfileStart.ENTITY_NAME, basalProfileStartList);
@@ -565,19 +584,29 @@ public class HomeController extends MolgenisPluginController
 		IOUtils.closeQuietly(csvRepo);
 	}
 
+	/**
+	 * Add all idonpump to hashset
+	 * @param hashSetIDs
+	 * @param molgenisUser
+	 * @param entityname
+	 */
 	private void addIdsOfEntityToSet(HashSet<String> hashSetIDs, MolgenisUser molgenisUser,String entityname)
 	{
+		//get all entities
 		Iterable<Entity> extendedEntities = dataService.findAll(entityname, new QueryImpl().eq(IdentificationServer.OWNER, molgenisUser));
+		//iterate and add entities
 		for(Entity e : extendedEntities)
 		{
 			hashSetIDs.add((String) e.get(IdentificationServer.IDONPUMP));
 		}
 	}
-
+	/**
+	 * Get existing ids and add to one hashset
+	 * @param molgenisUser
+	 * @return hashset containing all ids
+	 */
 	private HashSet<String> getExistingIDS(MolgenisUser molgenisUser)
 	{
-
-
 		HashSet<String> hashSetIDs = new HashSet<String>();
 		addIdsOfEntityToSet(hashSetIDs, molgenisUser, BgSensor.ENTITY_NAME);
 		addIdsOfEntityToSet(hashSetIDs, molgenisUser, TimeChange.ENTITY_NAME);
@@ -613,14 +642,23 @@ public class HomeController extends MolgenisPluginController
 		addIdsOfEntityToSet(hashSetIDs, molgenisUser, CurrentSensorBGUnits.ENTITY_NAME);
 		return hashSetIDs;
 	}
-
+	/**
+	 * Checks if id is in hashset
+	 * @param id
+	 * @param existingIDs
+	 * @return
+	 */
 	private boolean alreadyExists(String id, HashSet<String> existingIDs)
 	{
 		return existingIDs.contains(id);
 	}
 
-	/*
+
+	/**
 	 * Split file in header and body
+	 * @param f
+	 * @return
+	 * @throws IOException
 	 */
 	private static LinkedHashMap<String, String> splitInHeaderTail(File f) throws IOException
 	{
@@ -657,7 +695,12 @@ public class HomeController extends MolgenisPluginController
 
 		return fsplit;
 	}
-
+	/**
+	 * Convert file to string
+	 * @param f
+	 * @return file as string
+	 * @throws IOException
+	 */
 	private static String fileToString(File f) throws IOException
 	{
 		FileInputStream stream = new FileInputStream(f);
@@ -673,25 +716,46 @@ public class HomeController extends MolgenisPluginController
 			stream.close();
 		}
 	}
-
+	/**
+	 * Upload csv request mapping
+	 * @return string
+	 * @throws InterruptedException
+	 */
 	@RequestMapping("upload-csv")
 	public String uploadForm() throws InterruptedException
 	{
 		return "view-upload-pump-csv";
 	}
-
+	/**
+	 * View report request mapping
+	 * @return string
+	 * @throws InterruptedException
+	 */
 	@RequestMapping("view-report")
 	public String viewLogo() throws InterruptedException
 	{
 		return "view-report";
 	}
-
+	/**
+	 * Upload request mapping
+	 * @return string
+	 * @throws InterruptedException
+	 */
 	@RequestMapping("upload")
 	public String upload() throws InterruptedException
 	{
 		return "view-upload";
 	}
-
+	/**
+	 * Validate csv file
+	 * @param request
+	 * @param csvFile
+	 * @param model
+	 * @return string
+	 * @throws IOException
+	 * @throws MessagingException
+	 * @throws Exception
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/validate")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String validate(HttpServletRequest request, @RequestParam("csvFile") MultipartFile csvFile, Model model)
@@ -728,7 +792,7 @@ public class HomeController extends MolgenisPluginController
 	}
 
 	/**
-	 * 
+	 * Correct timestamp according to timezone recorded by app
 	 * @param dataService
 	 * @param tsToBeCorrected
 	 * @param timeChangeList
@@ -753,7 +817,11 @@ public class HomeController extends MolgenisPluginController
 		return tsToBeCorrected;
 			}
 
-
+	/**
+	 * Remove records that are near a time zone shift.
+	 * @param tsToBeCorrected
+	 * @param timeChanges
+	 */
 	private void removeRecordsInTimechangeRange(List<IdentificationServer> tsToBeCorrected, List<TimeChange> timeChanges)
 	{
 		//iterate records
@@ -785,7 +853,11 @@ public class HomeController extends MolgenisPluginController
 			}
 		}
 	}
-
+	/**
+	 * Correct timestamps
+	 * @param tsToBeCorrected
+	 * @param timeOffsets
+	 */
 	private void correctTimestamps(List<IdentificationServer> tsToBeCorrected, List<TimeOffset> timeOffsets)
 	{
 		for(int o =0; o< tsToBeCorrected.size();o++)
@@ -828,7 +900,12 @@ public class HomeController extends MolgenisPluginController
 		}
 
 	}
-
+	/**
+	 * Makes an timeline of timezone changes
+	 * @param ts0
+	 * @param timeChanges
+	 * @return list of timezone changes
+	 */
 	private List<TimeOffset> makeListOffTimeOffsets(TimeOffset ts0, List<TimeChange> timeChanges)
 	{
 		List<TimeOffset> timeOffsets =  new ArrayList<TimeOffset>();
@@ -853,7 +930,12 @@ public class HomeController extends MolgenisPluginController
 		}
 		return timeOffsets;
 	}
-
+	/**
+	 * Get first userrecord of app and get the recorded timezone
+	 * @param dataService
+	 * @param molgenisUser
+	 * @return UserInfo
+	 */
 	private UserInfo getFirstUserRecord(DataService dataService, MolgenisUser molgenisUser){
 		Iterator<UserInfo> userrecords = dataService.findAll(UserInfo.ENTITY_NAME, new QueryImpl().eq(UserInfo.OWNER, molgenisUser).and().sort(Direction.ASC, UserInfo.LASTCHANGED), UserInfo.class).iterator();
 		UserInfo ra1 = null;
@@ -878,7 +960,14 @@ public class HomeController extends MolgenisPluginController
 		return ra1;
 	}
 
-
+	/**
+	 * Get all timechanges
+	 * @param dataService2
+	 * @param molgenisUser
+	 * @param timeChangeList
+	 * @param ts0
+	 * @return list of timechanges
+	 */
 	private ArrayList<TimeChange> getTimeCanges(DataService dataService2, MolgenisUser molgenisUser, List<TimeChange> timeChangeList, TimeOffset ts0)
 	{
 		ArrayList<TimeChange> timechanges = new ArrayList<TimeChange>();
@@ -904,7 +993,10 @@ public class HomeController extends MolgenisPluginController
 
 		return timechanges;
 	}
-
+	/**
+	 * Compare 2 time changes
+	 * 
+	 */
 	public class CompareTimeOffsets implements Comparator<TimeChange> {
 		@Override
 		public int compare(TimeChange to1, TimeChange to2) {

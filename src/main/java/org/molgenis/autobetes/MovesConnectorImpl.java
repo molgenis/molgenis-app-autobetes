@@ -33,7 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 
+@EnableAsync
 public class MovesConnectorImpl implements MovesConnector
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MovesConnectorImpl.class);
@@ -63,60 +65,77 @@ public class MovesConnectorImpl implements MovesConnector
 	private static final long TWENTY_NINE_DAYS_IN_MILLISEC = 2505600000L;
 	private static final String DATE_FORMAT_STRING = "yyyyMMdd";
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
-	
-	@Async
+	/**
+	 * This method updates the activities of a certain user.
+	 * 
+	 * @param dataService for accessing database
+	 * @param user for which activities need to be managed
+	 * @return boolean, true is success
+	 */
 	public void manageActivities(DataService dataService, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
 		try{
-			//get movestoken from db
+			Thread thread = new Thread(){
+				public void run(){
+					//get movestoken from db
+					MovesToken movesToken = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
 
-			MovesToken movesToken = dataService.findOne(MovesToken.ENTITY_NAME, new QueryImpl().eq(MovesToken.OWNER, user), MovesToken.class);
+					if(movesToken != null){
+						boolean isValid = accessTokenIsValid(movesToken.getAccessToken());
+						if(!isValid){
+							//token is not valid anymore
+							//get new token
+							MovesToken newMovesToken = refreshToken(movesToken.getRefresh_Token(), user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
+							//update token
+							newMovesToken.setId(movesToken.getId());
+							dataService.update(MovesToken.ENTITY_NAME, newMovesToken);
+							movesToken = newMovesToken;
 
-			if(movesToken != null){
-				boolean isValid = accessTokenIsValid(movesToken.getAccessToken());
-				if(!isValid){
-					//token is not valid anymore
-					//get new token
-					MovesToken newMovesToken = refreshToken(movesToken.getRefresh_Token(), user, CLIENT_ID_PARAM_VALUE, CLIENT_SECRET_PARAM_VALUE);
-					//update token
-					newMovesToken.setId(movesToken.getId());
-					dataService.update(MovesToken.ENTITY_NAME, newMovesToken);
-					movesToken = newMovesToken;
+						}
+						//we now have a valid token that enables us to retrieve activities
+						//get the from date 
+						int from = getFromDate(dataService, user, movesToken);
+						int to = getCurrentDate();
 
+						//max 31 of days allowed and the requested range must be between user profiles first date and today
+						//retrieve activities from moves per 29 days
+
+						long fromInMillisec = convertDateformatToUnixTimestamp(from);
+						long toInMillisec = convertDateformatToUnixTimestamp(to);
+
+						while(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC < toInMillisec){
+							//get activities from fromInMillisec to fromInMillisec+29 days
+							getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC));
+							//add 29 days to fromInMillisec
+							fromInMillisec += TWENTY_NINE_DAYS_IN_MILLISEC;
+						}
+						//while loop is stopped, so fromInMillisec+29 days is now greater than current date.
+						//get activities from fromInMillisec to current date
+						getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(toInMillisec));
+					}
 				}
-				//we now have a valid token that enables us to retrieve activities
-				//get the from date 
-				int from = getFromDate(dataService, user, movesToken);
-				int to = getCurrentDate();
-
-				//max 31 of days allowed and the requested range must be between user profiles first date and today
-				//retrieve activities from moves per 29 days
-
-				long fromInMillisec = convertDateformatToUnixTimestamp(from);
-				long toInMillisec = convertDateformatToUnixTimestamp(to);
-
-				while(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC < toInMillisec){
-					//get activities from fromInMillisec to fromInMillisec+29 days
-					getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(fromInMillisec+TWENTY_NINE_DAYS_IN_MILLISEC));
-					//add 29 days to fromInMillisec
-					fromInMillisec += TWENTY_NINE_DAYS_IN_MILLISEC;
-				}
-				//while loop is stopped, so fromInMillisec+29 days is now greater than current date.
-				//get activities from fromInMillisec to current date
-				getActivitiesAndAddToDB(user,dataService,movesToken,convertUnixTimestampToDateFormat(fromInMillisec), convertUnixTimestampToDateFormat(toInMillisec));
-			}
+			};
+			thread.start();
 		}
 		catch(Exception e){
 			LOG.error(e.toString());
 			throw new RuntimeException(e);
 		}
 
+
 	}
-
-
+	/**
+	 * Checks if access token from moves is still valid
+	 * @param accessToken
+	 * @return boolean true if valid
+	 */
 	public boolean accessTokenIsValid(String accessToken){
 		try{
+			//ask moves server if token is valid
+			//define url
 			String url = MOVES_BASE_URL+OAUTH_URL+TOKEN_INFO+"?"+ACCESS_TOKEN+"="+accessToken;
+			//set up get request
 			HttpsURLConnection connection = doGetRequest(url);
+			//if response is "not found" then accesstoken is not valid
 			int responseCode = connection.getResponseCode();
 			if(responseCode == HttpsURLConnection.HTTP_NOT_FOUND){
 				//status code not found, token is not valid
@@ -132,25 +151,45 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 
 	}
-
+	/**
+	 * This method refreshes the access token.
+	 * @param refreshToken
+	 * @param user
+	 * @param clientId
+	 * @param clientSecret
+	 * @return new MovesToken
+	 */
 	public MovesToken refreshToken(String refreshToken, MolgenisUser user, String CLIENT_ID_PARAM_VALUE, String CLIENT_SECRET_PARAM_VALUE){
-
+		//define url
 		String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+REFRESH_TOKEN+"&"+REFRESH_TOKEN+"="+refreshToken+"&"+CLIENT_ID_PARAM+"="+CLIENT_ID_PARAM_VALUE+"&"+CLIENT_SECRET_PARAM+"="+CLIENT_SECRET_PARAM_VALUE;
 		String content = "{}";
+		//set up connection
 		HttpsURLConnection connection = doPostRequest(url, content);
-		//read response
+		//read and return response
 		JSONObject jObject = readJsonObjectFromResponse(connection);	
 		MovesToken movesToken = getMovesTokenEntityFromJson(jObject, user);
 		return movesToken;
 	}
-
+	/**
+	 * Once user authorizes this server to connect with moves an authorization code is retrieved. Together with the client id, secret id and token
+	 * this method retrieves the MovesToken which allows accessing personal data. 
+	 * @param user
+	 * @param token
+	 * @param authorizationcode
+	 * @param CLIENT_SECRET_PARAM_VALUE2 
+	 * @param CLIENT_ID_PARAM_VALUE 
+	 * @param clientId
+	 * @param secretId
+	 * @return MovesToken
+	 */
 	public MovesToken exchangeAutorizationcodeForAccesstoken(MolgenisUser user, String token, String authorizationcode, String client_id_param_value, String client_secret_param_value, String moves_redirect_url){
 		try{
+			//define url
 			String url = MOVES_BASE_URL+OAUTH_URL+ACCESS_TOKEN+"?"+GRANT_TYPE+"="+AUTHORIZATION_CODE+"&"+CODE+"="+authorizationcode+"&"+CLIENT_ID_PARAM+"="+client_id_param_value+"&"+CLIENT_SECRET_PARAM+"="+client_secret_param_value+"&"+REDIRECT_URI_PARAM+"="+moves_redirect_url+TOKEN_PARAM+token;
-			//String url = "https://api.moves-app.com/api/1.1/user/activities/daily?from=20141119&to=20141128&access_token=_MJnP57s9Bto6h9qNFyubozuI24y3UI3fZ2q755uVDx1nf8xyV77255YHUEXd9o2";
 			String content = "{}";
+			//set up connection
 			HttpsURLConnection connection = doPostRequest(url, content);
-			//read response
+			//read and return response
 			JSONObject jObject = readJsonObjectFromResponse(connection);	
 			MovesToken movesToken = getMovesTokenEntityFromJson(jObject, user);
 
@@ -163,12 +202,19 @@ public class MovesConnectorImpl implements MovesConnector
 			throw new RuntimeException(e);
 		}
 	}
-
+	/**
+	 * Retrieves user profile from Moves
+	 * @param movesToken
+	 * @return MovesUserProfile see https://dev.moves-app.com/docs/api_profile 
+	 */
 	public MovesUserProfile getUserProfile(MovesToken movesToken)
 	{
 		try{
+			//define url
 			String url = MOVES_BASE_URL+MOVES_API_BASE_URL+MOVES_GET_USER_PROFILE_URL+"?"+ACCESS_TOKEN+"="+movesToken.getAccessToken();
+			//set up connection
 			HttpsURLConnection connection = doGetRequest(url);
+			//parse and return
 			JSONObject jsonObject = readJsonObjectFromResponse(connection);
 			MovesUserProfile userProfile = getMovesUserProfileFromJson(jsonObject, movesToken);
 			return userProfile;
@@ -177,11 +223,20 @@ public class MovesConnectorImpl implements MovesConnector
 			return null;
 		}
 	}
-
+	/**
+	 * Retrieves all activities that occured in specified range of time
+	 * @param movesToken
+	 * @param from date in yyyyMMdd format
+	 * @param to date in yyyyMMdd format
+	 * @return list of activities
+	 */
 	public List<MovesActivity> getActivities(MovesToken movesToken, int from, int to){
 		try{
+			//define url
 			String url = MOVES_BASE_URL+MOVES_API_BASE_URL+MOVES_GET_ACTIVITIES_URL+"?"+FROM+from+"&"+TO+to+"&"+ACCESS_TOKEN+"="+movesToken.getAccessToken();
+			//set up connection
 			HttpsURLConnection connection = doGetRequest(url);
+			//parse response and return
 			JSONArray jArray = readJsonArrayFromResponse(connection);
 			List<MovesActivity> activities = getActivitiesFromJson(jArray, movesToken);
 			return activities;
@@ -192,6 +247,15 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 
 	}
+	/**
+	 * Retrieves activities and add it to the db
+	 * @param user
+	 * @param dataService
+	 * @param movesToken
+	 * @param from
+	 * @param to
+	 * @return 
+	 */
 	@Async
 	private void getActivitiesAndAddToDB(MolgenisUser user, DataService dataService, MovesToken movesToken, int from, int to){
 		//get activities from Moves
@@ -209,7 +273,13 @@ public class MovesConnectorImpl implements MovesConnector
 			}
 		}
 	}
-
+	/**
+	 * Get get the last day that activities are stored in db
+	 * @param dataService
+	 * @param user
+	 * @param movesToken
+	 * @return date in yyyyMMdd format
+	 */
 	private int getFromDate(DataService dataService, MolgenisUser user, MovesToken movesToken){
 		//get the last day that activities are stored in db
 		//sot.setSort(MovesActivity.STARTTIME);
@@ -241,7 +311,12 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 
 	}
-
+	/**
+	 * Iterates json and parses activities 
+	 * @param jArray
+	 * @param movesToken
+	 * @return list with activities
+	 */
 	private List<MovesActivity> getActivitiesFromJson(JSONArray jArray, MovesToken movesToken)
 	{
 		try{
@@ -318,7 +393,12 @@ public class MovesConnectorImpl implements MovesConnector
 			throw new RuntimeException(e);
 		}
 	}
-
+	/**
+	 * Parses json to MovesUserProfile
+	 * @param jObject
+	 * @param movesToken
+	 * @return MovesUserProfile
+	 */
 	private static MovesUserProfile getMovesUserProfileFromJson(JSONObject jObject, MovesToken movesToken){
 		try{
 			//TODO there might be a better way to implement this. The problem with this json is the three structure, because the nodes are not all on the same level.
@@ -344,7 +424,12 @@ public class MovesConnectorImpl implements MovesConnector
 			throw new RuntimeException(e);
 		}
 	}
-
+	/**
+	 * Parses json to movestoken
+	 * @param jObject
+	 * @param user
+	 * @return MovesToken
+	 */
 	private static MovesToken getMovesTokenEntityFromJson(JSONObject jObject, MolgenisUser user){
 		try{
 			MovesToken movesToken = new MovesToken();
@@ -361,7 +446,11 @@ public class MovesConnectorImpl implements MovesConnector
 			throw new RuntimeException(e);
 		}
 	}
-
+	/**
+	 * Converts input stream to json object.
+	 * @param connection
+	 * @return json object
+	 */
 	private static JSONObject readJsonObjectFromResponse(HttpsURLConnection connection){
 		try{
 			String responseAsString = convertInputStreamToString(connection);
@@ -374,7 +463,11 @@ public class MovesConnectorImpl implements MovesConnector
 		}
 
 	}
-
+	/**
+	 * Converts input stream to json array.
+	 * @param connection
+	 * @return json array
+	 */
 	private static JSONArray readJsonArrayFromResponse(HttpsURLConnection connection){
 		try{
 			String responseAsString = convertInputStreamToString(connection);
@@ -386,7 +479,11 @@ public class MovesConnectorImpl implements MovesConnector
 			throw new RuntimeException(e);
 		}
 	}
-
+	/**
+	 * Converts input stream to string.
+	 * @param connection
+	 * @return string
+	 */
 	private static String convertInputStreamToString(HttpsURLConnection connection){
 		try{
 			BufferedReader in = new BufferedReader(
@@ -405,7 +502,11 @@ public class MovesConnectorImpl implements MovesConnector
 			throw new RuntimeException(e);
 		}
 	}
-
+	/**
+	 * Given the url, this method sets up the get request
+	 * @param url
+	 * @return HttpsURLConnection
+	 */
 	private static HttpsURLConnection doGetRequest(String url){
 		try{
 			URL obj = new URL(url);
@@ -428,7 +529,12 @@ public class MovesConnectorImpl implements MovesConnector
 			throw new RuntimeException(e);
 		}
 	}
-
+	/**
+	 * Given the url, this method sets up the post request
+	 * @param url
+	 * @param content
+	 * @return HttpsURLConnection
+	 */
 	private static HttpsURLConnection doPostRequest(String url, String content){
 		try{
 			URL obj = new URL(url);
