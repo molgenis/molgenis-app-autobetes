@@ -146,10 +146,10 @@ public class AnonymousController extends MolgenisPluginController
 
 	@Autowired
 	private SavedScriptRunner scriptRunner;
-	
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private TokenService tokenService;
 
@@ -279,7 +279,12 @@ public class AnonymousController extends MolgenisPluginController
 
 
 
-
+	/**
+	 * Register user given the registration request
+	 * @param registrationRequest
+	 * @param servletRequest
+	 * @return registrationresponse
+	 */
 	@RequestMapping(value = "/registerUser", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@RunAsSystem
@@ -417,7 +422,8 @@ public class AnonymousController extends MolgenisPluginController
 			}
 
 	/**
-	 * @return time stamp of most recent sensor data of user to which this token belongs! 
+	 * Get timestamp of most recent sensor data of user to which this token belongs! 
+	 * @return timestamp
 	 */
 	@RequestMapping(value = "/sensorLastTimeStamp", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -987,7 +993,11 @@ public class AnonymousController extends MolgenisPluginController
 		entity.set(Event.OWNER, user);
 		return entity;
 	}
-
+	/**
+	 * convert double to boolean 1 = true 0 = false
+	 * @param input
+	 * @return
+	 */
 	private boolean convertDoubleToBoolean(double input)
 	{
 
